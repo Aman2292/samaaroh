@@ -5,6 +5,8 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { toast } from 'react-toastify';
 import { ArrowLeft } from 'iconsax-react';
+import Select from '../../components/common/Select';
+import DatePicker from '../../components/common/DatePicker';
 
 const schema = yup.object().shape({
     clientId: yup.string().required('Client is required'),
@@ -24,7 +26,7 @@ const CreateEvent = () => {
     const [planners, setPlanners] = useState([]);
     const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
 
-    const { register, handleSubmit, formState: { errors } } = useForm({
+    const { register, handleSubmit, control, formState: { errors } } = useForm({
         resolver: yupResolver(schema),
         defaultValues: {
             leadPlannerId: userInfo._id,
@@ -105,16 +107,15 @@ const CreateEvent = () => {
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">
-                                    Client <span className="text-red-500">*</span>
-                                </label>
-                                <select {...register('clientId')} className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
-                                    <option value="">Select client</option>
-                                    {clients.map(client => (
-                                        <option key={client._id} value={client._id}>{client.name}</option>
-                                    ))}
-                                </select>
-                                {errors.clientId && <p className="mt-1 text-sm text-red-600">{errors.clientId.message}</p>}
+                                <Select
+                                    label="Client"
+                                    name="clientId"
+                                    control={control}
+                                    error={errors.clientId}
+                                    required
+                                    options={clients.map(client => ({ value: client._id, label: client.name }))}
+                                    placeholder="Select client"
+                                />
                             </div>
 
                             <div>
@@ -126,26 +127,33 @@ const CreateEvent = () => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">
-                                    Event Type <span className="text-red-500">*</span>
-                                </label>
-                                <select {...register('eventType')} className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
-                                    <option value="wedding">Wedding</option>
-                                    <option value="birthday">Birthday</option>
-                                    <option value="corporate">Corporate</option>
-                                    <option value="anniversary">Anniversary</option>
-                                    <option value="engagement">Engagement</option>
-                                    <option value="other">Other</option>
-                                </select>
-                                {errors.eventType && <p className="mt-1 text-sm text-red-600">{errors.eventType.message}</p>}
+                                <Select
+                                    label="Event Type"
+                                    name="eventType"
+                                    control={control}
+                                    error={errors.eventType}
+                                    required
+                                    options={[
+                                        { value: 'wedding', label: 'Wedding' },
+                                        { value: 'birthday', label: 'Birthday' },
+                                        { value: 'corporate', label: 'Corporate' },
+                                        { value: 'anniversary', label: 'Anniversary' },
+                                        { value: 'engagement', label: 'Engagement' },
+                                        { value: 'other', label: 'Other' }
+                                    ]}
+                                />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">
-                                    Event Date <span className="text-red-500">*</span>
-                                </label>
-                                <input type="date" {...register('eventDate')} className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" />
-                                {errors.eventDate && <p className="mt-1 text-sm text-red-600">{errors.eventDate.message}</p>}
+                                <DatePicker
+                                    label="Event Date"
+                                    name="eventDate"
+                                    control={control}
+                                    error={errors.eventDate}
+                                    required
+                                    minDate={new Date()}
+                                    placeholder="Select date"
+                                />
                             </div>
 
                             <div>
@@ -160,14 +168,18 @@ const CreateEvent = () => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">
-                                    Lead Planner <span className="text-red-500">*</span>
-                                </label>
-                                <select {...register('leadPlannerId')} className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
-                                    {planners.map(planner => (
-                                        <option key={planner._id} value={planner._id}>{planner.name}</option>
-                                    ))}
-                                </select>
+                                <Select
+                                    label="Lead Planner"
+                                    name="leadPlannerId"
+                                    control={control}
+                                    error={errors.leadPlannerId}
+                                    required
+                                    disabled={userInfo.role === 'PLANNER'}
+                                    options={planners.map(planner => ({ value: planner._id, label: planner.name }))}
+                                />
+                                {userInfo.role === 'PLANNER' && (
+                                    <p className="mt-1 text-xs text-slate-500">You can only create events for yourself</p>
+                                )}
                             </div>
                         </div>
 

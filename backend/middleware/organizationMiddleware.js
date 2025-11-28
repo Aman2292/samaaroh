@@ -78,8 +78,33 @@ const applyRolePermissions = (req, res, next) => {
   next();
 };
 
+/**
+ * Middleware to check if user has one of the required roles
+ * @param {string[]} roles - Array of allowed roles
+ */
+const requireRole = (roles) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Not authorized' });
+    }
+
+    if (req.user.role === 'SUPER_ADMIN') {
+      return next();
+    }
+
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({ 
+        message: `Role ${req.user.role} is not authorized to access this resource` 
+      });
+    }
+
+    next();
+  };
+};
+
 module.exports = {
   scopeToOrganization,
   verifyOwnership,
-  applyRolePermissions
+  applyRolePermissions,
+  requireRole
 };

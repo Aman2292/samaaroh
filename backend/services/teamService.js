@@ -1,12 +1,14 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
+const { sendInvitationEmail } = require('./emailService');
 
 /**
  * Create a team member (PLANNER, FINANCE, COORDINATOR)
  * Only PLANNER_OWNER can create team members
  */
 const createTeamMember = async (teamMemberData, creatorId, organizationId) => {
-  const { email, password, name, phone, role } = teamMemberData;
+  const { email, name, phone, role } = teamMemberData;
 
   // Validate role
   const allowedRoles = ['PLANNER', 'FINANCE', 'COORDINATOR'];
@@ -20,9 +22,15 @@ const createTeamMember = async (teamMemberData, creatorId, organizationId) => {
     throw new Error('User with this email already exists');
   }
 
-  // Hash password
+  // Generate random password (will be changed by user)
+  const tempPassword = crypto.randomBytes(16).toString('hex');
   const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
+  const hashedPassword = await bcrypt.hash(tempPassword, salt);
+
+  // Generate invitation token
+  const invitationToken = crypto.randomBytes(32).toString('hex');
+  const invitationExpiresAt = new Date();
+  invitationExpiresAt.setDate(invitationExpiresAt.getDate() + 7); // 7 days expiry
 
   // Create team member
   const teamMember = await User.create({
@@ -33,8 +41,30 @@ const createTeamMember = async (teamMemberData, creatorId, organizationId) => {
     role,
     organizationId,
     createdBy: creatorId,
-    isActive: true
+    invitationStatus: 'pending',
+    invitationToken,
+    invitationSentAt: new Date(),
+    invitationExpiresAt,
+    isActive: false // Will be activated when they accept invitation
   });
+
+  // Get organization details for email
+  const Organization = require('../models/Organization');
+  const organization = await Organization.findById(organizationId);
+
+  // Send invitation email
+  try {
+    await sendInvitationEmail(
+      email,
+      name,
+      organization.name,
+      role,
+      invitationToken
+    );
+  } catch (emailError) {
+    console.error('Failed to send invitation email:', emailError);
+    // Don't throw - user is created, email can be resent
+  }
 
   return {
     _id: teamMember._id,
@@ -42,7 +72,8 @@ const createTeamMember = async (teamMemberData, creatorId, organizationId) => {
     name: teamMember.name,
     phone: teamMember.phone,
     role: teamMember.role,
-    organizationId: teamMember.organizationId
+    organizationId: teamMember.organizationId,
+    invitationStatus: teamMember.invitationStatus
   };
 };
 
@@ -52,9 +83,8 @@ const createTeamMember = async (teamMemberData, creatorId, organizationId) => {
 const getTeamMembers = async (organizationId) => {
   const teamMembers = await User.find({
     organizationId,
-    isActive: true,
     role: { $in: ['PLANNER_OWNER', 'PLANNER', 'FINANCE', 'COORDINATOR'] }
-  }).select('-password').sort({ createdAt: -1 });
+  }).select('-password -invitationToken').sort({ createdAt: -1 });
 
   return teamMembers;
 };

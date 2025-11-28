@@ -112,9 +112,86 @@ const deactivateTeamMember = async (req, res, next) => {
   }
 };
 
+/**
+ * @route   GET /api/team/verify-invitation/:token
+ * @desc    Verify invitation token
+ * @access  Public
+ */
+const verifyInvitationToken = async (req, res, next) => {
+  try {
+    const invitationService = require('../services/invitationService');
+    const user = await invitationService.verifyInvitationToken(req.params.token);
+
+    res.json({
+      success: true,
+      data: {
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        organizationName: user.organizationId?.name
+      }
+    });
+  } catch (error) {
+    if (error.message === 'Invalid or expired invitation token') {
+      return res.status(400).json({
+        success: false,
+        error: error.message
+      });
+    }
+    next(error);
+  }
+};
+
+/**
+ * @route   POST /api/team/accept-invitation
+ * @desc    Accept invitation and set password
+ * @access  Public
+ */
+const acceptInvitation = async (req, res, next) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({
+        success: false,
+        error: 'Token and password are required'
+      });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        error: 'Password must be at least 8 characters'
+      });
+    }
+
+    const invitationService = require('../services/invitationService');
+    const user = await invitationService.acceptInvitation(token, password);
+
+    res.json({
+      success: true,
+      message: 'Invitation accepted successfully. You can now log in with your email and password.',
+      data: {
+        email: user.email,
+        name: user.name
+      }
+    });
+  } catch (error) {
+    if (error.message === 'Invalid or expired invitation token') {
+      return res.status(400).json({
+        success: false,
+        error: error.message
+      });
+    }
+    next(error);
+  }
+};
+
 module.exports = {
   createTeamMember,
   getTeamMembers,
   updateTeamMember,
-  deactivateTeamMember
+  deactivateTeamMember,
+  verifyInvitationToken,
+  acceptInvitation
 };

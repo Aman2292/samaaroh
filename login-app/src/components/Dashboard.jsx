@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Add } from 'iconsax-react';
+import { Add, Notification } from 'iconsax-react';
+import SendNotificationModal from './Notifications/SendNotificationModal';
 import PlannerOwnerWidgets from './Dashboard/PlannerOwnerWidgets';
 import PlannerWidgets from './Dashboard/PlannerWidgets';
 import FinanceWidgets from './Dashboard/FinanceWidgets';
 import CoordinatorWidgets from './Dashboard/CoordinatorWidgets';
 import SuperAdminWidgets from './Dashboard/SuperAdminWidgets';
+import RecentEventsTable from './Dashboard/RecentEventsTable';
+import RecentOverduePayments from './Dashboard/RecentOverduePayments';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
@@ -16,6 +19,7 @@ const Dashboard = () => {
         teamMembers: 0
     });
     const [loading, setLoading] = useState(true);
+    const [isSendNotificationModalOpen, setIsSendNotificationModalOpen] = useState(false);
     const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
 
     useEffect(() => {
@@ -89,13 +93,27 @@ const Dashboard = () => {
             </header>
 
             {/* Role-Based Widgets */}
-            <div className={`grid gap-6 mb-8 ${userInfo.role === 'SUPER_ADMIN' ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'}`}>
+            <div className={`grid gap-6 mb-8 ${userInfo.role === 'SUPER_ADMIN' ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
                 {userInfo.role === 'SUPER_ADMIN' && <SuperAdminWidgets stats={stats} loading={loading} />}
                 {userInfo.role === 'PLANNER_OWNER' && <PlannerOwnerWidgets stats={stats} loading={loading} />}
                 {userInfo.role === 'PLANNER' && <PlannerWidgets stats={stats} loading={loading} />}
                 {userInfo.role === 'FINANCE' && <FinanceWidgets stats={stats} loading={loading} />}
                 {userInfo.role === 'COORDINATOR' && <CoordinatorWidgets stats={stats} loading={loading} />}
             </div>
+
+            {/* Recent Events Table for PLANNER */}
+            {userInfo.role === 'PLANNER' && (
+                <div className="mb-8">
+                    <RecentEventsTable />
+                </div>
+            )}
+
+            {/* Recent Overdue Payments for FINANCE */}
+            {userInfo.role === 'FINANCE' && (
+                <div className="mb-8">
+                    <RecentOverduePayments />
+                </div>
+            )}
 
             {/* Quick Actions */}
             {canCreateEvent && (
@@ -112,9 +130,18 @@ const Dashboard = () => {
                             <Add size="20" color="currentColor" />
                             <span>Create Event</span>
                         </button>
+                        <button onClick={() => setIsSendNotificationModalOpen(true)} className="flex items-center justify-center space-x-2 px-6 py-4 border-2 border-indigo-200 text-indigo-700 rounded-lg hover:bg-indigo-50 transition-colors font-medium">
+                            <Notification size="20" color="currentColor" />
+                            <span>Send Notification</span>
+                        </button>
                     </div>
                 </div>
             )}
+
+            <SendNotificationModal
+                isOpen={isSendNotificationModalOpen}
+                onClose={() => setIsSendNotificationModalOpen(false)}
+            />
         </div>
     );
 };

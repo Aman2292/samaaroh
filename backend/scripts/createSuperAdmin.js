@@ -13,7 +13,12 @@ const createSuperAdmin = async () => {
     const superAdminExists = await User.findOne({ role: 'SUPER_ADMIN' });
 
     if (superAdminExists) {
-      console.log('Super Admin already exists');
+      console.log('Super Admin already exists. Updating password...');
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash('admin123', salt);
+      superAdminExists.password = hashedPassword;
+      await superAdminExists.save();
+      console.log('Super Admin password updated to: admin123');
       process.exit(0);
     }
 

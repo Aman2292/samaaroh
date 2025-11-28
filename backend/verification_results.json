@@ -1,0 +1,13 @@
+{
+  "test1": {
+    "count": 3,
+    "notifications": 3
+  },
+  "test2": {
+    "count": 2,
+    "notifications": 2
+  },
+  "test3": {
+    "passed": true
+  }
+}

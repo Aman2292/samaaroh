@@ -7,6 +7,11 @@ const clientRoutes = require('./routes/clientRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 const teamRoutes = require('./routes/teamRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
+const userRoutes = require('./routes/userRoutes');
+const organizationRoutes = require('./routes/organizationRoutes');
+const activityLogRoutes = require('./routes/activityLogRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
 dotenv.config();
@@ -32,6 +37,11 @@ app.use('/api/clients', clientRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/team', teamRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/organization', organizationRoutes);
+app.use('/api/activity-logs', activityLogRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Error Handler (must be last)
 app.use(errorHandler);

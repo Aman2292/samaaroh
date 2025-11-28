@@ -1,24 +1,37 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LogoutCurve, Home, User, Calendar, People, HambergerMenu, ArrowLeft2 } from 'iconsax-react';
+
+import { LogoutCurve, Home, User, Calendar, People, MoneyRecive, HambergerMenu, ArrowLeft2, Building, UserOctagon, Setting2, DocumentText, Notification } from 'iconsax-react';
+import NotificationBell from './Notifications/NotificationBell';
+import NotificationsPanel from './Notifications/NotificationsPanel';
 
 const Layout = ({ children, onLogout }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const [isNotificationPanelOpen, setIsNotificationPanelOpen] = useState(false);
     const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
 
     const canAccessClients = ['PLANNER_OWNER', 'PLANNER', 'FINANCE'].includes(userInfo.role);
     const canAccessEvents = true; // All roles can access events
     const canAccessTeam = userInfo.role === 'PLANNER_OWNER';
+    const canAccessPayments = ['PLANNER_OWNER', 'FINANCE'].includes(userInfo.role);
+    const isSuperAdmin = userInfo.role === 'SUPER_ADMIN';
 
     const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/');
 
     const menuItems = [
         { path: '/', icon: Home, label: 'Dashboard', show: true },
+        { path: '/admin/organizations', icon: Building, label: 'Organizations', show: isSuperAdmin },
+        { path: '/admin/users', icon: UserOctagon, label: 'Users', show: isSuperAdmin },
         { path: '/clients', icon: User, label: 'Clients', show: canAccessClients },
         { path: '/events', icon: Calendar, label: 'Events', show: canAccessEvents },
+        { path: '/payments/outstanding', icon: MoneyRecive, label: 'Payments', show: canAccessPayments },
         { path: '/team', icon: People, label: 'Team', show: canAccessTeam },
+        { path: '/settings', icon: Setting2, label: 'Settings', show: canAccessTeam },
+        { path: '/activity-logs', icon: DocumentText, label: 'Activity Logs', show: canAccessTeam },
+        { path: '/profile', icon: User, label: 'My Profile', show: true },
+
     ];
 
     return (
@@ -52,8 +65,8 @@ const Layout = ({ children, onLogout }) => {
                             key={item.path}
                             onClick={() => navigate(item.path)}
                             className={`flex items-center space-x-3 px-4 py-3 rounded-lg w-full transition-colors ${isActive(item.path) && (item.path === '/' ? location.pathname === '/' : true)
-                                    ? 'bg-primary-50 text-primary-700'
-                                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                                ? 'bg-primary-50 text-primary-700'
+                                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                                 }`}
                             title={isCollapsed ? item.label : ''}
                         >
@@ -70,9 +83,12 @@ const Layout = ({ children, onLogout }) => {
                 {/* Footer - Fixed at bottom */}
                 <div className="p-4 border-t border-slate-100 flex-shrink-0">
                     {!isCollapsed && (
-                        <div className="mb-3 px-4 overflow-hidden">
-                            <div className="text-sm font-bold text-slate-700 truncate">{userInfo.name || 'User'}</div>
-                            <div className="text-xs text-slate-500 truncate">{userInfo.email || ''}</div>
+                        <div className="mb-3 px-4 overflow-hidden flex items-center justify-between">
+                            <div>
+                                <div className="text-sm font-bold text-slate-700 truncate">{userInfo.name || 'User'}</div>
+                                <div className="text-xs text-slate-500 truncate">{userInfo.email || ''}</div>
+                            </div>
+                            <NotificationBell onClick={() => setIsNotificationPanelOpen(true)} />
                         </div>
                     )}
                     <button
@@ -90,6 +106,11 @@ const Layout = ({ children, onLogout }) => {
             <main className={`flex-1 overflow-y-auto transition-all duration-300 ${isCollapsed ? 'ml-20' : 'ml-64'}`}>
                 {children}
             </main>
+
+            <NotificationsPanel
+                isOpen={isNotificationPanelOpen}
+                onClose={() => setIsNotificationPanelOpen(false)}
+            />
         </div>
     );
 };

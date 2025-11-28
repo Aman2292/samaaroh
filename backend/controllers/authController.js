@@ -21,10 +21,14 @@ const register = async (req, res) => {
 // @access  Public
 const login = async (req, res) => {
   try {
-    const user = await authService.loginUser(req.body);
+    // Extract IP address and user agent
+    const ipAddress = req.ip || req.connection.remoteAddress || 'unknown';
+    const userAgent = req.get('user-agent') || 'unknown';
+    
+    const user = await authService.loginUser(req.body, ipAddress, userAgent);
     res.json(user);
   } catch (error) {
-    if (error.message === 'Invalid email or password') {
+    if (error.message === 'Invalid email or password' || error.message.includes('deactivated') || error.message.includes('suspended')) {
       res.status(401).json({ message: error.message });
     } else {
       res.status(500).json({ message: error.message });

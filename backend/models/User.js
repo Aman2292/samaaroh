@@ -38,6 +38,29 @@ const userSchema = mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  lastLogin: {
+    type: Date
+  },
+  lastLoginIP: {
+    type: String
+  },
+  loginHistory: [{
+    timestamp: {
+      type: Date,
+      default: Date.now
+    },
+    ip: String,
+    userAgent: String
+  }],
+  // Invitation fields
+  invitationStatus: {
+    type: String,
+    enum: ['pending', 'accepted'],
+    default: 'accepted'
+  },
+  invitationToken: String,
+  invitationSentAt: Date,
+  invitationExpiresAt: Date,
   // Legacy fields (optional, kept if needed for migration or specific logic)
   businessName: String,
   serviceType: String,

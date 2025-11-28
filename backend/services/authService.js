@@ -13,11 +13,6 @@ const registerUser = async (userData) => {
   const { email, password, name, phone, role, organizationName, city } = userData;
 
   // Only allow PLANNER_OWNER via public registration
-  // Note: The frontend might send 'PLANNER_OWNER' or we default it here if not sent, 
-  // but the plan says we enforce it.
-  // If the user sends something else, we reject or override? 
-  // The plan says: "Only allow PLANNER_OWNER via public registration"
-  
   const effectiveRole = role || 'PLANNER_OWNER';
 
   if (effectiveRole !== 'PLANNER_OWNER') {
@@ -73,24 +68,70 @@ const registerUser = async (userData) => {
   }
 };
 
-const loginUser = async (userData) => {
+const loginUser = async (userData, ipAddress, userAgent) => {
   const { email, password } = userData;
 
-  const user = await User.findOne({ email }).populate('organizationId', 'name phone email city');
+  const user = await User.findOne({ email }).populate('organizationId', 'name phone email city status');
 
-  if (user && (await user.matchPassword(password))) {
-    return {
-      _id: user._id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      organizationId: user.organizationId?._id,
-      organizationName: user.organizationId?.name,
-      token: generateToken(user._id, user.role, user.organizationId?._id),
-    };
-  } else {
+  if (!user) {
     throw new Error('Invalid email or password');
   }
+
+  if (!user.isActive) {
+    throw new Error('Your account has been deactivated. Please contact support.');
+  }
+
+  // Check if organization is suspended (for non-SUPER_ADMIN)
+  if (user.role !== 'SUPER_ADMIN' && user.organizationId && user.organizationId.status === 'suspended') {
+    throw new Error('Your organization has been suspended. Please contact support.');
+  }
+
+  const isMatch = await user.matchPassword(password);
+
+  if (!isMatch) {
+    throw new Error('Invalid email or password');
+  }
+
+  // Update last login info
+  user.lastLogin = new Date();
+  user.lastLoginIP = ipAddress;
+
+  // Add to login history (keep last 10)
+  if (!user.loginHistory) {
+    user.loginHistory = [];
+  }
+  user.loginHistory.unshift({
+    timestamp: new Date(),
+    ip: ipAddress,
+    userAgent: userAgent
+  });
+  if (user.loginHistory.length > 10) {
+    user.loginHistory = user.loginHistory.slice(0, 10);
+  }
+
+  await user.save();
+
+  // Log login activity
+  const ActivityLog = require('../models/ActivityLog');
+  await ActivityLog.create({
+    userId: user._id,
+    userRole: user.role,
+    action: 'login',
+    targetType: 'system',
+    ipAddress,
+    userAgent,
+    organizationId: user.organizationId?._id
+  });
+
+  return {
+    _id: user._id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+    organizationId: user.organizationId?._id,
+    organizationName: user.organizationId?.name,
+    token: generateToken(user._id, user.role, user.organizationId?._id),
+  };
 };
 
 module.exports = {
