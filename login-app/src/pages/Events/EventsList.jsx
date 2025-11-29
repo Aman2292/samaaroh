@@ -1,13 +1,15 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Add, Calendar, Eye, TaskSquare, Element3, ClipboardText, TickCircle, Clock, CloseCircle, Flag } from 'iconsax-react';
+import { Add, Calendar, Eye, TaskSquare, Element3, ClipboardText, TickCircle, Clock, CloseCircle, Flag, SearchNormal, Refresh } from 'iconsax-react';
 import LoadingSkeleton from '../../components/common/LoadingSkeleton';
 import EmptyState from '../../components/common/EmptyState';
 import ErrorMessage from '../../components/common/ErrorMessage';
 import EventsKanban from './EventsKanban';
 import { toast } from 'react-toastify';
 import Select from '../../components/common/Select';
+import DatePicker from '../../components/common/DatePicker';
 
 const EventsList = () => {
     const navigate = useNavigate();
@@ -17,6 +19,18 @@ const EventsList = () => {
     const [page, setPage] = useState(1);
     const [pagination, setPagination] = useState(null);
     const [viewMode, setViewMode] = useState('list'); // 'list' or 'kanban'
+    const [showFilters, setShowFilters] = useState(false);
+
+    // Filter states
+    const [filters, setFilters] = useState({
+        status: '',
+        eventType: '',
+        dateFrom: '',
+        dateTo: '',
+        plannerId: ''
+    });
+    const [teamMembers, setTeamMembers] = useState([]);
+
     const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
 
     const canCreate = ['PLANNER_OWNER', 'PLANNER'].includes(userInfo.role);
@@ -29,7 +43,18 @@ const EventsList = () => {
 
             const limit = viewMode === 'kanban' ? 100 : 20;
 
-            const response = await fetch(`http://localhost:5001/api/events?page=${page}&limit=${limit}`, {
+            // Build query string with filters
+            const params = new URLSearchParams({
+                page: page.toString(),
+                limit: limit.toString(),
+                ...(filters.status && { status: filters.status }),
+                ...(filters.eventType && { eventType: filters.eventType }),
+                ...(filters.dateFrom && { dateFrom: filters.dateFrom }),
+                ...(filters.dateTo && { dateTo: filters.dateTo }),
+                ...(filters.plannerId && { plannerId: filters.plannerId })
+            });
+
+            const response = await fetch(`http://localhost:5001/api/events?${params}`, {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
 
@@ -48,9 +73,29 @@ const EventsList = () => {
         }
     };
 
+    const fetchTeamMembers = async () => {
+        try {
+            const response = await fetch('http://localhost:5001/api/team', {
+                headers: { 'Authorization': `Bearer ${userInfo.token}` }
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setTeamMembers(data.data.filter(member =>
+                    ['PLANNER_OWNER', 'PLANNER'].includes(member.role)
+                ));
+            }
+        } catch (error) {
+            console.error('Failed to fetch team members:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchTeamMembers();
+    }, []);
+
     useEffect(() => {
         fetchEvents();
-    }, [page, viewMode]);
+    }, [page, viewMode, filters]);
 
     const handleStatusChange = async (eventId, newStatus) => {
         try {
@@ -103,14 +148,14 @@ const EventsList = () => {
                                 className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-white shadow text-primary-600' : 'text-slate-500 hover:text-slate-700'}`}
                                 title="List View"
                             >
-                                <TaskSquare size="20" variant={viewMode === 'list' ? 'Bold' : 'Outline'} />
+                                <TaskSquare size={20} variant={viewMode === 'list' ? 'Bold' : 'Outline'} color="currentColor" />
                             </button>
                             <button
                                 onClick={() => setViewMode('kanban')}
                                 className={`p-2 rounded-md transition-all ${viewMode === 'kanban' ? 'bg-white shadow text-primary-600' : 'text-slate-500 hover:text-slate-700'}`}
                                 title="Kanban View"
                             >
-                                <Element3 size="20" variant={viewMode === 'kanban' ? 'Bold' : 'Outline'} />
+                                <Element3 size={20} variant={viewMode === 'kanban' ? 'Bold' : 'Outline'} color="currentColor" />
                             </button>
                         </div>
                         {canCreate && (
@@ -120,6 +165,104 @@ const EventsList = () => {
                             </button>
                         )}
                     </div>
+                </div>
+
+                {/* Filters Section */}
+                <div className="mb-6">
+                    <button
+                        onClick={() => setShowFilters(!showFilters)}
+                        className="flex items-center space-x-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors mb-4"
+                    >
+                        <SearchNormal size={20} />
+                        <span>{showFilters ? 'Hide Filters' : 'Show Filters'}</span>
+                    </button>
+
+                    {showFilters && (
+                        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">Status</label>
+                                    <select
+                                        value={filters.status}
+                                        onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+                                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                    >
+                                        <option value="">All Statuses</option>
+                                        <option value="pending">Pending</option>
+                                        <option value="confirmed">Confirmed</option>
+                                        <option value="in_progress">In Progress</option>
+                                        <option value="completed">Completed</option>
+                                        <option value="cancelled">Cancelled</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">Event Type</label>
+                                    <select
+                                        value={filters.eventType}
+                                        onChange={(e) => setFilters({ ...filters, eventType: e.target.value })}
+                                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                    >
+                                        <option value="">All Types</option>
+                                        <option value="wedding">Wedding</option>
+                                        <option value="corporate">Corporate</option>
+                                        <option value="birthday">Birthday</option>
+                                        <option value="anniversary">Anniversary</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">From Date</label>
+                                    <input
+                                        type="date"
+                                        value={filters.dateFrom}
+                                        onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
+                                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">To Date</label>
+                                    <input
+                                        type="date"
+                                        value={filters.dateTo}
+                                        onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
+                                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                    />
+                                </div>
+
+                                {userInfo.role === 'PLANNER_OWNER' && teamMembers.length > 0 && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-2">Assigned Planner</label>
+                                        <select
+                                            value={filters.plannerId}
+                                            onChange={(e) => setFilters({ ...filters, plannerId: e.target.value })}
+                                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                        >
+                                            <option value="">All Planners</option>
+                                            {teamMembers.map(member => (
+                                                <option key={member._id} value={member._id}>{member.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="flex items-center space-x-4 mt-4 pt-4 border-t border-slate-200">
+                                <button
+                                    onClick={() => setFilters({ status: '', eventType: '', dateFrom: '', dateTo: '', plannerId: '' })}
+                                    className="flex items-center space-x-2 px-4 py-2 text-slate-600 hover:text-slate-800 transition-colors"
+                                >
+                                    <Refresh size={18} />
+                                    <span>Clear Filters</span>
+                                </button>
+                                <div className="text-sm text-slate-500">
+                                    {events.length} event(s) found
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* PLANNER Notice Banner */}

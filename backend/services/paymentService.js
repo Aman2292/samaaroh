@@ -126,9 +126,15 @@ const getOutstandingPayments = async (organizationId, filters = {}) => {
   // Build query
   const query = {
     organizationId,
-    isDeleted: false,
-    status: { $in: ['pending', 'partially_paid', 'overdue'] }
+    isDeleted: false
   };
+
+  // Filter by payment status based on type
+  if (type === 'paid') {
+    // Paid tab: show only fully paid payments
+    query.status = 'paid';
+  }
+  // For 'all', 'client', 'vendor' tabs: show all statuses - no status filter needed
 
   // Filter by payment type
   if (type === 'client') {

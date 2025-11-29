@@ -12,6 +12,8 @@ const userRoutes = require('./routes/userRoutes');
 const organizationRoutes = require('./routes/organizationRoutes');
 const activityLogRoutes = require('./routes/activityLogRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const taskRoutes = require('./routes/taskRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
 dotenv.config();
@@ -42,6 +44,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/organization', organizationRoutes);
 app.use('/api/activity-logs', activityLogRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/tasks', taskRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Error Handler (must be last)
 app.use(errorHandler);

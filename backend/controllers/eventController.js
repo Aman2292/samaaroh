@@ -1,4 +1,5 @@
 const eventService = require('../services/eventService');
+const { logActivity } = require('../utils/activityLogger');
 
 /**
  * @route   POST /api/events
@@ -14,6 +15,20 @@ const createEvent = async (req, res, next) => {
     };
 
     const event = await eventService.createEvent(eventData);
+
+    // Log activity
+    await logActivity(
+      req.user._id,
+      req.user.role,
+      'create_event',
+      'event',
+      event._id,
+      event.eventName,
+      { eventType: event.eventType, eventDate: event.eventDate },
+      req.ip || 'unknown',
+      req.get('user-agent') || 'unknown',
+      req.user.organizationId
+    );
 
     res.status(201).json({
       success: true,
@@ -138,6 +153,20 @@ const updateEvent = async (req, res, next) => {
       req.user.role
     );
 
+    // Log activity
+    await logActivity(
+      req.user._id,
+      req.user.role,
+      'update_event',
+      'event',
+      event._id,
+      event.eventName,
+      { updatedFields: Object.keys(req.body) },
+      req.ip || 'unknown',
+      req.get('user-agent') || 'unknown',
+      req.user.organizationId
+    );
+
     res.json({
       success: true,
       data: event
@@ -162,6 +191,20 @@ const deleteEvent = async (req, res, next) => {
         error: 'Event not found'
       });
     }
+
+    // Log activity
+    await logActivity(
+      req.user._id,
+      req.user.role,
+      'delete_event',
+      'event',
+      event._id,
+      event.eventName,
+      {},
+      req.ip || 'unknown',
+      req.get('user-agent') || 'unknown',
+      req.user.organizationId
+    );
 
     res.json({
       success: true,

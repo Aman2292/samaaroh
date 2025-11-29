@@ -61,72 +61,73 @@ const customStyles = `
 `;
 
 const CustomDatePicker = ({
-    label,
-    name,
-    control,
-    error,
-    placeholder = "Select date",
-    className = "",
-    required = false,
-    minDate,
-    maxDate,
-    showTimeSelect = false,
-    dateFormat = "dd/MM/yyyy",
-    value,
-    onChange,
-    onBlur,
-    ...props
+  label,
+  name,
+  control,
+  error,
+  placeholder = "Select date",
+  className = "",
+  required = false,
+  minDate,
+  maxDate,
+  showTimeSelect = false,
+  dateFormat = "dd/MM/yyyy",
+  value,
+  onChange,
+  onBlur,
+  ...props
 }) => {
-    const renderDatePicker = (fieldValue, fieldOnChange, fieldOnBlur) => (
-        <DatePicker
-            selected={fieldValue ? new Date(fieldValue) : null}
-            onChange={(date) => fieldOnChange(date)}
-            onBlur={fieldOnBlur}
-            placeholderText={placeholder}
-            className={`
+  const renderDatePicker = (fieldValue, fieldOnChange, fieldOnBlur) => (
+    <DatePicker
+      selected={fieldValue ? new Date(fieldValue) : null}
+      onChange={(date) => fieldOnChange(date)}
+      onBlur={fieldOnBlur}
+      placeholderText={placeholder}
+      className={`
                 w-full bg-white border rounded-lg pl-10 pr-3 py-2.5 text-slate-800
                 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500
                 disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed
                 transition-all duration-200
                 ${error ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : 'border-slate-200'}
             `}
-            dateFormat={dateFormat}
-            minDate={minDate}
-            maxDate={maxDate}
-            showTimeSelect={showTimeSelect}
-            {...props}
-        />
-    );
+      dateFormat={dateFormat}
+      minDate={minDate}
+      maxDate={maxDate}
+      showTimeSelect={showTimeSelect}
+      onKeyDown={(e) => e.preventDefault()}
+      {...props}
+    />
+  );
 
-    return (
-        <div className={`w-full ${className}`}>
-            <style>{customStyles}</style>
-            {label && (
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    {label} {required && <span className="text-red-500">*</span>}
-                </label>
-            )}
-            <div className="relative">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10">
-                    <Calendar size="20" />
-                </div>
-                {control ? (
-                    <Controller
-                        control={control}
-                        name={name}
-                        render={({ field: { onChange: fieldOnChange, onBlur: fieldOnBlur, value: fieldValue } }) =>
-                            renderDatePicker(fieldValue, fieldOnChange, fieldOnBlur)
-                        }
-                    />
-                ) : (
-                    renderDatePicker(value, onChange, onBlur)
-                )}
-            </div>
-            {error && (
-                <p className="mt-1 text-sm text-red-600">{error.message || error}</p>
-            )}
+  return (
+    <div className={`w-full ${className}`}>
+      <style>{customStyles}</style>
+      {label && (
+        <label className="block text-sm font-medium text-slate-700 mb-1.5">
+          {label} {required && <span className="text-red-500">*</span>}
+        </label>
+      )}
+      <div className="relative">
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10">
+          <Calendar size="20" />
         </div>
-    );
+        {control ? (
+          <Controller
+            control={control}
+            name={name}
+            render={({ field: { onChange: fieldOnChange, onBlur: fieldOnBlur, value: fieldValue } }) =>
+              renderDatePicker(fieldValue, fieldOnChange, fieldOnBlur)
+            }
+          />
+        ) : (
+          renderDatePicker(value, onChange, onBlur)
+        )}
+      </div>
+      {error && (
+        <p className="mt-1 text-sm text-red-600">{error.message || error}</p>
+      )}
+    </div>
+  );
 };
 
 export default CustomDatePicker;

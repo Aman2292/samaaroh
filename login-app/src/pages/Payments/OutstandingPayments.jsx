@@ -142,6 +142,15 @@ const OutstandingPayments = () => {
                             >
                                 Vendor Payments
                             </button>
+                            <button
+                                onClick={() => setActiveTab('paid')}
+                                className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === 'paid'
+                                    ? 'bg-green-50 text-green-700'
+                                    : 'text-slate-600 hover:bg-slate-50'
+                                    }`}
+                            >
+                                Paid
+                            </button>
                         </div>
                         <button
                             onClick={fetchOutstandingPayments}
@@ -236,12 +245,14 @@ const OutstandingPayments = () => {
                                                 <td className="px-4 py-3">{getStatusBadge(payment)}</td>
                                                 <td className="px-4 py-3 text-right">
                                                     <div className="flex items-center justify-end space-x-2">
-                                                        <button
-                                                            onClick={() => handleMarkPaid(payment)}
-                                                            className="text-green-600 hover:text-green-700 text-xs font-medium"
-                                                        >
-                                                            Mark Paid
-                                                        </button>
+                                                        {payment.status !== 'paid' && (
+                                                            <button
+                                                                onClick={() => handleMarkPaid(payment)}
+                                                                className="text-green-600 hover:text-green-700 text-xs font-medium"
+                                                            >
+                                                                Mark Paid
+                                                            </button>
+                                                        )}
                                                         <button
                                                             onClick={() => navigate(`/events/${payment.eventId?._id}`)}
                                                             className="text-primary-600 hover:text-primary-700"

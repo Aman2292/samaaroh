@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { People, Add } from 'iconsax-react';
+import { People, Add, DocumentUpload, DocumentDownload } from 'iconsax-react';
 import LoadingSkeleton from '../../components/common/LoadingSkeleton';
 import EmptyState from '../../components/common/EmptyState';
 import ErrorMessage from '../../components/common/ErrorMessage';
-
+import ImportCSVModal from '../../components/Team/ImportCSVModal';
 import AddTeamMemberModal from '../../components/Team/AddTeamMemberModal';
+import { toast } from 'react-toastify';
 
 const TeamList = () => {
     const [teamMembers, setTeamMembers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showAddModal, setShowAddModal] = useState(false);
+    const [showImportModal, setShowImportModal] = useState(false);
     const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
 
-    const canManageTeam = userInfo.role === 'PLANNER_OWNER';
+    const canManageTeam = ['PLANNER_OWNER', 'PLANNER'].includes(userInfo.role);
 
     useEffect(() => {
         fetchTeamMembers();
@@ -42,12 +44,40 @@ const TeamList = () => {
         }
     };
 
+    const handleExportCSV = async () => {
+        try {
+            const response = await fetch('http://localhost:5001/api/team/export-csv', {
+                headers: {
+                    'Authorization': `Bearer ${userInfo.token}`
+                }
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `team-export-${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                toast.success('Team members exported successfully');
+            } else {
+                toast.error('Failed to export team members');
+            }
+        } catch (error) {
+            console.error('Error exporting CSV:', error);
+            toast.error('Failed to connect to server');
+        }
+    };
+
     const getRoleBadge = (role) => {
         const roleConfig = {
             PLANNER_OWNER: { bg: 'bg-purple-100', text: 'text-purple-700', label: 'Owner' },
             PLANNER: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Planner' },
             FINANCE: { bg: 'bg-green-100', text: 'text-green-700', label: 'Finance' },
-            COORDINATOR: { bg: 'bg-orange-100', text: 'text-orange-700', label: 'Coordinator' }
+            VENDOR: { bg: 'bg-orange-100', text: 'text-orange-700', label: 'Vendor' }
         };
 
         const config = roleConfig[role] || roleConfig.PLANNER;
@@ -89,13 +119,29 @@ const TeamList = () => {
                         <p className="text-slate-500 mt-1">Manage your team</p>
                     </div>
                     {canManageTeam && (
-                        <button
-                            onClick={() => setShowAddModal(true)}
-                            className="flex items-center space-x-2 px-4 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
-                        >
-                            <Add size="20" color="currentColor" />
-                            <span>Add Team Member</span>
-                        </button>
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => setShowImportModal(true)}
+                                className="flex items-center space-x-2 px-4 py-2.5 border border-primary-600 text-primary-600 rounded-lg hover:bg-primary-50 transition-colors font-medium"
+                            >
+                                <DocumentUpload size="20" color="currentColor" />
+                                <span>Import CSV</span>
+                            </button>
+                            <button
+                                onClick={handleExportCSV}
+                                className="flex items-center space-x-2 px-4 py-2.5 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium"
+                            >
+                                <DocumentDownload size="20" color="currentColor" />
+                                <span>Export CSV</span>
+                            </button>
+                            <button
+                                onClick={() => setShowAddModal(true)}
+                                className="flex items-center space-x-2 px-4 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
+                            >
+                                <Add size="20" color="currentColor" />
+                                <span>Add Team Member</span>
+                            </button>
+                        </div>
                     )}
                 </div>
 
@@ -104,6 +150,16 @@ const TeamList = () => {
                         onClose={() => setShowAddModal(false)}
                         onSuccess={() => {
                             setShowAddModal(false);
+                            fetchTeamMembers();
+                        }}
+                    />
+                )}
+
+                {showImportModal && (
+                    <ImportCSVModal
+                        isOpen={showImportModal}
+                        onClose={() => setShowImportModal(false)}
+                        onSuccess={() => {
                             fetchTeamMembers();
                         }}
                     />

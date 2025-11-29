@@ -1,7 +1,18 @@
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+import { toast } from 'react-toastify';
+import { CloseCircle, MoneyRecive } from 'iconsax-react';
 import Select from '../common/Select';
 import DatePicker from '../common/DatePicker';
 
-// ... (imports remain same)
+const schema = yup.object().shape({
+    paidAmount: yup.number().required('Amount is required').positive('Must be positive'),
+    paidDate: yup.string().required('Date is required'),
+    paymentMethod: yup.string().required('Payment method is required'),
+    notes: yup.string()
+});
 
 const MarkPaidModal = ({ onClose, onSuccess, payment }) => {
     const [loading, setLoading] = useState(false);
@@ -19,9 +30,40 @@ const MarkPaidModal = ({ onClose, onSuccess, payment }) => {
         }
     });
 
-    // ... (setQuickAmount remains same)
+    const setQuickAmount = (percentage) => {
+        const amount = (outstandingAmount * percentage / 100).toFixed(2);
+        setValue('paidAmount', parseFloat(amount));
+    };
 
-    // ... (onSubmit remains same)
+    const onSubmit = async (data) => {
+        try {
+            setLoading(true);
+
+            const response = await fetch(`http://localhost:5001/api/payments/${payment._id}/mark-paid`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${userInfo.token}`
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                toast.success('Payment marked as paid successfully');
+                onSuccess?.();
+                onClose();
+            } else {
+                toast.error(result.error || 'Failed to mark payment as paid');
+            }
+        } catch (error) {
+            console.error('Error marking payment as paid:', error);
+            toast.error('Failed to connect to server');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -124,7 +166,7 @@ const MarkPaidModal = ({ onClose, onSuccess, payment }) => {
                             <Select
                                 label="Payment Method"
                                 name="paymentMethod"
-                                register={register}
+                                control={control}
                                 error={errors.paymentMethod}
                                 required
                                 options={[
@@ -184,8 +226,8 @@ const MarkPaidModal = ({ onClose, onSuccess, payment }) => {
                         </button>
                     </div>
                 </form>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 

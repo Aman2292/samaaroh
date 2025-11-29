@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Add, Notification } from 'iconsax-react';
 import SendNotificationModal from './Notifications/SendNotificationModal';
-import PlannerOwnerWidgets from './Dashboard/PlannerOwnerWidgets';
+import EnhancedDashboard from './Dashboard/EnhancedDashboard';
 import PlannerWidgets from './Dashboard/PlannerWidgets';
 import FinanceWidgets from './Dashboard/FinanceWidgets';
 import CoordinatorWidgets from './Dashboard/CoordinatorWidgets';
@@ -23,7 +23,9 @@ const Dashboard = () => {
     const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
 
     useEffect(() => {
-        fetchStats();
+        if (userInfo.role !== 'PLANNER_OWNER') {
+            fetchStats();
+        }
     }, []);
 
     const fetchStats = async () => {
@@ -74,6 +76,11 @@ const Dashboard = () => {
     const canAccessClients = ['PLANNER_OWNER', 'PLANNER', 'FINANCE'].includes(userInfo.role);
     const canCreateEvent = ['PLANNER_OWNER', 'PLANNER'].includes(userInfo.role);
 
+    // Show Enhanced Dashboard for PLANNER_OWNER
+    if (userInfo.role === 'PLANNER_OWNER') {
+        return <EnhancedDashboard />;
+    }
+
     return (
         <div className="p-8">
             <header className="flex justify-between items-center mb-8">
@@ -95,7 +102,6 @@ const Dashboard = () => {
             {/* Role-Based Widgets */}
             <div className={`grid gap-6 mb-8 ${userInfo.role === 'SUPER_ADMIN' ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
                 {userInfo.role === 'SUPER_ADMIN' && <SuperAdminWidgets stats={stats} loading={loading} />}
-                {userInfo.role === 'PLANNER_OWNER' && <PlannerOwnerWidgets stats={stats} loading={loading} />}
                 {userInfo.role === 'PLANNER' && <PlannerWidgets stats={stats} loading={loading} />}
                 {userInfo.role === 'FINANCE' && <FinanceWidgets stats={stats} loading={loading} />}
                 {userInfo.role === 'COORDINATOR' && <CoordinatorWidgets stats={stats} loading={loading} />}
@@ -147,3 +153,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+

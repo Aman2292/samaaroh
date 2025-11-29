@@ -42,6 +42,39 @@ const organizationSchema = mongoose.Schema({
   suspensionReason: {
     type: String
   },
+  taskStatuses: [{
+    value: {
+      type: String,
+      required: true
+    },
+    label: {
+      type: String,
+      required: true
+    },
+    color: {
+      type: String,
+      default: '#64748B'
+    },
+    bgColor: {
+      type: String,
+      default: '#F1F5F9'
+    },
+    icon: {
+      type: String
+    },
+    order: {
+      type: Number,
+      default: 0
+    },
+    isDefault: {
+      type: Boolean,
+      default: false
+    }
+  }],
+  defaultTaskStatuses: {
+    type: Boolean,
+    default: true
+  },
   isActive: {
     type: Boolean,
     default: true
