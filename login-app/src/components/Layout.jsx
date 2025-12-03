@@ -16,12 +16,14 @@ const Layout = ({ children, onLogout }) => {
     const canAccessEvents = true; // All roles can access events
     const canAccessTeam = userInfo.role === 'PLANNER_OWNER';
     const canAccessPayments = ['PLANNER_OWNER', 'FINANCE'].includes(userInfo.role);
+    const canAccessVenue = userInfo.role === 'PLANNER_OWNER';
     const isSuperAdmin = userInfo.role === 'SUPER_ADMIN';
 
     const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/');
 
     const menuItems = [
         { path: '/', icon: Home, label: 'Dashboard', show: true },
+        { path: '/venue', icon: Building, label: 'Venue', show: canAccessVenue },
         { path: '/admin/organizations', icon: Building, label: 'Organizations', show: isSuperAdmin },
         { path: '/admin/users', icon: UserOctagon, label: 'Users', show: isSuperAdmin },
         { path: '/clients', icon: User, label: 'Clients', show: canAccessClients },
@@ -71,9 +73,8 @@ const Layout = ({ children, onLogout }) => {
                             title={isCollapsed ? item.label : ''}
                         >
                             <item.icon
-                                size="24"
+                                size={isCollapsed ? "28" : "24"}
                                 color="currentColor"
-                                variant={isActive(item.path) && (item.path === '/' ? location.pathname === '/' : true) ? 'Bold' : 'Outline'}
                             />
                             {!isCollapsed && <span className="font-medium">{item.label}</span>}
                         </button>
@@ -82,21 +83,21 @@ const Layout = ({ children, onLogout }) => {
 
                 {/* Footer - Fixed at bottom */}
                 <div className="p-4 border-t border-slate-100 flex-shrink-0">
-                    {!isCollapsed && (
-                        <div className="mb-3 px-4 overflow-hidden flex items-center justify-between">
-                            <div>
+                    <div className={`mb-3 ${isCollapsed ? 'flex justify-center' : 'px-4 flex items-center justify-between'}`}>
+                        {!isCollapsed && (
+                            <div className="overflow-hidden">
                                 <div className="text-sm font-bold text-slate-700 truncate">{userInfo.name || 'User'}</div>
                                 <div className="text-xs text-slate-500 truncate">{userInfo.email || ''}</div>
                             </div>
-                            <NotificationBell onClick={() => setIsNotificationPanelOpen(true)} />
-                        </div>
-                    )}
+                        )}
+                        <NotificationBell onClick={() => setIsNotificationPanelOpen(true)} />
+                    </div>
                     <button
                         onClick={onLogout}
-                        className="flex items-center space-x-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors`}
                         title={isCollapsed ? 'Logout' : ''}
                     >
-                        <LogoutCurve size="24" color="currentColor" />
+                        <LogoutCurve size={isCollapsed ? "28" : "24"} color="currentColor" />
                         {!isCollapsed && <span className="font-medium">Logout</span>}
                     </button>
                 </div>

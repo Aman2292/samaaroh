@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, User, Location } from 'iconsax-react';
 import PaymentsTab from '../../components/Events/PaymentsTab';
 import LoadingSkeleton from '../../components/common/LoadingSkeleton';
+import GuestListTab from '../../components/Events/GuestListTab';
+import EventTasksTab from '../../components/Events/EventTasksTab';
 import { toast } from 'react-toastify';
 
 const EventDetail = () => {
@@ -119,8 +121,8 @@ const EventDetail = () => {
                             <button
                                 onClick={() => setActiveTab('overview')}
                                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === 'overview'
-                                        ? 'bg-primary-50 text-primary-700'
-                                        : 'text-slate-600 hover:bg-slate-50'
+                                    ? 'bg-primary-50 text-primary-700'
+                                    : 'text-slate-600 hover:bg-slate-50'
                                     }`}
                             >
                                 Overview
@@ -128,17 +130,29 @@ const EventDetail = () => {
                             <button
                                 onClick={() => setActiveTab('payments')}
                                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === 'payments'
-                                        ? 'bg-primary-50 text-primary-700'
-                                        : 'text-slate-600 hover:bg-slate-50'
+                                    ? 'bg-primary-50 text-primary-700'
+                                    : 'text-slate-600 hover:bg-slate-50'
                                     }`}
                             >
                                 Payments
                             </button>
                             <button
-                                disabled
-                                className="px-4 py-2 rounded-lg font-medium text-slate-400 cursor-not-allowed"
+                                onClick={() => setActiveTab('guests')}
+                                className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === 'guests'
+                                    ? 'bg-primary-50 text-primary-700'
+                                    : 'text-slate-600 hover:bg-slate-50'
+                                    }`}
                             >
-                                Tasks (Coming Soon)
+                                Guest List
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('tasks')}
+                                className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === 'tasks'
+                                    ? 'bg-primary-50 text-primary-700'
+                                    : 'text-slate-600 hover:bg-slate-50'
+                                    }`}
+                            >
+                                Tasks
                             </button>
                         </div>
                     </div>
@@ -221,6 +235,15 @@ const EventDetail = () => {
 
                         {activeTab === 'payments' && (
                             <PaymentsTab eventId={event._id} clientId={event.clientId?._id} />
+                        )}
+                        {activeTab === 'guests' && (
+                            <GuestListTab eventId={event._id} event={event} />
+                        )}
+
+
+
+                        {activeTab === 'tasks' && (
+                            <EventTasksTab eventId={event._id} event={event} />
                         )}
                     </div>
                 </div>

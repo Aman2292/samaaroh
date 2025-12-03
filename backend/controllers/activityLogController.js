@@ -4,14 +4,27 @@ const User = require('../models/User');
 /**
  * @route   GET /api/activity-logs
  * @desc    Get activity logs with filters
- * @access  Private (PLANNER_OWNER only)
+ * @access  Private (PLANNER_OWNER, SUPER_ADMIN)
  */
 const getActivityLogs = async (req, res, next) => {
   try {
-    const { userId, action, resourceType, startDate, endDate, page = 1, limit = 50 } = req.query;
+    const { userId, action, resourceType, startDate, endDate, page = 1, limit = 50, organizationId } = req.query;
 
     // Build filter query
-    const filter = { organizationId: req.user.organizationId };
+    const filter = {};
+
+    // Role-based filtering
+    if (req.user.role === 'PLANNER_OWNER') {
+      filter.organizationId = req.user.organizationId;
+    } else if (req.user.role === 'SUPER_ADMIN') {
+      // Super Admin can filter by organization if provided
+      if (organizationId) {
+        filter.organizationId = organizationId;
+      }
+    } else {
+      // Other roles shouldn't access this, but just in case
+      return res.status(403).json({ error: 'Not authorized to view activity logs' });
+    }
 
     if (userId) filter.userId = userId;
     if (action) filter.action = action;
@@ -33,6 +46,7 @@ const getActivityLogs = async (req, res, next) => {
     // Get paginated logs
     const logs = await ActivityLog.find(filter)
       .populate('userId', 'name email role')
+      .populate('organizationId', 'name') // Populate organization info for Super Admin
       .sort({ createdAt: -1 })
       .limit(parseInt(limit))
       .skip((parseInt(page) - 1) * parseInt(limit))
@@ -56,14 +70,25 @@ const getActivityLogs = async (req, res, next) => {
 /**
  * @route   GET /api/activity-logs/export
  * @desc    Export activity logs as CSV
- * @access  Private (PLANNER_OWNER only)
+ * @access  Private (PLANNER_OWNER, SUPER_ADMIN)
  */
 const exportActivityLogs = async (req, res, next) => {
   try {
-    const { userId, action, resourceType, startDate, endDate } = req.query;
+    const { userId, action, resourceType, startDate, endDate, organizationId } = req.query;
 
     // Build filter query
-    const filter = { organizationId: req.user.organizationId };
+    const filter = {};
+
+    // Role-based filtering
+    if (req.user.role === 'PLANNER_OWNER') {
+      filter.organizationId = req.user.organizationId;
+    } else if (req.user.role === 'SUPER_ADMIN') {
+      if (organizationId) {
+        filter.organizationId = organizationId;
+      }
+    } else {
+      return res.status(403).json({ error: 'Not authorized to export activity logs' });
+    }
 
     if (userId) filter.userId = userId;
     if (action) filter.action = action;
@@ -82,13 +107,15 @@ const exportActivityLogs = async (req, res, next) => {
     // Get all logs matching filter
     const logs = await ActivityLog.find(filter)
       .populate('userId', 'name email role')
+      .populate('organizationId', 'name')
       .sort({ createdAt: -1 })
       .lean();
 
     // Convert to CSV
-    const csvHeader = 'Timestamp,User,Role,Action,Resource Type,Resource Name,IP Address,Details\n';
+    const csvHeader = 'Timestamp,Organization,User,Role,Action,Resource Type,Resource Name,IP Address,Details\n';
     const csvRows = logs.map(log => {
       const timestamp = new Date(log.createdAt).toLocaleString('en-IN');
+      const orgName = log.organizationId?.name || 'N/A';
       const user = log.userId?.name || 'Unknown';
       const role = log.userId?.role || 'Unknown';
       const action = log.action ? log.action.replace(/_/g, ' ').toUpperCase() : 'N/A';
@@ -97,7 +124,7 @@ const exportActivityLogs = async (req, res, next) => {
       const ipAddress = log.ipAddress || 'N/A';
       const details = log.details ? JSON.stringify(log.details).replace(/"/g, '""') : 'N/A';
 
-      return `"${timestamp}","${user}","${role}","${action}","${resourceType}","${resourceName}","${ipAddress}","${details}"`;
+      return `"${timestamp}","${orgName}","${user}","${role}","${action}","${resourceType}","${resourceName}","${ipAddress}","${details}"`;
     }).join('\n');
 
     const csv = csvHeader + csvRows;

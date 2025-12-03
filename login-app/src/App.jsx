@@ -18,6 +18,7 @@ import OrganizationSettings from './pages/Settings/OrganizationSettings'
 import ActivityLogs from './pages/ActivityLogs/ActivityLogs'
 import SetPassword from './pages/Public/SetPassword'
 import TeamList from './pages/Team/TeamList'
+import Venue from './pages/Venue/Venue'
 import TasksPage from './pages/Tasks/TasksPage'
 
 // Wrapper component to handle authentication state
@@ -66,6 +67,7 @@ function AppContent() {
         <Route path="/settings" element={isAuthenticated ? <Layout onLogout={handleLogout}><OrganizationSettings /></Layout> : <Navigate to="/login" replace />} />
         <Route path="/activity-logs" element={isAuthenticated ? <Layout onLogout={handleLogout}><ActivityLogs /></Layout> : <Navigate to="/login" replace />} />
         <Route path="/team" element={isAuthenticated ? <Layout onLogout={handleLogout}><TeamList /></Layout> : <Navigate to="/login" replace />} />
+        <Route path="/venue" element={isAuthenticated ? <Layout onLogout={handleLogout}><Venue /></Layout> : <Navigate to="/login" replace />} />
         <Route path="/tasks" element={isAuthenticated ? <Layout onLogout={handleLogout}><TasksPage /></Layout> : <Navigate to="/login" replace />} />
         <Route path="*" element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />} />
       </Routes>

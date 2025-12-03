@@ -146,17 +146,28 @@ const ActivityLogs = () => {
             const data = await response.json();
 
             if (response.ok) {
+                const headers = ['Timestamp', 'User', 'Role', 'Action', 'Resource Type', 'Resource Name', 'Description'];
+                if (userInfo.role === 'SUPER_ADMIN') {
+                    headers.splice(1, 0, 'Organization');
+                }
+
                 const csvContent = [
-                    ['Timestamp', 'User', 'Role', 'Action', 'Resource Type', 'Resource Name', 'Description'],
-                    ...data.data.map(log => [
-                        new Date(log.createdAt).toLocaleString(),
-                        log.userId?.name || 'Unknown',
-                        log.userId?.role || 'N/A',
-                        log.action,
-                        log.targetType,
-                        log.targetName || 'N/A',
-                        log.details || ''
-                    ])
+                    headers,
+                    ...data.data.map(log => {
+                        const row = [
+                            new Date(log.createdAt).toLocaleString(),
+                            log.userId?.name || 'Unknown',
+                            log.userId?.role || 'N/A',
+                            log.action,
+                            log.targetType,
+                            log.targetName || 'N/A',
+                            log.details || ''
+                        ];
+                        if (userInfo.role === 'SUPER_ADMIN') {
+                            row.splice(1, 0, log.organizationId?.name || 'N/A');
+                        }
+                        return row;
+                    })
                 ].map(e => e.join(",")).join("\n");
 
                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -339,6 +350,9 @@ const ActivityLogs = () => {
                                 <thead className="bg-slate-50 border-b border-slate-100">
                                     <tr>
                                         <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Timestamp</th>
+                                        {userInfo.role === 'SUPER_ADMIN' && (
+                                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Organization</th>
+                                        )}
                                         <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">User</th>
                                         <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Action</th>
                                         <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Resource</th>
@@ -351,6 +365,11 @@ const ActivityLogs = () => {
                                             <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
                                                 {formatTimestamp(log.createdAt)}
                                             </td>
+                                            {userInfo.role === 'SUPER_ADMIN' && (
+                                                <td className="px-6 py-4 text-sm text-slate-600">
+                                                    {log.organizationId?.name || 'N/A'}
+                                                </td>
+                                            )}
                                             <td className="px-6 py-4">
                                                 <div className="text-sm font-medium text-slate-800">{log.userId?.name || 'Unknown'}</div>
                                                 <div className="text-xs text-slate-500">{log.userId?.role?.replace('_', ' ')}</div>

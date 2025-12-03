@@ -69,4 +69,6 @@ const restrictTo = (...roles) => {
   };
 };
 
-module.exports = { protect, requireOrganization, restrictTo };
+const plannerOwner = restrictTo('PLANNER_OWNER');
+
+module.exports = { protect, requireOrganization, restrictTo, plannerOwner };

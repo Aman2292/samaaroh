@@ -66,6 +66,11 @@ const createTeamMember = async (teamMemberData, creatorId, organizationId) => {
     // Don't throw - user is created, email can be resent
   }
 
+  // Add user to organization's teamMembers array
+  await Organization.findByIdAndUpdate(organizationId, {
+    $push: { teamMembers: teamMember._id }
+  });
+
   return {
     _id: teamMember._id,
     email: teamMember.email,
@@ -110,6 +115,9 @@ const updateTeamMember = async (userId, updateData) => {
 /**
  * Deactivate team member
  */
+/**
+ * Deactivate team member
+ */
 const deactivateTeamMember = async (userId) => {
   const user = await User.findByIdAndUpdate(
     userId,
@@ -120,9 +128,28 @@ const deactivateTeamMember = async (userId) => {
   return user;
 };
 
+/**
+ * Delete team member (Hard delete)
+ * Used for cancelling invitations or removing users completely
+ */
+const deleteTeamMember = async (userId) => {
+  const user = await User.findByIdAndDelete(userId);
+  
+  if (user) {
+    // Remove from organization's teamMembers array
+    const Organization = require('../models/Organization');
+    await Organization.findByIdAndUpdate(user.organizationId, {
+      $pull: { teamMembers: userId }
+    });
+  }
+  
+  return user;
+};
+
 module.exports = {
   createTeamMember,
   getTeamMembers,
   updateTeamMember,
-  deactivateTeamMember
+  deactivateTeamMember,
+  deleteTeamMember
 };

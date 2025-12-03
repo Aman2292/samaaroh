@@ -6,7 +6,7 @@ const { requireRole } = require('../middleware/organizationMiddleware');
 
 // All routes require authentication and PLANNER_OWNER role
 router.use(protect);
-router.use(requireRole(['PLANNER_OWNER']));
+router.use(requireRole(['PLANNER_OWNER', 'SUPER_ADMIN']));
 
 // Activity logs routes
 router.get('/', activityLogController.getActivityLogs);

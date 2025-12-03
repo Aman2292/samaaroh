@@ -113,6 +113,38 @@ const deactivateTeamMember = async (req, res, next) => {
 };
 
 /**
+ * @route   DELETE /api/team/:id/hard
+ * @desc    Permanently delete team member (cancel invitation)
+ * @access  Private (PLANNER_OWNER only)
+ */
+const deleteTeamMember = async (req, res, next) => {
+  try {
+    if (req.user.role !== 'PLANNER_OWNER') {
+      return res.status(403).json({
+        success: false,
+        error: 'Only organization owners can delete team members'
+      });
+    }
+
+    const teamMember = await teamService.deleteTeamMember(req.params.id);
+
+    if (!teamMember) {
+      return res.status(404).json({
+        success: false,
+        error: 'Team member not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Team member deleted successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * @route   GET /api/team/verify-invitation/:token
  * @desc    Verify invitation token
  * @access  Public
@@ -432,5 +464,6 @@ module.exports = {
   acceptInvitation,
   importCSV,
   exportCSV,
-  downloadCSVTemplate
+  downloadCSVTemplate,
+  deleteTeamMember
 };

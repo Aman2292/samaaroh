@@ -132,7 +132,7 @@ const TaskModal = ({ isOpen, onClose, task, events, teamMembers, taskStatuses, o
                         onClick={onClose}
                         className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
                     >
-                        <CloseCircle size="24" className="text-slate-600" />
+                        <CloseCircle size="24" color="#64748b" />
                     </button>
                 </div>
 

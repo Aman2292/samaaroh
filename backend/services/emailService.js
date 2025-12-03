@@ -1,29 +1,28 @@
 const nodemailer = require('nodemailer');
 
 // Create transporter
+// Create transporter
 const createTransporter = () => {
-  // For development, use ethereal email (fake SMTP)
-  // For production, use real SMTP like Gmail, SendGrid, etc.
-  
-  if (process.env.NODE_ENV === 'production') {
+  // Check if SMTP credentials are provided
+  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
     return nodemailer.createTransport({
       host: process.env.SMTP_HOST,
-      port: process.env.SMTP_PORT,
-      secure: process.env.SMTP_PORT == 465,
+      port: process.env.SMTP_PORT || 587,
+      secure: process.env.SMTP_PORT == 465, // true for 465, false for other ports
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS
       }
     });
   } else {
-    // For development, log email to console instead of sending
+    // If no credentials, log email to console (Development Mode)
     return {
       sendMail: async (mailOptions) => {
-        console.log('\n=== EMAIL SENT (Development Mode) ===');
+        console.log('\n=== EMAIL SENT (Mock Mode - No SMTP Config) ===');
         console.log('To:', mailOptions.to);
         console.log('Subject:', mailOptions.subject);
-        console.log('HTML:', mailOptions.html);
-        console.log('=====================================\n');
+        console.log('HTML Preview:', mailOptions.html.substring(0, 100) + '...');
+        console.log('===============================================\n');
         return { messageId: 'dev-' + Date.now() };
       }
     };

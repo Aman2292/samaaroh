@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { People, Add, DocumentUpload, DocumentDownload } from 'iconsax-react';
+import { People, Add, DocumentUpload, DocumentDownload, Trash } from 'iconsax-react';
 import LoadingSkeleton from '../../components/common/LoadingSkeleton';
 import EmptyState from '../../components/common/EmptyState';
 import ErrorMessage from '../../components/common/ErrorMessage';
 import ImportCSVModal from '../../components/Team/ImportCSVModal';
 import AddTeamMemberModal from '../../components/Team/AddTeamMemberModal';
+import DeleteConfirmationModal from '../../components/common/DeleteConfirmationModal';
 import { toast } from 'react-toastify';
 
 const TeamList = () => {
@@ -13,6 +14,8 @@ const TeamList = () => {
     const [error, setError] = useState(null);
     const [showAddModal, setShowAddModal] = useState(false);
     const [showImportModal, setShowImportModal] = useState(false);
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [memberToDelete, setMemberToDelete] = useState(null);
     const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
 
     const canManageTeam = ['PLANNER_OWNER', 'PLANNER'].includes(userInfo.role);
@@ -69,6 +72,37 @@ const TeamList = () => {
         } catch (error) {
             console.error('Error exporting CSV:', error);
             toast.error('Failed to connect to server');
+        }
+    };
+
+    const handleDeleteClick = (member) => {
+        setMemberToDelete(member);
+        setDeleteModalOpen(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!memberToDelete) return;
+
+        try {
+            const response = await fetch(`http://localhost:5001/api/team/${memberToDelete._id}/hard`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${userInfo.token}`
+                }
+            });
+
+            if (response.ok) {
+                toast.success('Team member deleted successfully');
+                fetchTeamMembers();
+            } else {
+                const data = await response.json();
+                toast.error(data.error || 'Failed to delete team member');
+            }
+        } catch (error) {
+            toast.error('Failed to connect to server');
+        } finally {
+            setDeleteModalOpen(false);
+            setMemberToDelete(null);
         }
     };
 
@@ -165,6 +199,14 @@ const TeamList = () => {
                     />
                 )}
 
+                <DeleteConfirmationModal
+                    isOpen={deleteModalOpen}
+                    onClose={() => setDeleteModalOpen(false)}
+                    onConfirm={handleDeleteConfirm}
+                    title="Delete Team Member"
+                    message={`Are you sure you want to delete ${memberToDelete?.name}? This action cannot be undone.`}
+                />
+
                 {loading ? (
                     <LoadingSkeleton type="table" count={5} />
                 ) : error ? (
@@ -187,6 +229,9 @@ const TeamList = () => {
                                     <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Phone</th>
                                     <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Role</th>
                                     <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Status</th>
+                                    {canManageTeam && (
+                                        <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase">Actions</th>
+                                    )}
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
@@ -199,6 +244,16 @@ const TeamList = () => {
                                         <td className="px-6 py-4 text-slate-600">{member.phone || 'N/A'}</td>
                                         <td className="px-6 py-4">{getRoleBadge(member.role)}</td>
                                         <td className="px-6 py-4">{getStatusBadge(member)}</td>
+                                        {canManageTeam && (
+                                            <td className="px-6 py-4 text-right">
+                                                <button
+                                                    onClick={() => handleDeleteClick(member)}
+                                                    className="text-red-600 hover:text-red-800 font-medium text-sm px-3 py-1 hover:bg-red-50 rounded-md transition-colors"
+                                                >
+                                                    Delete
+                                                </button>
+                                            </td>
+                                        )}
                                     </tr>
                                 ))}
                             </tbody>
