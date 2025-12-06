@@ -13,7 +13,7 @@ const schema = yup.object().shape({
     eventName: yup.string().required('Event name is required').min(2, 'Event name must be at least 2 characters'),
     eventType: yup.string().required('Event type is required'),
     eventDate: yup.date().required('Event date is required').min(new Date(), 'Event date cannot be in the past'),
-    venue: yup.string(),
+    venueId: yup.string(),
     estimatedBudget: yup.number().min(0, 'Budget must be positive'),
     leadPlannerId: yup.string().required('Lead planner is required'),
     notes: yup.string().max(1000, 'Notes must not exceed 1000 characters')
@@ -24,6 +24,7 @@ const CreateEvent = () => {
     const [loading, setLoading] = useState(false);
     const [clients, setClients] = useState([]);
     const [planners, setPlanners] = useState([]);
+    const [venues, setVenues] = useState([]);
     const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
 
     const { register, handleSubmit, control, formState: { errors } } = useForm({
@@ -37,6 +38,7 @@ const CreateEvent = () => {
     useEffect(() => {
         fetchClients();
         fetchPlanners();
+        fetchVenues();
     }, []);
 
     const fetchClients = async () => {
@@ -63,6 +65,18 @@ const CreateEvent = () => {
             }
         } catch (err) {
             console.error('Failed to fetch planners');
+        }
+    };
+
+    const fetchVenues = async () => {
+        try {
+            const response = await fetch('http://localhost:5001/api/venue', {
+                headers: { 'Authorization': `Bearer ${userInfo.token}` }
+            });
+            const data = await response.json();
+            if (response.ok) setVenues(data.data || []);
+        } catch (err) {
+            console.error('Failed to fetch venues');
         }
     };
 
@@ -157,8 +171,14 @@ const CreateEvent = () => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Venue</label>
-                                <input type="text" {...register('venue')} className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Enter venue" />
+                                <Select
+                                    label="Venue"
+                                    name="venueId"
+                                    control={control}
+                                    error={errors.venueId}
+                                    options={venues.map(venue => ({ value: venue._id, label: `${venue.category} in ${venue.address?.city}` }))}
+                                    placeholder="Select venue"
+                                />
                             </div>
 
                             <div>

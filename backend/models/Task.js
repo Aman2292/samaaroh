@@ -12,8 +12,11 @@ const taskSchema = new mongoose.Schema({
     },
     eventId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Event',
-        required: [true, 'Event is required']
+        ref: 'Event'
+    },
+    venueId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Organization.venues' // Note: This is a logical ref, not a strict Mongoose ref to subdoc
     },
     assignedTo: {
         type: mongoose.Schema.Types.ObjectId,

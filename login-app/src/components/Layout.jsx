@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-import { LogoutCurve, Home, User, Calendar, People, MoneyRecive, HambergerMenu, ArrowLeft2, Building, UserOctagon, Setting2, DocumentText, Notification } from 'iconsax-react';
+import { LogoutCurve, Home, User, Calendar, People, MoneyRecive, HambergerMenu, ArrowLeft2, Building, UserOctagon, Setting2, DocumentText, Notification, TaskSquare } from 'iconsax-react';
 import NotificationBell from './Notifications/NotificationBell';
 import NotificationsPanel from './Notifications/NotificationsPanel';
 
@@ -34,6 +34,7 @@ const Layout = ({ children, onLogout }) => {
         { path: '/activity-logs', icon: DocumentText, label: 'Activity Logs', show: canAccessTeam },
         { path: '/profile', icon: User, label: 'My Profile', show: true },
 
+        { path: '/tasks', icon: TaskSquare, label: 'Tasks', show: userInfo.role === 'PLANNER_OWNER' },
     ];
 
     return (

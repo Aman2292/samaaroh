@@ -28,9 +28,9 @@ const eventSchema = new mongoose.Schema({
     required: true,
     index: true
   },
-  venue: {
-    type: String,
-    trim: true
+  venueId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Organization.venues'
   },
   estimatedBudget: {
     type: Number,

@@ -8,12 +8,27 @@ const { sendErrorResponse, sendSuccessResponse } = require('../utils/responseHan
 // @access  Private (PLANNER_OWNER, PLANNER)
 exports.createTask = async (req, res) => {
     try {
-        const { title, description, eventId, assignedTo, status, priority, dueDate, tags, notes } = req.body;
+        const { title, description, eventId, venueId, assignedTo, status, priority, dueDate, tags, notes } = req.body;
 
-        // Validate event exists and belongs to organization
-        const event = await Event.findById(eventId);
-        if (!event || event.organizationId.toString() !== req.user.organizationId.toString()) {
-            return sendErrorResponse(res, 'Event not found', 404);
+        if (!eventId && !venueId) {
+            return sendErrorResponse(res, 'Task must be linked to either an Event or a Venue', 400);
+        }
+
+        // Validate event if provided
+        if (eventId) {
+            const event = await Event.findById(eventId);
+            if (!event || event.organizationId.toString() !== req.user.organizationId.toString()) {
+                return sendErrorResponse(res, 'Event not found', 404);
+            }
+        }
+
+        // Validate venue if provided (check if it exists in organization)
+        if (venueId) {
+            const organization = await require('../models/Organization').findById(req.user.organizationId);
+            const venue = organization.venues.id(venueId);
+            if (!venue) {
+                return sendErrorResponse(res, 'Venue not found', 404);
+            }
         }
 
         // Validate assignee exists and belongs to organization
@@ -26,6 +41,7 @@ exports.createTask = async (req, res) => {
             title,
             description,
             eventId,
+            venueId,
             assignedTo,
             createdBy: req.user._id,
             organizationId: req.user.organizationId,
@@ -54,13 +70,14 @@ exports.createTask = async (req, res) => {
 // @access  Private
 exports.getTasks = async (req, res) => {
     try {
-        const { eventId, assignedTo, status, priority, page = 1, limit = 20 } = req.query;
+        const { eventId, venueId, assignedTo, status, priority, page = 1, limit = 20 } = req.query;
 
         // Build query
         const query = { organizationId: req.user.organizationId };
 
         // Filters
         if (eventId) query.eventId = eventId;
+        if (venueId) query.venueId = venueId;
         if (status) query.status = status;
         if (priority) query.priority = priority;
 

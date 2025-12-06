@@ -4,6 +4,7 @@ import VenueProfile from './VenueProfile';
 import VenueGallery from './VenueGallery';
 import VenuePackages from './VenuePackages';
 import VenueAvailability from './VenueAvailability';
+import VenueTasks from './VenueTasks';
 import CreateVenueModal from './CreateVenueModal';
 import LoadingSkeleton from '../../components/common/LoadingSkeleton';
 import ErrorMessage from '../../components/common/ErrorMessage';
@@ -31,7 +32,7 @@ const Venue = () => {
             if (response.ok) {
                 const newVenues = data.data || [];
                 setVenues(newVenues);
-                
+
                 // Update selectedVenue if it exists to keep data fresh
                 if (selectedVenue) {
                     const updatedSelected = newVenues.find(v => v._id === selectedVenue._id);
@@ -70,7 +71,8 @@ const Venue = () => {
         { id: 'profile', label: 'Profile', icon: Building },
         { id: 'gallery', label: 'Gallery', icon: Gallery },
         { id: 'packages', label: 'Packages', icon: Box },
-        { id: 'availability', label: 'Availability', icon: Calendar }
+        { id: 'availability', label: 'Availability', icon: Calendar },
+        { id: 'tasks', label: 'Tasks', icon: TickCircle }
     ];
 
     if (loading && !venues.length) return <div className="p-8"><LoadingSkeleton type="card" count={3} /></div>;
@@ -146,6 +148,7 @@ const Venue = () => {
                         {activeTab === 'gallery' && <VenueGallery venueData={selectedVenue} onUpdate={fetchVenues} />}
                         {activeTab === 'packages' && <VenuePackages venueData={selectedVenue} onUpdate={fetchVenues} />}
                         {activeTab === 'availability' && <VenueAvailability venueData={selectedVenue} onUpdate={fetchVenues} />}
+                        {activeTab === 'tasks' && <VenueTasks venueData={selectedVenue} onUpdate={fetchVenues} />}
                     </div>
                 </div>
             </div>

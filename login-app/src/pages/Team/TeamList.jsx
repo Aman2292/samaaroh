@@ -6,6 +6,7 @@ import ErrorMessage from '../../components/common/ErrorMessage';
 import ImportCSVModal from '../../components/Team/ImportCSVModal';
 import AddTeamMemberModal from '../../components/Team/AddTeamMemberModal';
 import DeleteConfirmationModal from '../../components/common/DeleteConfirmationModal';
+import MemberProfileModal from '../../components/Team/MemberProfileModal';
 import { toast } from 'react-toastify';
 
 const TeamList = () => {
@@ -16,6 +17,8 @@ const TeamList = () => {
     const [showImportModal, setShowImportModal] = useState(false);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [memberToDelete, setMemberToDelete] = useState(null);
+    const [selectedMember, setSelectedMember] = useState(null);
+    const [showProfileModal, setShowProfileModal] = useState(false);
     const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
 
     const canManageTeam = ['PLANNER_OWNER', 'PLANNER'].includes(userInfo.role);
@@ -199,6 +202,13 @@ const TeamList = () => {
                     />
                 )}
 
+                <MemberProfileModal
+                    isOpen={showProfileModal}
+                    onClose={() => setShowProfileModal(false)}
+                    member={selectedMember}
+                    onUpdate={fetchTeamMembers}
+                />
+
                 <DeleteConfirmationModal
                     isOpen={deleteModalOpen}
                     onClose={() => setDeleteModalOpen(false)}
@@ -236,7 +246,14 @@ const TeamList = () => {
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 {teamMembers.map((member) => (
-                                    <tr key={member._id} className="hover:bg-slate-50 transition-colors">
+                                    <tr
+                                        key={member._id}
+                                        onClick={() => {
+                                            setSelectedMember(member);
+                                            setShowProfileModal(true);
+                                        }}
+                                        className="hover:bg-slate-50 transition-colors cursor-pointer"
+                                    >
                                         <td className="px-6 py-4">
                                             <div className="font-medium text-slate-800">{member.name}</div>
                                         </td>
@@ -247,7 +264,10 @@ const TeamList = () => {
                                         {canManageTeam && (
                                             <td className="px-6 py-4 text-right">
                                                 <button
-                                                    onClick={() => handleDeleteClick(member)}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteClick(member);
+                                                    }}
                                                     className="text-red-600 hover:text-red-800 font-medium text-sm px-3 py-1 hover:bg-red-50 rounded-md transition-colors"
                                                 >
                                                     Delete

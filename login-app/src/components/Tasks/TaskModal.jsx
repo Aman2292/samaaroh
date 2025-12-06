@@ -10,16 +10,21 @@ import { toast } from 'react-toastify';
 const schema = yup.object().shape({
     title: yup.string().required('Title is required'),
     description: yup.string(),
-    eventId: yup.string().required('Event is required'),
+    eventId: yup.string().when('venueId', {
+        is: (venueId) => !venueId,
+        then: () => yup.string().required('Event or Venue is required'),
+        otherwise: () => yup.string().nullable()
+    }),
+    venueId: yup.string().nullable(),
     assignedTo: yup.string().required('Assignee is required'),
     status: yup.string().required('Status is required'),
     priority: yup.string().required('Priority is required'),
     dueDate: yup.date().nullable(),
     tags: yup.string(),
     notes: yup.string()
-});
+}, [['eventId', 'venueId']]);
 
-const TaskModal = ({ isOpen, onClose, task, events, teamMembers, taskStatuses, onSuccess }) => {
+const TaskModal = ({ isOpen, onClose, task, initialData, events, venueId, teamMembers, taskStatuses, onSuccess }) => {
     const [loading, setLoading] = useState(false);
     const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
 
@@ -29,6 +34,7 @@ const TaskModal = ({ isOpen, onClose, task, events, teamMembers, taskStatuses, o
             title: '',
             description: '',
             eventId: '',
+            venueId: '',
             assignedTo: '',
             status: 'todo',
             priority: 'medium',
@@ -44,6 +50,7 @@ const TaskModal = ({ isOpen, onClose, task, events, teamMembers, taskStatuses, o
                 title: task.title || '',
                 description: task.description || '',
                 eventId: task.eventId?._id || task.eventId || '',
+                venueId: task.venueId || venueId || '',
                 assignedTo: task.assignedTo?._id || task.assignedTo || '',
                 status: task.status || 'todo',
                 priority: task.priority || 'medium',
@@ -53,18 +60,19 @@ const TaskModal = ({ isOpen, onClose, task, events, teamMembers, taskStatuses, o
             });
         } else {
             reset({
-                title: '',
-                description: '',
-                eventId: '',
-                assignedTo: '',
-                status: 'todo',
-                priority: 'medium',
-                dueDate: null,
-                tags: '',
-                notes: ''
+                title: initialData?.title || '',
+                description: initialData?.description || '',
+                eventId: initialData?.eventId || '',
+                venueId: initialData?.venueId || venueId || '',
+                assignedTo: initialData?.assignedTo || '',
+                status: initialData?.status || 'todo',
+                priority: initialData?.priority || 'medium',
+                dueDate: initialData?.dueDate ? new Date(initialData.dueDate) : null,
+                tags: initialData?.tags || '',
+                notes: initialData?.notes || ''
             });
         }
-    }, [task, reset]);
+    }, [task, initialData, reset]);
 
     const onSubmit = async (data) => {
         try {
@@ -169,18 +177,20 @@ const TaskModal = ({ isOpen, onClose, task, events, teamMembers, taskStatuses, o
 
                     {/* Event and Assignee */}
                     <div className="grid grid-cols-2 gap-4">
-                        <Select
-                            label="Event"
-                            name="eventId"
-                            control={control}
-                            error={errors.eventId}
-                            required
-                            options={events.map(event => ({
-                                value: event._id,
-                                label: event.eventName
-                            }))}
-                            placeholder="Select event"
-                        />
+                        {events && events.length > 0 && (
+                            <Select
+                                label="Event"
+                                name="eventId"
+                                control={control}
+                                error={errors.eventId}
+                                required={!venueId}
+                                options={events.map(event => ({
+                                    value: event._id,
+                                    label: event.eventName
+                                }))}
+                                placeholder="Select event"
+                            />
+                        )}
 
                         <Select
                             label="Assign To"
