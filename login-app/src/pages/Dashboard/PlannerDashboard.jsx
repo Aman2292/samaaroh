@@ -9,7 +9,9 @@ const PlannerDashboard = () => {
     const [stats, setStats] = useState({
         myEvents: 0,
         upcomingEvents: 0,
-        eventsThisMonth: 0
+        eventsThisMonth: 0,
+        riskyEvents: 0,
+        cashStuck: 0
     });
     const [recentEvents, setRecentEvents] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -49,7 +51,9 @@ const PlannerDashboard = () => {
                 setStats({
                     myEvents: eventsData.pagination?.total || 0,
                     upcomingEvents: statsData.data?.upcomingEvents || 0,
-                    eventsThisMonth: statsData.data?.eventsThisMonth || 0
+                    eventsThisMonth: statsData.data?.eventsThisMonth || 0,
+                    riskyEvents: statsData.data?.riskyEvents || 0,
+                    cashStuck: statsData.data?.cashStuck || 0
                 });
                 setRecentEvents(allEvents.slice(0, 5));
             } else {
@@ -131,6 +135,42 @@ const PlannerDashboard = () => {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Feature 6: Smart Analytics Cards */}
+
+                            {/* Risky Events Card - Only show if > 0 */}
+                            {stats.riskyEvents > 0 && (
+                                <div className="bg-white rounded-xl shadow-sm border border-red-100 p-6">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-sm font-medium text-red-600">Risky Events</p>
+                                            <p className="text-3xl font-bold text-red-700 mt-2">{stats.riskyEvents}</p>
+                                            <p className="text-xs text-red-500 mt-1">Due soon & overdue payments</p>
+                                        </div>
+                                        <div className="p-3 bg-red-50 rounded-lg animate-pulse">
+                                            <Calendar size="32" color="#ef4444" variant="Bold" />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Cash Stuck Card - Only show if > 0 */}
+                            {stats.cashStuck > 0 && (
+                                <div className="bg-white rounded-xl shadow-sm border border-orange-100 p-6">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-sm font-medium text-orange-600">Cash Stuck</p>
+                                            <p className="text-3xl font-bold text-orange-700 mt-2">
+                                                ₹{(stats.cashStuck / 1000).toFixed(1)}k
+                                            </p>
+                                            <p className="text-xs text-orange-500 mt-1">Total overdue payments</p>
+                                        </div>
+                                        <div className="p-3 bg-orange-50 rounded-lg">
+                                            <TrendUp size="32" color="#f97316" variant="Bold" />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Recent Events Table */}

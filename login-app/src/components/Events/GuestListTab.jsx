@@ -75,15 +75,21 @@ const GuestListTab = ({ eventId, event }) => {
 
         const headcount = stats.expectedHeadcount || 0;
         const percentage = (headcount / event.capacity) * 100;
+        const overage = headcount - event.capacity;
 
-        if (percentage >= 100) {
+        if (headcount > event.capacity) {
+            const overagePercent = Math.round(((headcount - event.capacity) / event.capacity) * 100);
+
             return (
-                <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start space-x-3">
+                <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start space-x-3 animate-pulse">
                     <Danger size="24" color="#ef4444" variant="Bold" className="shrink-0 mt-0.5" />
                     <div>
-                        <h4 className="text-red-800 font-semibold">Capacity Limit Exceeded!</h4>
-                        <p className="text-red-600 text-sm mt-1">
-                            Current headcount ({headcount}) exceeds the venue capacity ({event.capacity}).
+                        <h4 className="text-red-800 font-bold">⚠️ Capacity Limit Exceeded!</h4>
+                        <p className="text-red-700 text-sm mt-1 font-medium">
+                            You are <strong>{overage} guests</strong> above planned capacity ({overagePercent}%).
+                        </p>
+                        <p className="text-red-600 text-xs mt-1">
+                            Talk to your venue or caterer immediately to avoid issues.
                         </p>
                     </div>
                 </div>

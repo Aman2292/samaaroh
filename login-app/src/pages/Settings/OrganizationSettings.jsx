@@ -75,8 +75,8 @@ const OrganizationSettings = () => {
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
                                     className={`flex-1 px-4 py-3 text-sm font-medium rounded-lg transition-colors ${activeTab === tab.id
-                                            ? 'bg-primary-50 text-primary-700'
-                                            : 'text-slate-600 hover:bg-slate-50'
+                                        ? 'bg-primary-50 text-primary-700'
+                                        : 'text-slate-600 hover:bg-slate-50'
                                         }`}
                                 >
                                     {tab.label}
@@ -95,7 +95,7 @@ const OrganizationSettings = () => {
                         )}
 
                         {activeTab === 'subscription' && (
-                            <SubscriptionTab />
+                            <SubscriptionTab organization={organization} />
                         )}
 
                         {activeTab === 'danger' && (

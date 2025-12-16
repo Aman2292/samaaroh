@@ -121,6 +121,35 @@ const unsuspendOrganization = async (req, res, next) => {
 };
 
 /**
+ * @route   PUT /api/admin/organizations/:id/features
+ * @desc    Update organization subscribed features
+ * @access  Private (SUPER_ADMIN only)
+ */
+const updateOrganizationFeatures = async (req, res, next) => {
+  try {
+    const { features } = req.body;
+    const ipAddress = req.ip || req.connection.remoteAddress || 'unknown';
+    const userAgent = req.get('user-agent') || 'unknown';
+    
+    const organization = await adminService.updateOrganizationFeatures(
+      req.params.id,
+      features,
+      req.user._id,
+      ipAddress,
+      userAgent
+    );
+
+    res.json({
+      success: true,
+      data: organization,
+      message: 'Organization features updated successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * @route   DELETE /api/admin/organizations/:id
  * @desc    Delete organization (soft delete)
  * @access  Private (SUPER_ADMIN only)
@@ -251,6 +280,32 @@ const deactivateUser = async (req, res, next) => {
 };
 
 /**
+ * @route   PUT /api/admin/users/:id/activate
+ * @desc    Activate (Unblock) user
+ * @access  Private (SUPER_ADMIN only)
+ */
+const activateUser = async (req, res, next) => {
+  try {
+    const ipAddress = req.ip || req.connection.remoteAddress || 'unknown';
+    const userAgent = req.get('user-agent') || 'unknown';
+    
+    await adminService.activateUser(
+      req.params.id,
+      req.user._id,
+      ipAddress,
+      userAgent
+    );
+
+    res.json({
+      success: true,
+      message: 'User activated successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * @route   POST /api/admin/users/:id/reset-password
  * @desc    Reset user password
  * @access  Private (SUPER_ADMIN only)
@@ -294,6 +349,24 @@ const getUserActivityLogs = async (req, res, next) => {
   }
 };
 
+/**
+ * @route   GET /api/admin/organizations/:id/activity
+ * @desc    Get organization activity logs
+ * @access  Private (SUPER_ADMIN only)
+ */
+const getOrganizationActivityLogs = async (req, res, next) => {
+  try {
+    const logs = await adminService.getOrganizationActivityLogs(req.params.id);
+
+    res.json({
+      success: true,
+      data: logs
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getSystemStats,
   getAllOrganizations,
@@ -306,6 +379,9 @@ module.exports = {
   getAllUsers,
   getUserDetails,
   deactivateUser,
+  updateOrganizationFeatures,
+  activateUser,
   resetUserPassword,
-  getUserActivityLogs
+  getUserActivityLogs,
+  getOrganizationActivityLogs
 };

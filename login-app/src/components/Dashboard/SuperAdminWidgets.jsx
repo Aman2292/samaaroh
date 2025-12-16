@@ -126,14 +126,6 @@ const SuperAdminWidgets = ({ stats, loading }) => {
 
     return (
         <>
-            {/* Debug Info */}
-            <div className="col-span-full bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                <p className="text-sm text-blue-800">
-                    <strong>📊 Real Data Loaded:</strong> Organizations: {systemStats.totalOrganizations},
-                    Users: {systemStats.totalUsers}, Events: {systemStats.totalEvents},
-                    Clients: {systemStats.totalClients}
-                </p>
-            </div>
 
             {/* Stats Cards */}
             <div className="col-span-full grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">

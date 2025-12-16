@@ -1,158 +1,114 @@
+const mongoose = require('mongoose');
 const Event = require('../models/Event');
 const Client = require('../models/Client');
+const Payment = require('../models/Payment');
 const { startOfDay, endOfDay, addDays } = require('date-fns');
 
 /**
  * Create a new event
+ * @param {Object} eventData 
+ * @returns {Promise<Event>}
  */
 const createEvent = async (eventData) => {
-  // Verify client exists and belongs to organization
-  const client = await Client.findOne({
-    _id: eventData.clientId,
-    organizationId: eventData.organizationId,
-    isActive: true
-  });
-
-  if (!client) {
-    throw new Error('Client not found or does not belong to your organization');
-  }
-
-  const event = await Event.create(eventData);
+  const event = new Event(eventData);
+  await event.save();
   return event;
 };
 
 /**
- * Get events for an organization with filters and pagination
+ * Get events with pagination and filtering
+ * @param {String} organizationId
+ * @param {Object} filter - MongoDB filter object
+ * @param {Object} options - Pagination options
+ * @returns {Promise<Object>} - Paginated result
  */
-const getEvents = async (organizationId, filters, { page = 1, limit = 20 }) => {
-  const query = { isActive: true };
-
-  // If organizationId is provided (not SUPER_ADMIN), filter by it
+const getEvents = async (organizationId, filter, options) => {
+  const { page = 1, limit = 10, sort = { eventDate: 1 } } = options;
+  
+  // Ensure we only get active events unless specified otherwise
+  const query = { isActive: true, ...filter };
+  
   if (organizationId) {
-    query.organizationId = organizationId;
+      query.organizationId = organizationId;
   }
 
-  // Apply additional filters from middleware (role-based)
-  Object.assign(query, filters);
-
-  // Status filter
-  if (filters.status) {
-    query.status = filters.status;
-  }
-
-  // Event type filter
-  if (filters.eventType) {
-    query.eventType = filters.eventType;
-  }
-
-  // Date range filter
-  if (filters.dateFrom || filters.dateTo) {
-    query.eventDate = {};
-    if (filters.dateFrom) {
-      query.eventDate.$gte = startOfDay(new Date(filters.dateFrom));
-    }
-    if (filters.dateTo) {
-      query.eventDate.$lte = endOfDay(new Date(filters.dateTo));
-    }
-  }
-
-  // Planner filter
-  if (filters.plannerId) {
-    query.leadPlannerId = filters.plannerId;
-  }
-
-  const options = {
-    page: parseInt(page),
-    limit: parseInt(limit),
-    sort: { eventDate: 1 },
+  return await Event.paginate(query, {
+    page,
+    limit,
+    sort,
     populate: [
-      { path: 'clientId', select: 'name phone email' },
+      { path: 'clientId', select: 'name email phone' },
       { path: 'leadPlannerId', select: 'name email' },
-      { path: 'createdBy', select: 'name email' }
+      { path: 'venueId', select: 'name address' }
     ]
-  };
-
-  const result = await Event.paginate(query, options);
-  return result;
+  });
 };
 
 /**
- * Get upcoming events (next 7 days)
+ * Get upcoming events for an organization
+ * @param {String} organizationId 
+ * @param {Object} filters
+ * @returns {Promise<Array>}
  */
-const getUpcomingEvents = async (organizationId, filters) => {
+const getUpcomingEvents = async (organizationId, filters = {}) => {
   const today = startOfDay(new Date());
   const nextWeek = endOfDay(addDays(today, 7));
-
+  
   const query = {
+    organizationId,
     isActive: true,
     eventDate: { $gte: today, $lte: nextWeek },
-    status: { $in: ['booked', 'in_progress'] }
+    status: { $in: ['booked', 'in_progress'] },
+    ...filters
   };
 
-  // If organizationId is provided (not SUPER_ADMIN), filter by it
-  if (organizationId) {
-    query.organizationId = organizationId;
-  }
-
-  // Apply role-based filters
-  Object.assign(query, filters);
-
-  const events = await Event.find(query)
-    .populate('clientId', 'name phone')
-    .populate('leadPlannerId', 'name')
-    .sort({ eventDate: 1 });
-
-  return events;
+  return await Event.find(query)
+    .sort({ eventDate: 1 })
+    .populate('clientId', 'name')
+    .populate('venueId', 'name');
 };
 
 /**
- * Get a single event by ID
+ * Get event by ID
+ * @param {String} eventId 
+ * @returns {Promise<Event>}
  */
 const getEventById = async (eventId) => {
-  const event = await Event.findById(eventId)
-    .populate('clientId', 'name phone email city')
-    .populate('leadPlannerId', 'name email role')
-    .populate('assignedCoordinators', 'name email role')
-    .populate('createdBy', 'name email');
-
-  return event;
+  return await Event.findOne({ _id: eventId, isActive: true })
+    .populate('clientId')
+    .populate('leadPlannerId', 'name email')
+    .populate('assignedCoordinators', 'name email')
+    .populate('venueId')
+    .populate('guests.addedBy', 'name');
 };
 
 /**
- * Update an event
+ * Update active event
+ * @param {String} eventId 
+ * @param {Object} updateData 
+ * @param {String} userId
+ * @param {String} userRole
+ * @returns {Promise<Event>}
  */
 const updateEvent = async (eventId, updateData, userId, userRole) => {
-  const event = await Event.findById(eventId);
-
-  if (!event) {
-    throw new Error('Event not found');
-  }
-
-  // Check permissions: SUPER_ADMIN, PLANNER_OWNER or assigned lead planner can update
-  if (userRole !== 'SUPER_ADMIN' && userRole !== 'PLANNER_OWNER' && event.leadPlannerId.toString() !== userId.toString()) {
-    throw new Error('You do not have permission to update this event');
-  }
-
-  const updatedEvent = await Event.findByIdAndUpdate(
-    eventId,
-    { ...updateData, updatedAt: Date.now() },
+  return await Event.findOneAndUpdate(
+    { _id: eventId, isActive: true },
+    updateData,
     { new: true, runValidators: true }
-  ).populate('clientId leadPlannerId assignedCoordinators createdBy');
-
-  return updatedEvent;
+  );
 };
 
 /**
- * Soft delete an event
+ * Soft delete event
+ * @param {String} eventId 
+ * @returns {Promise<Event>}
  */
 const deleteEvent = async (eventId) => {
-  const event = await Event.findByIdAndUpdate(
+  return await Event.findByIdAndUpdate(
     eventId,
-    { isActive: false, updatedAt: Date.now() },
+    { isActive: false, status: 'cancelled' },
     { new: true }
   );
-
-  return event;
 };
 
 /**
@@ -185,9 +141,61 @@ const getEventStats = async (organizationId, filters) => {
     })
   ]);
 
+  // --- Smart Analytics: Risky Events & Cash Stuck ---
+
+  // 1. Cash Stuck: Total calculated overdue amount
+  // (Using simple match: dueDate < now AND status != paid)
+  let cashStuck = 0;
+  if (organizationId) {
+      const cashResult = await Payment.aggregate([
+          {
+              $match: {
+                  organizationId: new mongoose.Types.ObjectId(organizationId),
+                  dueDate: { $lt: new Date() },
+                  status: { $ne: 'paid' },
+                  isDeleted: false
+              }
+          },
+          {
+              $group: {
+                  _id: null,
+                  total: { $sum: { $subtract: ["$amount", "$paidAmount"] } } 
+              }
+          }
+      ]);
+      cashStuck = cashResult[0]?.total || 0;
+  }
+
+  // 2. Risky Events: Upcoming events (next 7 days) having ANY overdue payments
+  let riskyEvents = 0;
+  if (organizationId) {
+      // Get IDs of upcoming events first
+      const upcomingEventDocs = await Event.find({
+          ...baseQuery,
+          eventDate: { $gte: today, $lte: nextWeek },
+          status: { $in: ['booked', 'in_progress'] }
+      }).select('_id');
+      
+      const upcomingIds = upcomingEventDocs.map(e => e._id);
+
+      if (upcomingIds.length > 0) {
+          // Count how many of these have at least one overdue payment
+          const result = await Payment.distinct('eventId', {
+              organizationId: organizationId,
+              eventId: { $in: upcomingIds },
+              dueDate: { $lt: new Date() },
+              status: { $ne: 'paid' },
+              isDeleted: false
+          });
+          riskyEvents = result.length;
+      }
+  }
+
   return {
     upcomingEvents: upcomingCount,
-    eventsThisMonth: monthCount
+    eventsThisMonth: monthCount,
+    riskyEvents,
+    cashStuck
   };
 };
 

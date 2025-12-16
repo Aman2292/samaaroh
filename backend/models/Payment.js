@@ -27,6 +27,14 @@ const PaymentSchema = new mongoose.Schema({
     ref: 'Client'
   },
   
+  // Link to invoice (optional - for invoice-based payments)
+  invoiceId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Invoice',
+    default: null,
+    index: true
+  },
+  
   // For vendor payments
   vendorName: { type: String },
   vendorCategory: { 

@@ -67,13 +67,18 @@ const Venue = () => {
         </div>
     );
 
+    const orgFeatures = userInfo.organizationId?.subscribedFeatures || {};
+    const venueFeatures = typeof orgFeatures.venue === 'object'
+        ? orgFeatures.venue
+        : { access: !!orgFeatures.venue, profile: true, gallery: true, packages: true, availability: true, tasks: true };
+
     const tabs = [
-        { id: 'profile', label: 'Profile', icon: Building },
-        { id: 'gallery', label: 'Gallery', icon: Gallery },
-        { id: 'packages', label: 'Packages', icon: Box },
-        { id: 'availability', label: 'Availability', icon: Calendar },
-        { id: 'tasks', label: 'Tasks', icon: TickCircle }
-    ];
+        { id: 'profile', label: 'Profile', icon: Building, show: venueFeatures.profile !== false },
+        { id: 'gallery', label: 'Gallery', icon: Gallery, show: venueFeatures.gallery !== false },
+        { id: 'packages', label: 'Packages', icon: Box, show: venueFeatures.packages !== false },
+        { id: 'availability', label: 'Availability', icon: Calendar, show: venueFeatures.availability !== false },
+        { id: 'tasks', label: 'Tasks', icon: TickCircle, show: venueFeatures.tasks !== false }
+    ].filter(tab => tab.show);
 
     if (loading && !venues.length) return <div className="p-8"><LoadingSkeleton type="card" count={3} /></div>;
     if (error) return <div className="p-8"><ErrorMessage message={error} onRetry={fetchVenues} /></div>;

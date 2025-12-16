@@ -47,7 +47,18 @@ const createEvent = async (req, res, next) => {
 const getEvents = async (req, res, next) => {
   try {
     const { page, limit, status, eventType, dateFrom, dateTo, plannerId } = req.query;
-    const organizationId = req.user.organizationId;
+    
+    // SUPER_ADMIN can view events for any organization via query param
+    // If no organizationId param is provided, SUPER_ADMIN can view ALL events (null = all orgs)
+    // Other roles are restricted to their own organization
+    let organizationId;
+    if (req.user.role === 'SUPER_ADMIN') {
+      // For SUPER_ADMIN: use query param if provided, otherwise null (all events)
+      organizationId = req.query.organizationId || null;
+    } else {
+      // For other roles: always use their organization
+      organizationId = req.user.organizationId;
+    }
 
     // Combine query filters with role-based filters from middleware
     const filters = {

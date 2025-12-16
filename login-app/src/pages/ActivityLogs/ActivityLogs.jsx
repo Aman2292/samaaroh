@@ -13,6 +13,7 @@ const ActivityLogs = () => {
     const [page, setPage] = useState(1);
     const [pagination, setPagination] = useState(null);
     const [filters, setFilters] = useState({
+        organizationId: '',
         userId: '',
         action: '',
         resourceType: '',
@@ -20,6 +21,7 @@ const ActivityLogs = () => {
         endDate: ''
     });
     const [teamMembers, setTeamMembers] = useState([]);
+    const [organizations, setOrganizations] = useState([]);
     const [exporting, setExporting] = useState(false);
     const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
 
@@ -79,6 +81,9 @@ const ActivityLogs = () => {
 
     useEffect(() => {
         fetchTeamMembers();
+        if (userInfo.role === 'SUPER_ADMIN') {
+            fetchOrganizations();
+        }
     }, []);
 
     useEffect(() => {
@@ -96,6 +101,20 @@ const ActivityLogs = () => {
             }
         } catch (error) {
             console.error('Failed to fetch team members');
+        }
+    };
+
+    const fetchOrganizations = async () => {
+        try {
+            const response = await fetch('http://localhost:5001/api/admin/organizations', {
+                headers: { 'Authorization': `Bearer ${userInfo.token}` }
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setOrganizations(data.data);
+            }
+        } catch (error) {
+            console.error('Failed to fetch organizations');
         }
     };
 
@@ -133,6 +152,7 @@ const ActivityLogs = () => {
                 page: 1,
                 limit: 1000, // Export all (or a large limit)
                 userId: filters.userId,
+                organizationId: filters.organizationId,
                 action: filters.action,
                 resourceType: filters.resourceType,
                 startDate: filters.startDate,
@@ -271,6 +291,24 @@ const ActivityLogs = () => {
                                 ]}
                             />
                         </div>
+
+                        {/* Organization Filter (Super Admin Only) */}
+                        {userInfo.role === 'SUPER_ADMIN' && (
+                            <div>
+                                <Select
+                                    label="Organization"
+                                    value={filters.organizationId}
+                                    onChange={(e) => {
+                                        setFilters({ ...filters, organizationId: e.target.value });
+                                        setPage(1);
+                                    }}
+                                    options={[
+                                        { value: '', label: 'All Organizations' },
+                                        ...organizations.map(org => ({ value: org._id, label: org.name }))
+                                    ]}
+                                />
+                            </div>
+                        )}
 
                         {/* Action Filter */}
                         <div>

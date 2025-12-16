@@ -1,6 +1,8 @@
-
-import React, { useState } from 'react';
-import { Lock, Eye, EyeSlash, Sms } from 'iconsax-react';
+import React, { useState, useEffect } from 'react';
+import { Lock, Eye, EyeSlash, Sms, ArrowLeft, ArrowRight } from 'iconsax-react';
+import PrimaryButton from './common/PrimaryButton';
+import TertiaryButton from './common/TertiaryButton';
+import registerBg from '../assets/register-bg.png';
 
 const Login = ({ onLogin, onNavigate }) => {
     const [email, setEmail] = useState('');
@@ -8,6 +10,44 @@ const Login = ({ onLogin, onNavigate }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+
+    const testimonials = [
+        {
+            text: "Samaaroh has completely transformed how we manage our wedding planning business. The efficiency we've gained is incredible.",
+            name: "Jane Doe",
+            role: "Top Wedding Planner, Mumbai",
+            initials: "JD"
+        },
+        {
+            text: "The best platform for connecting with clients. My venue bookings have doubled since I started using Samaaroh.",
+            name: "Rajesh Kumar",
+            role: "Venue Owner, Delhi",
+            initials: "RK"
+        },
+        {
+            text: "Managing guest lists and vendor payments used to be a nightmare. Samaaroh made it a breeze!",
+            name: "Priya Kapoor",
+            role: "Event Coordinator, Bangalore",
+            initials: "PK"
+        }
+    ];
+
+    const [currentTestimonial, setCurrentTestimonial] = useState(0);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
+        }, 2000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const nextTestimonial = () => {
+        setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
+    };
+
+    const prevTestimonial = () => {
+        setCurrentTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -39,111 +79,131 @@ const Login = ({ onLogin, onNavigate }) => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-            <div className="bg-white rounded-2xl shadow-xl flex overflow-hidden max-w-4xl w-full">
-                {/* Left Side - Decorative */}
-                <div className="hidden md:block w-1/2 bg-gradient-to-br from-primary-600 to-primary-700 p-12 text-white flex flex-col justify-between relative overflow-hidden">
-                    <div className="relative z-10">
-                        <h2 className="text-3xl font-bold mb-2">
-                            Welcome Back
-                        </h2>
-                        <p className="text-primary-100">
-                            Sign in to access your dashboard and manage your events.
-                        </p>
-                    </div>
-                    <div className="relative z-10">
-                        <p className="text-sm opacity-80">© 2024 Samaaroh Inc.</p>
-                    </div>
-                    {/* Abstract circles */}
-                    <div className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none">
-                        <div className="absolute -top-24 -left-24 w-64 h-64 rounded-full bg-white mix-blend-overlay blur-3xl"></div>
-                        <div className="absolute -bottom-24 -right-24 w-64 h-64 rounded-full bg-white mix-blend-overlay blur-3xl"></div>
-                    </div>
-                </div>
+        <div className="min-h-screen flex w-full bg-gradient-to-br from-purple-200 via-purple-50 to-purple-200">
 
-                {/* Right Side - Form */}
-                <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
-                    <div className="text-center mb-8">
-                        <h3 className="text-2xl font-bold text-slate-800">
-                            Sign In
-                        </h3>
-                        <p className="text-slate-500 mt-2">Please enter your details</p>
+            {/* Left Side - Form */}
+            <div className="w-full md:w-1/2 p-6 md:p-8 flex flex-col justify-center overflow-y-auto">
+                <div className="max-w-md mx-auto w-full">
+                    <div className="mb-8">
+                        <h3 className="text-3xl font-bold text-slate-900">Welcome Back</h3>
+                        <p className="text-slate-500 mt-2">Sign in to access your dashboard.</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
-                            <div className="relative">
-                                <Sms size="20" color="#000" variant="Outline" className="absolute left-3 top-1/2 -translate-y-1/2 z-10" />
-                                <input
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all"
-                                    placeholder="user@example.com"
-                                    required
-                                />
-                            </div>
-                        </div>
+                        <InputField
+                            label="Email"
+                            name="email"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            Icon={Sms}
+                            placeholder="user@example.com"
+                        />
 
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">Password</label>
+                            <label className="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
                             <div className="relative">
-                                <Lock size="20" color="#000" variant="Outline" className="absolute left-3 top-1/2 -translate-y-1/2 z-10" />
+                                <Lock size="20" color="#64748b" className="absolute left-3.5 top-1/2 -translate-y-1/2 z-10" variant="Outline" />
                                 <input
                                     type={showPassword ? "text" : "password"}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full pl-10 pr-12 py-3 rounded-lg border border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all"
+                                    className="w-full pl-11 pr-12 py-3 rounded-xl border border-slate-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 outline-none transition-all"
                                     placeholder="••••••••"
                                     required
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 z-10 text-black hover:text-slate-700"
+                                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 z-10"
                                 >
-                                    {showPassword ? <EyeSlash size="20" color="#000" variant="Outline" /> : <Eye size="20" color="#000" variant="Outline" />}
+                                    {showPassword ? <EyeSlash size="20" color="#64748b" variant="Outline" /> : <Eye size="20" color="#64748b" variant="Outline" />}
                                 </button>
                             </div>
                         </div>
 
                         <div className="flex items-center justify-between text-sm">
                             <label className="flex items-center text-slate-600 cursor-pointer">
-                                <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500 mr-2" />
+                                <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-purple-600 focus:ring-purple-500 mr-2" />
                                 Remember me
                             </label>
-                            <a href="#" className="text-primary-600 hover:text-primary-700 font-medium">Forgot password?</a>
+                            <a href="#" className="text-purple-600 hover:text-purple-700 font-medium">Forgot password?</a>
                         </div>
 
                         {error && (
-                            <div className="text-red-500 text-sm text-center bg-red-50 py-2 rounded-lg">
+                            <div className="text-red-500 text-sm text-center bg-red-50 py-3 rounded-xl font-medium">
                                 {error}
                             </div>
                         )}
 
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 rounded-lg transition-all transform active:scale-[0.98] flex items-center justify-center"
-                        >
-                            {loading ? (
-                                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                            ) : (
-                                'Sign In'
-                            )}
-                        </button>
+                        <PrimaryButton type="submit" disabled={loading} fullWidth className="!py-3 !text-base !rounded-xl">
+                            {loading ? 'Signing In...' : 'Sign In'}
+                        </PrimaryButton>
                     </form>
 
-                    <div className="mt-8 space-y-4">
-                        <div className="text-center text-sm text-slate-500">
+                    <div className="mt-8 text-center">
+                        <span className="text-slate-500">
                             Don't have an account?{' '}
-                            <button onClick={() => onNavigate('register')} className="text-primary-600 font-medium hover:underline">
+                            <TertiaryButton onClick={() => onNavigate('register')} className="!px-1 !py-0 !inline-flex !font-semibold !text-[#7F5EFF] hover:!bg-transparent hover:!underline">
                                 Sign up
+                            </TertiaryButton>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Right Side - Image */}
+            <div className="hidden md:block w-1/2 p-4 sticky top-0 h-screen relative">
+                <div className="relative w-full h-full rounded-[2rem] overflow-hidden">
+
+                    {/* Back Button (Top Left of Image) */}
+                    <button
+                        onClick={() => onNavigate('home')}
+                        className="absolute top-6 left-6 z-20 w-12 h-12 flex items-center justify-center rounded-full bg-black/20 backdrop-blur-md border border-white/20 text-white hover:bg-black/40 transition-all cursor-pointer"
+                    >
+                        <ArrowLeft size="24" color="#ffffff" />
+                    </button>
+
+                    <img
+                        src={registerBg}
+                        alt="Wedding Inspiration"
+                        className="absolute inset-0 w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+
+                    <div className="absolute bottom-12 left-12 right-12 z-20">
+                        {/* Navigation Buttons - Moved Above */}
+                        <div className="flex justify-end gap-3 mb-4">
+                            <button
+                                onClick={prevTestimonial}
+                                className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-all active:scale-95"
+                            >
+                                <ArrowLeft size="20" color="#ffffff" />
                             </button>
+                            <button
+                                onClick={nextTestimonial}
+                                className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-all active:scale-95"
+                            >
+                                <ArrowRight size="20" color="#ffffff" />
+                            </button>
+                        </div>
+
+                        <div
+                            key={currentTestimonial}
+                            className="bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-2xl text-white relative animate-[fadeIn_0.5s_ease-out]"
+                        >
+                            <p className="text-xl font-medium leading-relaxed mb-6 min-h-[84px]">
+                                "{testimonials[currentTestimonial].text}"
+                            </p>
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-purple-200 flex items-center justify-center text-purple-700 font-bold shrink-0">
+                                    {testimonials[currentTestimonial].initials}
+                                </div>
+                                <div>
+                                    <p className="font-semibold text-white">{testimonials[currentTestimonial].name}</p>
+                                    <p className="text-sm text-white/70">{testimonials[currentTestimonial].role}</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -152,5 +212,22 @@ const Login = ({ onLogin, onNavigate }) => {
     );
 };
 
-export default Login;
+const InputField = ({ label, name, value, onChange, Icon, placeholder, type = "text" }) => (
+    <div>
+        <label className="block text-sm font-medium text-slate-700 mb-1.5">{label}</label>
+        <div className="relative">
+            <Icon size="20" color="#64748b" className="absolute left-3.5 top-1/2 -translate-y-1/2 z-10" variant="Outline" />
+            <input
+                type={type}
+                name={name}
+                value={value}
+                onChange={onChange}
+                className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 outline-none transition-all"
+                placeholder={placeholder}
+                required
+            />
+        </div>
+    </div>
+);
 
+export default Login;

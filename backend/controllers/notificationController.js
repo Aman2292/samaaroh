@@ -103,9 +103,43 @@ const sendNotification = async (req, res, next) => {
   }
 };
 
+/**
+ * @route   POST /api/notifications/request-access
+ * @desc    Request access to a feature
+ * @access  Private (Planner Owner)
+ */
+const requestAccess = async (req, res, next) => {
+  try {
+    const { featureName } = req.body;
+
+    if (!featureName) {
+      return res.status(400).json({
+        success: false,
+        error: 'Feature name is required'
+      });
+    }
+
+    // Populate organization name for the message if not already present
+    // req.user usually has organizationId as an ID string unless populated middleware runs.
+    // Let's assume userController.protect populates basic fields or we rely on just ID if name is missing.
+    // For better UX, we might want to ensure we have the Org name.
+    // But since this is just a quick request, relying on what's in req.user is faster.
+    
+    await notificationService.sendAccessRequest(req.user, featureName);
+
+    res.json({
+      success: true,
+      message: 'Access request sent successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getNotifications,
   markNotificationAsRead,
   markAllNotificationsAsRead,
-  sendNotification
+  sendNotification,
+  requestAccess
 };

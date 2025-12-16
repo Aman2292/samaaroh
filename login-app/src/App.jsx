@@ -12,7 +12,9 @@ import EventDetail from './pages/Events/EventDetail'
 import CreateEvent from './pages/Events/CreateEvent'
 import OutstandingPayments from './pages/Payments/OutstandingPayments'
 import OrganizationsList from './pages/Admin/OrganizationsList'
+import AdminOrganizationDetails from './pages/Admin/AdminOrganizationDetails'
 import UsersList from './pages/Admin/UsersList'
+import AdminEvents from './pages/Admin/AdminEvents'
 import MyProfile from './pages/Profile/MyProfile'
 import OrganizationSettings from './pages/Settings/OrganizationSettings'
 import ActivityLogs from './pages/ActivityLogs/ActivityLogs'
@@ -20,6 +22,8 @@ import SetPassword from './pages/Public/SetPassword'
 import TeamList from './pages/Team/TeamList'
 import Venue from './pages/Venue/Venue'
 import TasksPage from './pages/Tasks/TasksPage'
+import InvoicesList from './pages/Invoices/InvoicesList'
+import CreateInvoice from './pages/Invoices/CreateInvoice'
 
 // Wrapper component to handle authentication state
 function AppContent() {
@@ -51,13 +55,15 @@ function AppContent() {
       <Routes>
         {/* Public Routes */}
         <Route path="/accept-invitation/:token" element={<SetPassword />} />
-        <Route path="/login" element={!isAuthenticated ? <Login onLogin={handleLogin} /> : <Navigate to="/" replace />} />
-        <Route path="/register" element={!isAuthenticated ? <Register onLogin={handleLogin} /> : <Navigate to="/" replace />} />
+        <Route path="/login" element={!isAuthenticated ? <Login onLogin={handleLogin} onNavigate={(path) => navigate('/' + path)} /> : <Navigate to="/" replace />} />
+        <Route path="/register" element={!isAuthenticated ? <Register onLogin={handleLogin} onNavigate={(path) => navigate('/' + path)} /> : <Navigate to="/" replace />} />
 
         {/* Protected Routes */}
         <Route path="/" element={isAuthenticated ? <Layout onLogout={handleLogout}><Dashboard /></Layout> : <Navigate to="/login" replace />} />
         <Route path="/admin/organizations" element={isAuthenticated ? <Layout onLogout={handleLogout}><OrganizationsList /></Layout> : <Navigate to="/login" replace />} />
+        <Route path="/admin/organizations/:id" element={isAuthenticated ? <Layout onLogout={handleLogout}><AdminOrganizationDetails /></Layout> : <Navigate to="/login" replace />} />
         <Route path="/admin/users" element={isAuthenticated ? <Layout onLogout={handleLogout}><UsersList /></Layout> : <Navigate to="/login" replace />} />
+        <Route path="/admin/events" element={isAuthenticated ? <Layout onLogout={handleLogout}><AdminEvents /></Layout> : <Navigate to="/login" replace />} />
         <Route path="/clients" element={isAuthenticated ? <Layout onLogout={handleLogout}><ClientsList /></Layout> : <Navigate to="/login" replace />} />
         <Route path="/events" element={isAuthenticated ? <Layout onLogout={handleLogout}><EventsList /></Layout> : <Navigate to="/login" replace />} />
         <Route path="/events/create" element={isAuthenticated ? <Layout onLogout={handleLogout}><CreateEvent /></Layout> : <Navigate to="/login" replace />} />
@@ -69,6 +75,9 @@ function AppContent() {
         <Route path="/team" element={isAuthenticated ? <Layout onLogout={handleLogout}><TeamList /></Layout> : <Navigate to="/login" replace />} />
         <Route path="/venue" element={isAuthenticated ? <Layout onLogout={handleLogout}><Venue /></Layout> : <Navigate to="/login" replace />} />
         <Route path="/tasks" element={isAuthenticated ? <Layout onLogout={handleLogout}><TasksPage /></Layout> : <Navigate to="/login" replace />} />
+        <Route path="/invoices" element={isAuthenticated ? <Layout onLogout={handleLogout}><InvoicesList /></Layout> : <Navigate to="/login" replace />} />
+        <Route path="/invoices/create" element={isAuthenticated ? <Layout onLogout={handleLogout}><CreateInvoice /></Layout> : <Navigate to="/login" replace />} />
+        <Route path="/invoices/edit/:id" element={isAuthenticated ? <Layout onLogout={handleLogout}><CreateInvoice mode="edit" /></Layout> : <Navigate to="/login" replace />} />
         <Route path="*" element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />} />
       </Routes>
     </>

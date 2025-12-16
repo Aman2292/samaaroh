@@ -11,12 +11,23 @@ const Layout = ({ children, onLogout }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isNotificationPanelOpen, setIsNotificationPanelOpen] = useState(false);
     const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
+    // Default to true if not present to support legacy sessions/defaults
+    const features = userInfo.subscribedFeatures || {
+        clients: true,
+        events: { access: true, guests: true, payments: true, tasks: true },
+        payments: true,
+        team: true,
+        tasks: true, // Activity logs usually grouped here or separate? Plan said Tasks.
+        venue: true
+    };
+    // Helper to safely access nested events features
+    const eventFeatures = features.events || { access: true };
 
-    const canAccessClients = ['PLANNER_OWNER', 'PLANNER', 'FINANCE'].includes(userInfo.role);
-    const canAccessEvents = true; // All roles can access events
-    const canAccessTeam = userInfo.role === 'PLANNER_OWNER';
-    const canAccessPayments = ['PLANNER_OWNER', 'FINANCE'].includes(userInfo.role);
-    const canAccessVenue = userInfo.role === 'PLANNER_OWNER';
+    const canAccessClients = ['PLANNER_OWNER', 'PLANNER', 'FINANCE'].includes(userInfo.role) && features.clients;
+    const canAccessEvents = features.events?.access !== false && eventFeatures.access; // redundant check but safe
+    const canAccessTeam = userInfo.role === 'PLANNER_OWNER' && features.team;
+    const canAccessPayments = ['PLANNER_OWNER', 'FINANCE'].includes(userInfo.role) && features.payments;
+    const canAccessVenue = userInfo.role === 'PLANNER_OWNER' && features.venue;
     const isSuperAdmin = userInfo.role === 'SUPER_ADMIN';
 
     const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/');
@@ -25,16 +36,18 @@ const Layout = ({ children, onLogout }) => {
         { path: '/', icon: Home, label: 'Dashboard', show: true },
         { path: '/venue', icon: Building, label: 'Venue', show: canAccessVenue },
         { path: '/admin/organizations', icon: Building, label: 'Organizations', show: isSuperAdmin },
+        { path: '/admin/events', icon: Calendar, label: 'Events', show: isSuperAdmin },
         { path: '/admin/users', icon: UserOctagon, label: 'Users', show: isSuperAdmin },
         { path: '/clients', icon: User, label: 'Clients', show: canAccessClients },
-        { path: '/events', icon: Calendar, label: 'Events', show: canAccessEvents },
+        { path: '/events', icon: Calendar, label: 'Events', show: canAccessEvents && !isSuperAdmin },
         { path: '/payments/outstanding', icon: MoneyRecive, label: 'Payments', show: canAccessPayments },
         { path: '/team', icon: People, label: 'Team', show: canAccessTeam },
         { path: '/settings', icon: Setting2, label: 'Settings', show: canAccessTeam },
         { path: '/activity-logs', icon: DocumentText, label: 'Activity Logs', show: canAccessTeam },
+        { path: '/invoices', icon: DocumentText, label: 'Invoices', show: userInfo.role === 'PLANNER_OWNER' || userInfo.role === 'FINANCE' },
         { path: '/profile', icon: User, label: 'My Profile', show: true },
 
-        { path: '/tasks', icon: TaskSquare, label: 'Tasks', show: userInfo.role === 'PLANNER_OWNER' },
+        { path: '/tasks', icon: TaskSquare, label: 'Tasks', show: userInfo.role === 'PLANNER_OWNER' && features.tasks },
     ];
 
     return (

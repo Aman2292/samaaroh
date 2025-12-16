@@ -23,6 +23,15 @@ const TeamList = () => {
 
     const canManageTeam = ['PLANNER_OWNER', 'PLANNER'].includes(userInfo.role);
 
+    // Get features with normalization
+    const orgFeatures = userInfo.organizationId?.subscribedFeatures || {};
+    const teamFeatures = typeof orgFeatures.team === 'object'
+        ? orgFeatures.team
+        : { access: !!orgFeatures.team, manage: true, export: true };
+
+    const canExport = teamFeatures.export !== false;
+    const canManage = teamFeatures.manage !== false && canManageTeam;
+
     useEffect(() => {
         fetchTeamMembers();
     }, []);
@@ -155,29 +164,37 @@ const TeamList = () => {
                         <h1 className="text-3xl font-bold text-slate-800">Team Members</h1>
                         <p className="text-slate-500 mt-1">Manage your team</p>
                     </div>
+
+
                     {canManageTeam && (
                         <div className="flex items-center gap-3">
-                            <button
-                                onClick={() => setShowImportModal(true)}
-                                className="flex items-center space-x-2 px-4 py-2.5 border border-primary-600 text-primary-600 rounded-lg hover:bg-primary-50 transition-colors font-medium"
-                            >
-                                <DocumentUpload size="20" color="currentColor" />
-                                <span>Import CSV</span>
-                            </button>
-                            <button
-                                onClick={handleExportCSV}
-                                className="flex items-center space-x-2 px-4 py-2.5 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium"
-                            >
-                                <DocumentDownload size="20" color="currentColor" />
-                                <span>Export CSV</span>
-                            </button>
-                            <button
-                                onClick={() => setShowAddModal(true)}
-                                className="flex items-center space-x-2 px-4 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
-                            >
-                                <Add size="20" color="currentColor" />
-                                <span>Add Team Member</span>
-                            </button>
+                            {canManage && (
+                                <button
+                                    onClick={() => setShowImportModal(true)}
+                                    className="flex items-center space-x-2 px-4 py-2.5 border border-primary-600 text-primary-600 rounded-lg hover:bg-primary-50 transition-colors font-medium"
+                                >
+                                    <DocumentUpload size="20" color="currentColor" />
+                                    <span>Import CSV</span>
+                                </button>
+                            )}
+                            {canExport && (
+                                <button
+                                    onClick={handleExportCSV}
+                                    className="flex items-center space-x-2 px-4 py-2.5 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium"
+                                >
+                                    <DocumentDownload size="20" color="currentColor" />
+                                    <span>Export CSV</span>
+                                </button>
+                            )}
+                            {canManage && (
+                                <button
+                                    onClick={() => setShowAddModal(true)}
+                                    className="flex items-center space-x-2 px-4 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
+                                >
+                                    <Add size="20" color="currentColor" />
+                                    <span>Add Team Member</span>
+                                </button>
+                            )}
                         </div>
                     )}
                 </div>

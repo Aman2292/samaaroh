@@ -4,6 +4,7 @@ import './index.css'
 import App from './App.jsx'
 import ErrorBoundary from './ErrorBoundary.jsx'
 
+console.log('Main.jsx mounting...');
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ErrorBoundary>

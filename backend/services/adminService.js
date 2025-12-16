@@ -19,10 +19,10 @@ const getSystemStats = async () => {
     const activeUsers = await User.countDocuments({ isActive: true });
 
     // Get total events across all organizations
-    const totalEvents = await Event.countDocuments({ isDeleted: false });
+    const totalEvents = await Event.countDocuments({ isActive: true });
 
     // Get total clients across all organizations
-    const totalClients = await Client.countDocuments({ isDeleted: false });
+    const totalClients = await Client.countDocuments({ isActive: true });
 
     // Get organization growth data (last 6 months)
     const sixMonthsAgo = new Date();
@@ -69,7 +69,7 @@ const getSystemStats = async () => {
       {
         $match: {
           createdAt: { $gte: sevenDaysAgo },
-          isDeleted: false
+          isActive: true
         }
       },
       {
@@ -89,7 +89,7 @@ const getSystemStats = async () => {
       {
         $match: {
           createdAt: { $gte: sevenDaysAgo },
-          isDeleted: false
+          isActive: true
         }
       },
       {
@@ -151,13 +151,22 @@ const getAllOrganizations = async (filters = {}) => {
   // Get stats for each organization
   const orgsWithStats = await Promise.all(
     organizations.map(async (org) => {
-      const eventsCount = await Event.countDocuments({ organizationId: org._id, isDeleted: false });
+      const eventsCount = await Event.countDocuments({ organizationId: org._id, isActive: true });
       const usersCount = await User.countDocuments({ organizationId: org._id, isActive: true });
       
+      const recentEvents = await Event.find({ 
+        organizationId: org._id, 
+        isActive: true
+      })
+      .select('eventName eventDate status')
+      .sort({ eventDate: -1 })
+      .limit(3);
+
       return {
         ...org.toObject(),
         eventsCount,
-        usersCount
+        usersCount,
+        recentEvents
       };
     })
   );
@@ -185,9 +194,9 @@ const getOrganizationDetails = async (orgId) => {
     throw new Error('Organization not found');
   }
 
-  const eventsCount = await Event.countDocuments({ organizationId: orgId, isDeleted: false });
+  const eventsCount = await Event.countDocuments({ organizationId: orgId, isActive: true });
   const usersCount = await User.countDocuments({ organizationId: orgId, isActive: true });
-  const clientsCount = await Client.countDocuments({ organizationId: orgId, isDeleted: false });
+  const clientsCount = await Client.countDocuments({ organizationId: orgId, isActive: true });
 
   return {
     ...organization.toObject(),
@@ -230,6 +239,129 @@ const suspendOrganization = async (orgId, reason, suspendedByUserId, ipAddress, 
     orgId,
     organization.name,
     { reason },
+    ipAddress,
+    userAgent
+  );
+
+  return organization;
+};
+
+/**
+ * Update organization features
+ */
+const updateOrganizationFeatures = async (orgId, features, updatedByUserId, ipAddress, userAgent) => {
+  const organization = await Organization.findById(orgId);
+
+  if (!organization) {
+    throw new Error('Organization not found');
+  }
+
+  // Merge features (deep merge logic needed if partial updates)
+  // For now, assuming full object or careful checking. 
+  // Should handle nested 'events' object.
+  if (features.clients !== undefined) organization.subscribedFeatures.clients = features.clients;
+  if (features.tasks !== undefined) organization.subscribedFeatures.tasks = features.tasks;
+
+  // Normalize legacy feature flags specific to this Organization
+  // If 'payments', 'team', or 'venue' are boolean (legacy), convert to object defaults
+  if (typeof organization.subscribedFeatures.payments !== 'object') {
+      const isTrue = organization.subscribedFeatures.payments === true;
+      organization.subscribedFeatures.payments = { access: isTrue, client: true, vendor: true };
+  }
+  if (typeof organization.subscribedFeatures.team !== 'object') {
+      const isTrue = organization.subscribedFeatures.team === true;
+      organization.subscribedFeatures.team = { access: isTrue, manage: true, export: true };
+  }
+  if (typeof organization.subscribedFeatures.venue !== 'object') {
+      const isTrue = organization.subscribedFeatures.venue === true;
+      organization.subscribedFeatures.venue = { access: isTrue, profile: true, gallery: true, packages: true, availability: true, tasks: true };
+  }
+
+  // Handle nested updates for Events
+  if (features.events !== undefined) {
+    let eventsObj = typeof organization.subscribedFeatures.events === 'object' && organization.subscribedFeatures.events !== null
+      ? (organization.subscribedFeatures.events.toObject ? organization.subscribedFeatures.events.toObject() : { ...organization.subscribedFeatures.events })
+      : { access: true, guests: true, payments: true, tasks: true };
+
+    if (typeof features.events === 'boolean') {
+        eventsObj.access = features.events;
+    } else {
+        if (features.events.access !== undefined) eventsObj.access = features.events.access;
+        if (features.events.guests !== undefined) eventsObj.guests = features.events.guests;
+        if (features.events.payments !== undefined) eventsObj.payments = features.events.payments;
+        if (features.events.tasks !== undefined) eventsObj.tasks = features.events.tasks;
+    }
+    
+    organization.subscribedFeatures.events = eventsObj;
+  }
+
+  // Handle nested updates for Payments
+  if (features.payments !== undefined) {
+    // Already normalized above, but ensure we work with the object
+    let paymentsObj = organization.subscribedFeatures.payments && organization.subscribedFeatures.payments.toObject 
+        ? organization.subscribedFeatures.payments.toObject() 
+        : { ...organization.subscribedFeatures.payments };
+
+    if (typeof features.payments === 'boolean') {
+        paymentsObj.access = features.payments;
+    } else {
+        if (features.payments.access !== undefined) paymentsObj.access = features.payments.access;
+        if (features.payments.client !== undefined) paymentsObj.client = features.payments.client;
+        if (features.payments.vendor !== undefined) paymentsObj.vendor = features.payments.vendor;
+    }
+
+    organization.subscribedFeatures.payments = paymentsObj;
+  }
+
+  // Handle nested updates for Venue
+  if (features.venue !== undefined) {
+    let venueObj = organization.subscribedFeatures.venue && organization.subscribedFeatures.venue.toObject 
+        ? organization.subscribedFeatures.venue.toObject() 
+        : { ...organization.subscribedFeatures.venue };
+
+    if (typeof features.venue === 'boolean') {
+        venueObj.access = features.venue;
+    } else {
+        if (features.venue.access !== undefined) venueObj.access = features.venue.access;
+        if (features.venue.profile !== undefined) venueObj.profile = features.venue.profile;
+        if (features.venue.gallery !== undefined) venueObj.gallery = features.venue.gallery;
+        if (features.venue.packages !== undefined) venueObj.packages = features.venue.packages;
+        if (features.venue.availability !== undefined) venueObj.availability = features.venue.availability;
+        if (features.venue.tasks !== undefined) venueObj.tasks = features.venue.tasks;
+    }
+
+    organization.subscribedFeatures.venue = venueObj;
+  }
+
+  // Handle nested updates for Team
+  if (features.team !== undefined) {
+    let teamObj = organization.subscribedFeatures.team && organization.subscribedFeatures.team.toObject 
+        ? organization.subscribedFeatures.team.toObject() 
+        : { ...organization.subscribedFeatures.team };
+
+    if (typeof features.team === 'boolean') {
+        teamObj.access = features.team;
+    } else {
+        if (features.team.access !== undefined) teamObj.access = features.team.access;
+        if (features.team.manage !== undefined) teamObj.manage = features.team.manage;
+        if (features.team.export !== undefined) teamObj.export = features.team.export;
+    }
+
+    organization.subscribedFeatures.team = teamObj;
+  }
+
+  await organization.save();
+
+  // Log activity
+  const user = await User.findById(updatedByUserId);
+  await logActivity(
+    updatedByUserId,
+    user?.role,
+    'update_features',
+    'organization',
+    orgId,
+    organization.name,
+    { features },
     ipAddress,
     userAgent
   );
@@ -351,7 +483,7 @@ const getOrganizationEvents = async (orgId, filters = {}) => {
 
   const query = {
     organizationId: orgId,
-    isDeleted: false
+    isActive: true
   };
 
   const skip = (page - 1) * limit;
@@ -447,7 +579,7 @@ const getUserDetails = async (userId) => {
       { leadPlannerId: userId },
       { coordinators: userId }
     ],
-    isDeleted: false
+    isActive: true
   });
 
   return {
@@ -481,6 +613,40 @@ const deactivateUser = async (userId, deactivatedByUserId, ipAddress, userAgent)
     deactivatedByUserId,
     adminUser?.role,
     'deactivate_user',
+    'user',
+    userId,
+    user.name,
+    { email: user.email },
+    ipAddress,
+    userAgent
+  );
+
+  return user;
+};
+
+/**
+ * Activate user (Unblock)
+ */
+const activateUser = async (userId, activatedByUserId, ipAddress, userAgent) => {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  if (user.isActive) {
+    throw new Error('User is already active');
+  }
+
+  user.isActive = true;
+  await user.save();
+
+  // Log activity
+  const adminUser = await User.findById(activatedByUserId);
+  await logActivity(
+    activatedByUserId,
+    adminUser?.role,
+    'activate_user',
     'user',
     userId,
     user.name,
@@ -536,6 +702,22 @@ const getUserActivityLogs = async (userId) => {
   return await getActivityLogs(userId, 20);
 };
 
+/**
+ * Get organization activity logs
+ */
+const getOrganizationActivityLogs = async (organizationId) => {
+  try {
+    const logs = await ActivityLog.find({ organizationId })
+      .sort({ createdAt: -1 })
+      .populate('userId', 'name email role')
+      .limit(100);
+
+    return logs;
+  } catch (error) {
+    throw error;
+  }
+};
+
 module.exports = {
   getSystemStats,
   getAllOrganizations,
@@ -548,6 +730,9 @@ module.exports = {
   getAllUsers,
   getUserDetails,
   deactivateUser,
+  activateUser,
   resetUserPassword,
-  getUserActivityLogs
+  updateOrganizationFeatures,
+  getUserActivityLogs,
+  getOrganizationActivityLogs
 };

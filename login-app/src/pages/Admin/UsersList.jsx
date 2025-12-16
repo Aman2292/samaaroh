@@ -103,6 +103,32 @@ const UsersList = () => {
         }
     };
 
+    const handleActivate = async () => {
+        try {
+            setActionLoading(true);
+            const response = await fetch(
+                `http://localhost:5001/api/admin/users/${selectedUser._id}/activate`,
+                {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${userInfo.token}` }
+                }
+            );
+
+            const data = await response.json();
+            if (response.ok) {
+                toast.success('User activated successfully');
+                setShowDeactivateModal(false);
+                fetchUsers();
+            } else {
+                toast.error(data.error || 'Failed to activate user');
+            }
+        } catch (error) {
+            toast.error('Failed to connect to server');
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
     const handleResetPassword = async (user) => {
         try {
             const response = await fetch(
@@ -277,6 +303,17 @@ const UsersList = () => {
                                                             Deactivate
                                                         </button>
                                                     )}
+                                                    {!user.isActive && user.role !== 'SUPER_ADMIN' && (
+                                                        <button
+                                                            onClick={() => {
+                                                                setSelectedUser(user);
+                                                                setShowDeactivateModal(true);
+                                                            }}
+                                                            className="text-green-600 hover:text-green-700 font-medium text-sm"
+                                                        >
+                                                            Activate
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>
@@ -316,9 +353,10 @@ const UsersList = () => {
                 {showDeactivateModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                         <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
-                            <h3 className="text-xl font-bold text-slate-800 mb-4">Deactivate User</h3>
+                            <h3 className="text-xl font-bold text-slate-800 mb-4">{selectedUser?.isActive ? 'Block User' : 'Unblock User'}</h3>
                             <p className="text-slate-600 mb-4">
-                                Are you sure you want to deactivate <strong>{selectedUser?.name}</strong>? They will be unable to login.
+                                Are you sure you want to {selectedUser?.isActive ? 'block' : 'unblock'} <strong>{selectedUser?.name}</strong>?
+                                {selectedUser?.isActive ? ' They will be unable to login.' : ' They will sortly be able to login again.'}
                             </p>
                             <div className="flex space-x-3">
                                 <button
@@ -329,11 +367,11 @@ const UsersList = () => {
                                     Cancel
                                 </button>
                                 <button
-                                    onClick={handleDeactivate}
-                                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                                    onClick={selectedUser?.isActive ? handleDeactivate : handleActivate}
+                                    className={`flex-1 px-4 py-2 text-white rounded-lg ${selectedUser?.isActive ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
                                     disabled={actionLoading}
                                 >
-                                    {actionLoading ? 'Deactivating...' : 'Deactivate'}
+                                    {actionLoading ? 'Processing...' : (selectedUser?.isActive ? 'Block' : 'Unblock')}
                                 </button>
                             </div>
                         </div>

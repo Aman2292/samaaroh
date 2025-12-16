@@ -1,4 +1,5 @@
 const Organization = require('../models/Organization');
+const Venue = require('../models/Venue');
 const asyncHandler = require('express-async-handler');
 
 // @desc    Get all venues for the organization
@@ -12,10 +13,12 @@ const getVenues = asyncHandler(async (req, res) => {
         throw new Error('Organization not found');
     }
 
+    const venues = await Venue.find({ organizationId: organization._id });
+
     res.status(200).json({
         success: true,
-        count: organization.venues.length,
-        data: organization.venues
+        count: venues.length,
+        data: venues
     });
 });
 
@@ -23,14 +26,14 @@ const getVenues = asyncHandler(async (req, res) => {
 // @route   GET /api/venue/:id
 // @access  Private (PLANNER_OWNER)
 const getVenue = asyncHandler(async (req, res) => {
+    // Verify organization ownership
     const organization = await Organization.findOne({ ownerUserId: req.user._id });
-
     if (!organization) {
         res.status(404);
         throw new Error('Organization not found');
     }
 
-    const venue = organization.venues.id(req.params.id);
+    const venue = await Venue.findOne({ _id: req.params.id, organizationId: organization._id });
 
     if (!venue) {
         res.status(404);
@@ -56,20 +59,18 @@ const createVenue = asyncHandler(async (req, res) => {
 
     const { category, description, address, amenities, policies } = req.body;
 
-    const newVenue = {
+    const venue = await Venue.create({
+        organizationId: organization._id,
         category,
         description,
         address,
         amenities,
         policies
-    };
-
-    organization.venues.push(newVenue);
-    await organization.save();
+    });
 
     res.status(201).json({
         success: true,
-        data: organization.venues[organization.venues.length - 1]
+        data: venue
     });
 });
 
@@ -84,14 +85,17 @@ const updateVenue = asyncHandler(async (req, res) => {
         throw new Error('Organization not found');
     }
 
-    const venue = organization.venues.id(req.params.id);
+    const venue = await Venue.findOne({ _id: req.params.id, organizationId: organization._id });
 
     if (!venue) {
         res.status(404);
         throw new Error('Venue not found');
     }
 
-    const { category, description, address, amenities, policies, floorPlans, videoUrls } = req.body;
+    const { category, description, address, amenities, policies, floorPlans, videoUrls, galleryImages } = req.body;
+    
+    console.log(`[updateVenue] Body keys: ${Object.keys(req.body)}`);
+    if (galleryImages) console.log(`[updateVenue] galleryImages length: ${galleryImages.length}`);
 
     if (category) venue.category = category;
     if (description) venue.description = description;
@@ -100,8 +104,9 @@ const updateVenue = asyncHandler(async (req, res) => {
     if (policies) venue.policies = policies;
     if (floorPlans) venue.floorPlans = floorPlans;
     if (videoUrls) venue.videoUrls = videoUrls;
+    if (galleryImages) venue.galleryImages = galleryImages;
 
-    await organization.save();
+    await venue.save();
 
     res.status(200).json({
         success: true,
@@ -121,7 +126,7 @@ const addGalleryImages = asyncHandler(async (req, res) => {
         throw new Error('Organization not found');
     }
 
-    const venue = organization.venues.id(req.params.id);
+    const venue = await Venue.findOne({ _id: req.params.id, organizationId: organization._id });
 
     if (!venue) {
         res.status(404);
@@ -130,7 +135,7 @@ const addGalleryImages = asyncHandler(async (req, res) => {
 
     if (images && images.length > 0) {
         venue.galleryImages.push(...images);
-        await organization.save();
+        await venue.save();
     }
 
     res.status(200).json({
@@ -151,7 +156,7 @@ const deleteGalleryImage = asyncHandler(async (req, res) => {
         throw new Error('Organization not found');
     }
 
-    const venue = organization.venues.id(req.params.id);
+    const venue = await Venue.findOne({ _id: req.params.id, organizationId: organization._id });
 
     if (!venue) {
         res.status(404);
@@ -159,7 +164,7 @@ const deleteGalleryImage = asyncHandler(async (req, res) => {
     }
 
     venue.galleryImages = venue.galleryImages.filter(img => img !== imageUrl);
-    await organization.save();
+    await venue.save();
 
     res.status(200).json({
         success: true,
@@ -178,7 +183,7 @@ const addPackage = asyncHandler(async (req, res) => {
         throw new Error('Organization not found');
     }
 
-    const venue = organization.venues.id(req.params.id);
+    const venue = await Venue.findOne({ _id: req.params.id, organizationId: organization._id });
 
     if (!venue) {
         res.status(404);
@@ -186,7 +191,7 @@ const addPackage = asyncHandler(async (req, res) => {
     }
 
     venue.packages.push(req.body);
-    await organization.save();
+    await venue.save();
 
     res.status(201).json({
         success: true,
@@ -205,7 +210,7 @@ const updatePackage = asyncHandler(async (req, res) => {
         throw new Error('Organization not found');
     }
 
-    const venue = organization.venues.id(req.params.id);
+    const venue = await Venue.findOne({ _id: req.params.id, organizationId: organization._id });
 
     if (!venue) {
         res.status(404);
@@ -220,7 +225,7 @@ const updatePackage = asyncHandler(async (req, res) => {
     }
 
     Object.assign(pkg, req.body);
-    await organization.save();
+    await venue.save();
 
     res.status(200).json({
         success: true,
@@ -239,7 +244,7 @@ const deletePackage = asyncHandler(async (req, res) => {
         throw new Error('Organization not found');
     }
 
-    const venue = organization.venues.id(req.params.id);
+    const venue = await Venue.findOne({ _id: req.params.id, organizationId: organization._id });
 
     if (!venue) {
         res.status(404);
@@ -247,7 +252,7 @@ const deletePackage = asyncHandler(async (req, res) => {
     }
 
     venue.packages.pull(req.params.packageId);
-    await organization.save();
+    await venue.save();
 
     res.status(200).json({
         success: true,
@@ -266,7 +271,7 @@ const updateAvailability = asyncHandler(async (req, res) => {
         throw new Error('Organization not found');
     }
 
-    const venue = organization.venues.id(req.params.id);
+    const venue = await Venue.findOne({ _id: req.params.id, organizationId: organization._id });
 
     if (!venue) {
         res.status(404);
@@ -291,7 +296,7 @@ const updateAvailability = asyncHandler(async (req, res) => {
         }
     }
 
-    await organization.save();
+    await venue.save();
 
     res.status(200).json({
         success: true,

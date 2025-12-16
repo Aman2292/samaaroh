@@ -117,6 +117,34 @@ const organizationSchema = mongoose.Schema({
       notes: String
     }]
   }],
+  subscribedFeatures: {
+    clients: { type: Boolean, default: true },
+    events: {
+      access: { type: Boolean, default: true }, // Main Events Tab
+      guests: { type: Boolean, default: true },
+      payments: { type: Boolean, default: true },
+      tasks: { type: Boolean, default: true }
+    },
+    payments: {
+      access: { type: Boolean, default: true },
+      client: { type: Boolean, default: true },
+      vendor: { type: Boolean, default: true }
+    },
+    team: {
+      access: { type: Boolean, default: true },
+      manage: { type: Boolean, default: true }, // Add/Delete/Invite
+      export: { type: Boolean, default: true }
+    },
+    tasks: { type: Boolean, default: true },
+    venue: {
+      access: { type: Boolean, default: true },
+      profile: { type: Boolean, default: true },
+      gallery: { type: Boolean, default: true },
+      packages: { type: Boolean, default: true },
+      availability: { type: Boolean, default: true },
+      tasks: { type: Boolean, default: true }
+    }
+  },
   taskStatuses: [{
     value: {
       type: String,

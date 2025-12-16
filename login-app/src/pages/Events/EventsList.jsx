@@ -265,6 +265,8 @@ const EventsList = () => {
                     )}
                 </div>
 
+
+
                 {/* PLANNER Notice Banner */}
                 {userInfo.role === 'PLANNER' && (
                     <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start space-x-3">
@@ -429,7 +431,7 @@ const EventsList = () => {
                     </>
                 )}
             </div>
-        </div>
+        </div >
     );
 };
 

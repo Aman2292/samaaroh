@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building, Add, SearchNormal1, Refresh2 } from 'iconsax-react';
+import { Building, Add, SearchNormal1, Refresh2, Setting, Eye, Trash, Forbidden2, TickCircle, Calendar, Profile2User } from 'iconsax-react';
 import LoadingSkeleton from '../../components/common/LoadingSkeleton';
 import EmptyState from '../../components/common/EmptyState';
 import { toast } from 'react-toastify';
@@ -18,6 +18,8 @@ const OrganizationsList = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [suspendReason, setSuspendReason] = useState('');
     const [actionLoading, setActionLoading] = useState(false);
+    const [showFeaturesModal, setShowFeaturesModal] = useState(false);
+    const [features, setFeatures] = useState({});
 
     const debouncedSearch = useDebounce(search, 300);
     const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
@@ -44,7 +46,7 @@ const OrganizationsList = () => {
 
             const data = await response.json();
             if (response.ok) {
-                setOrganizations(data.data);
+                setOrganizations(data.data || []);
                 setPagination(data.pagination);
             } else {
                 toast.error(data.error || 'Failed to fetch organizations');
@@ -140,6 +142,101 @@ const OrganizationsList = () => {
         }
     };
 
+    const openFeaturesModal = (org) => {
+        setSelectedOrg(org);
+        const defaultFeatures = {
+            clients: true,
+            events: { access: true, guests: true, payments: true, tasks: true },
+            payments: { access: true, client: true, vendor: true },
+            team: { access: true, manage: true, export: true },
+            tasks: true,
+            venue: { access: true, profile: true, gallery: true, packages: true, availability: true, tasks: true }
+        };
+
+        const orgFeatures = org.subscribedFeatures || {};
+
+        const normalize = (val, defaults) => {
+            if (val === true || val === false) return { ...defaults, access: val };
+            if (val && typeof val === 'object') return { ...defaults, ...val };
+            return defaults;
+        };
+
+        const mergedFeatures = {
+            ...defaultFeatures,
+            clients: orgFeatures.clients ?? defaultFeatures.clients,
+            tasks: orgFeatures.tasks ?? defaultFeatures.tasks,
+            events: normalize(orgFeatures.events, defaultFeatures.events),
+            payments: normalize(orgFeatures.payments, defaultFeatures.payments),
+            team: normalize(orgFeatures.team, defaultFeatures.team),
+            venue: normalize(orgFeatures.venue, defaultFeatures.venue)
+        };
+
+        setFeatures(mergedFeatures);
+        setShowFeaturesModal(true);
+    };
+
+    const handleUpdateFeatures = async () => {
+        try {
+            setActionLoading(true);
+            const response = await fetch(
+                `http://localhost:5001/api/admin/organizations/${selectedOrg._id}/features`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userInfo.token}`
+                    },
+                    body: JSON.stringify({ features })
+                }
+            );
+
+            const data = await response.json();
+            if (response.ok) {
+                toast.success('Features updated successfully');
+                setShowFeaturesModal(false);
+                fetchOrganizations();
+            } else {
+                toast.error(data.error || 'Failed to update features');
+            }
+        } catch (error) {
+            toast.error('Failed to connect to server');
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const toggleFeature = (key, subKey = null) => {
+        if (subKey) {
+            setFeatures(prev => ({
+                ...prev,
+                [key]: {
+                    ...prev[key],
+                    [subKey]: !prev[key][subKey]
+                }
+            }));
+        } else {
+            setFeatures(prev => {
+                const currentVal = prev[key];
+                const isObject = typeof currentVal === 'object';
+
+                if (isObject) {
+                    return {
+                        ...prev,
+                        [key]: {
+                            ...prev[key],
+                            access: !prev[key].access
+                        }
+                    };
+                }
+
+                return {
+                    ...prev,
+                    [key]: !currentVal
+                };
+            });
+        }
+    };
+
     const getStatusBadge = (status) => {
         if (status === 'suspended') {
             return <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">Suspended</span>;
@@ -189,77 +286,124 @@ const OrganizationsList = () => {
                     />
                 ) : (
                     <>
-                        <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-                            <table className="w-full">
-                                <thead className="bg-slate-50 border-b border-slate-100">
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Organization</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Owner</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">City</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Events</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Users</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Status</th>
-                                        <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100">
-                                    {organizations.map((org) => (
-                                        <tr key={org._id} className="hover:bg-slate-50 transition-colors">
-                                            <td className="px-6 py-4">
-                                                <div className="font-medium text-slate-800">{org.name}</div>
-                                                <div className="text-xs text-slate-500">
-                                                    {new Date(org.createdAt).toLocaleDateString('en-IN')}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {organizations.map((org) => (
+                                <div key={org._id} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-all duration-300">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div className="flex-1 min-w-0 pr-4">
+                                            <h3 className="text-lg font-bold text-slate-800 truncate" title={org.name}>
+                                                {org.name}
+                                            </h3>
+                                            <p className="text-xs text-slate-500 mt-1">
+                                                Joined {new Date(org.createdAt).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}
+                                            </p>
+                                        </div>
+                                        {getStatusBadge(org.status)}
+                                    </div>
+
+                                    <div className="space-y-3 mb-6">
+                                        <div className="flex items-center space-x-3 text-slate-600">
+                                            <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0">
+                                                <span className="text-xs font-bold">
+                                                    {org.ownerUserId?.name?.charAt(0) || 'U'}
+                                                </span>
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-medium text-slate-800 truncate">{org.ownerUserId?.name || 'Unknown'}</p>
+                                                <p className="text-xs text-slate-500 truncate">{org.ownerUserId?.email}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-3 mb-3">
+                                            <div className="bg-slate-50 p-2.5 rounded-xl flex items-center space-x-3">
+                                                <div className="bg-purple-100 p-1.5 rounded-lg text-purple-600">
+                                                    <Calendar size="16" color="currentColor" />
                                                 </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="text-slate-800">{org.ownerUserId?.name}</div>
-                                                <div className="text-xs text-slate-500">{org.ownerUserId?.email}</div>
-                                            </td>
-                                            <td className="px-6 py-4 text-slate-600">{org.city || 'N/A'}</td>
-                                            <td className="px-6 py-4 text-slate-600">{org.eventsCount || 0}</td>
-                                            <td className="px-6 py-4 text-slate-600">{org.usersCount || 0}</td>
-                                            <td className="px-6 py-4">{getStatusBadge(org.status)}</td>
-                                            <td className="px-6 py-4 text-right">
-                                                <div className="flex items-center justify-end space-x-2">
-                                                    <button
-                                                        onClick={() => navigate(`/admin/organizations/${org._id}`)}
-                                                        className="text-primary-600 hover:text-primary-700 font-medium text-sm"
-                                                    >
-                                                        View
-                                                    </button>
-                                                    {org.status === 'active' ? (
-                                                        <button
-                                                            onClick={() => {
-                                                                setSelectedOrg(org);
-                                                                setShowSuspendModal(true);
-                                                            }}
-                                                            className="text-orange-600 hover:text-orange-700 font-medium text-sm"
-                                                        >
-                                                            Suspend
-                                                        </button>
-                                                    ) : (
-                                                        <button
-                                                            onClick={() => handleUnsuspend(org)}
-                                                            className="text-green-600 hover:text-green-700 font-medium text-sm"
-                                                        >
-                                                            Unsuspend
-                                                        </button>
-                                                    )}
-                                                    <button
-                                                        onClick={() => {
-                                                            setSelectedOrg(org);
-                                                            setShowDeleteModal(true);
-                                                        }}
-                                                        className="text-red-600 hover:text-red-700 font-medium text-sm"
-                                                    >
-                                                        Delete
-                                                    </button>
+                                                <div>
+                                                    <span className="text-xs text-slate-500 block">Events</span>
+                                                    <span className="text-sm font-bold text-slate-800">{org.eventsCount || 0}</span>
                                                 </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                            </div>
+                                            <div className="bg-slate-50 p-2.5 rounded-xl flex items-center space-x-3">
+                                                <div className="bg-blue-100 p-1.5 rounded-lg text-blue-600">
+                                                    <Profile2User size="16" color="currentColor" />
+                                                </div>
+                                                <div>
+                                                    <span className="text-xs text-slate-500 block">Users</span>
+                                                    <span className="text-sm font-bold text-slate-800">{org.usersCount || 0}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {org.recentEvents && org.recentEvents.length > 0 && (
+                                            <div className="mb-3">
+                                                <p className="text-xs font-medium text-slate-500 mb-2 uppercase tracking-wide">Recent Events</p>
+                                                <div className="space-y-2">
+                                                    {org.recentEvents.map((event, idx) => (
+                                                        <div key={idx} className="flex items-center justify-between text-sm">
+                                                            <div className="flex items-center space-x-2 min-w-0">
+                                                                <div className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0"></div>
+                                                                <span className="truncate text-slate-700 font-medium" title={event.eventName}>{event.eventName}</span>
+                                                            </div>
+                                                            <span className="text-xs text-slate-500 shrink-0">
+                                                                {new Date(event.eventDate).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}
+                                                            </span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <div className="flex items-center space-x-2 text-sm text-slate-500 pt-1">
+                                            <Building size="16" className="text-slate-400" />
+                                            <span className="truncate">{org.city || 'No Location'}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                                        <div className="flex space-x-1">
+                                            {org.status === 'active' ? (
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedOrg(org);
+                                                        setShowSuspendModal(true);
+                                                    }}
+                                                    className="p-2 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                                                    title="Suspend"
+                                                >
+                                                    <Forbidden2 size="18" />
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    onClick={() => handleUnsuspend(org)}
+                                                    className="p-2 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                                                    title="Activate"
+                                                >
+                                                    <TickCircle size="18" />
+                                                </button>
+                                            )}
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedOrg(org);
+                                                    setShowDeleteModal(true);
+                                                }}
+                                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                title="Delete"
+                                            >
+                                                <Trash size="18" />
+                                            </button>
+                                        </div>
+
+                                        <button
+                                            onClick={() => navigate(`/admin/organizations/${org._id}`)}
+                                            className="flex items-center space-x-2 px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded-xl hover:bg-slate-800 hover:shadow-md transition-all active:scale-95"
+                                        >
+                                            <span>Manage</span>
+                                            <Setting size="16" color="currentColor" />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
 
                         {/* Pagination */}
@@ -360,7 +504,7 @@ const OrganizationsList = () => {
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 };
 

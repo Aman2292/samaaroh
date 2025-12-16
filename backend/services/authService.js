@@ -71,7 +71,7 @@ const registerUser = async (userData) => {
 const loginUser = async (userData, ipAddress, userAgent) => {
   const { email, password } = userData;
 
-  const user = await User.findOne({ email }).populate('organizationId', 'name phone email city status');
+  const user = await User.findOne({ email }).populate('organizationId', 'name phone email city status subscribedFeatures');
 
   if (!user) {
     throw new Error('Invalid email or password');
@@ -124,12 +124,12 @@ const loginUser = async (userData, ipAddress, userAgent) => {
   });
 
   return {
-    _id: user._id,
     email: user.email,
     name: user.name,
     role: user.role,
     organizationId: user.organizationId?._id,
     organizationName: user.organizationId?.name,
+    subscribedFeatures: user.organizationId?.subscribedFeatures,
     token: generateToken(user._id, user.role, user.organizationId?._id),
   };
 };

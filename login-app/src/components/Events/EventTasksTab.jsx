@@ -100,41 +100,105 @@ const EventTasksTab = ({ eventId, event }) => {
         }
     };
 
-    const TaskCard = ({ task, index }) => (
-        <Draggable draggableId={task._id} index={index}>
-            {(provided) => (
-                <div
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                    onClick={() => {
-                        setSelectedTask(task);
-                        setShowModal(true);
-                    }}
-                    className="bg-white p-4 rounded-lg shadow-sm border border-slate-200 mb-3 hover:shadow-md transition-shadow cursor-pointer"
-                >
-                    <div className="flex justify-between items-start mb-2">
-                        <span className={`text-xs font-medium px-2 py-0.5 rounded ${getPriorityColor(task.priority)} capitalize`}>
-                            {task.priority}
-                        </span>
-                        {task.dueDate && (
-                            <div className={`flex items-center text-xs ${new Date(task.dueDate) < new Date() ? 'text-red-600 font-medium' : 'text-slate-500'}`}>
-                                <Clock size="14" className="mr-1" />
-                                {new Date(task.dueDate).toLocaleDateString()}
+    const [focusMode, setFocusMode] = useState(false);
+
+    const checkDueSoon = (date) => {
+        if (!date) return false;
+        const diff = new Date(date) - new Date();
+        const hours = diff / (1000 * 60 * 60);
+        return hours > 0 && hours <= 48;
+    };
+
+    const isDueToday = (date) => {
+        if (!date) return false;
+        const taskDate = new Date(date);
+        const today = new Date();
+        return taskDate.getDate() === today.getDate() &&
+            taskDate.getMonth() === today.getMonth() &&
+            taskDate.getFullYear() === today.getFullYear();
+    };
+
+    const handleLoadDefaults = async () => {
+        if (!window.confirm('Load default wedding checklist?')) return;
+
+        const defaultTasks = [
+            { title: 'Confirm Wedding Venue', priority: 'urgent', status: 'todo' },
+            { title: 'Finalize Guest List', priority: 'high', status: 'todo' },
+            { title: 'Book Photographer', priority: 'high', status: 'todo' },
+            { title: 'Select Decor Theme', priority: 'medium', status: 'todo' },
+            { title: 'Send Invitations', priority: 'high', status: 'todo' },
+            { title: 'Arrange Transportation', priority: 'medium', status: 'todo' },
+        ];
+
+        try {
+            setLoading(true);
+            const promises = defaultTasks.map(task =>
+                fetch('http://localhost:5001/api/tasks', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userInfo.token}`
+                    },
+                    body: JSON.stringify({ ...task, eventId })
+                })
+            );
+            await Promise.all(promises);
+            toast.success('Default checklist loaded!');
+            fetchTasks();
+        } catch (error) {
+            toast.error('Failed to load defaults');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const TaskCard = ({ task, index }) => {
+        const dueSoon = checkDueSoon(task.dueDate);
+
+        return (
+            <Draggable draggableId={task._id} index={index}>
+                {(provided) => (
+                    <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        onClick={() => {
+                            setSelectedTask(task);
+                            setShowModal(true);
+                        }}
+                        className={`
+                        bg-white p-4 rounded-lg shadow-sm border mb-3 hover:shadow-md transition-shadow cursor-pointer relative overflow-hidden
+                        ${dueSoon ? 'border-yellow-400 ring-1 ring-yellow-400/50' : 'border-slate-200'}
+                    `}
+                    >
+                        {dueSoon && (
+                            <div className="absolute top-0 right-0 bg-yellow-400 text-yellow-900 text-[10px] font-bold px-2 py-0.5 rounded-bl-lg">
+                                DUE SOON
                             </div>
                         )}
-                    </div>
-                    <h4 className="font-medium text-slate-800 mb-1 line-clamp-2">{task.title}</h4>
-                    <div className="flex items-center justify-between mt-3">
-                        <div className="flex items-center text-slate-500 text-xs">
-                            <User size="14" className="mr-1" />
-                            {task.assignedTo?.name || 'Unassigned'}
+                        <div className="flex justify-between items-start mb-2">
+                            <span className={`text-xs font-medium px-2 py-0.5 rounded ${getPriorityColor(task.priority)} capitalize`}>
+                                {task.priority}
+                            </span>
+                            {task.dueDate && (
+                                <div className={`flex items-center text-xs ${new Date(task.dueDate) < new Date() ? 'text-red-600 font-medium' : 'text-slate-500'}`}>
+                                    <Clock size="14" className="mr-1" />
+                                    {new Date(task.dueDate).toLocaleDateString()}
+                                </div>
+                            )}
+                        </div>
+                        <h4 className="font-medium text-slate-800 mb-1 line-clamp-2">{task.title}</h4>
+                        <div className="flex items-center justify-between mt-3">
+                            <div className="flex items-center text-slate-500 text-xs">
+                                <User size="14" className="mr-1" />
+                                {task.assignedTo?.name || 'Unassigned'}
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </Draggable>
-    );
+                )}
+            </Draggable>
+        )
+    };
 
     const Column = ({ title, id, tasks }) => (
         <div className="bg-slate-50 p-4 rounded-xl min-h-[500px] flex flex-col">
@@ -161,29 +225,80 @@ const EventTasksTab = ({ eventId, event }) => {
         </div>
     );
 
+    // Apply Focus Mode Filter
+    const filterTasks = (taskList) => {
+        if (!focusMode) return taskList;
+        return taskList.filter(t => isDueToday(t.dueDate));
+    };
+
+    const hasTasks = tasks.todo.length > 0 || tasks.in_progress.length > 0 || tasks.completed.length > 0;
+
     return (
         <div className="h-full">
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-slate-800">Task Board</h2>
-                <button
-                    onClick={() => {
-                        setSelectedTask(null);
-                        setShowModal(true);
-                    }}
-                    className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-                >
-                    <Add size="20" color="#ffffff" variant="Outline" />
-                    <span>Add Task</span>
-                </button>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                <div>
+                    <h2 className="text-xl font-bold text-slate-800">Task Board</h2>
+                    <p className="text-sm text-slate-500">Manage your event tasks</p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => setFocusMode(!focusMode)}
+                        className={`
+                            flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors border
+                            ${focusMode
+                                ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
+                                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}
+                        `}
+                    >
+                        <Flag size="20" variant={focusMode ? "Bold" : "Outline"} />
+                        <span>Focus Mode (Today)</span>
+                    </button>
+
+                    <button
+                        onClick={() => {
+                            setSelectedTask(null);
+                            setShowModal(true);
+                        }}
+                        className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                    >
+                        <Add size="20" color="#ffffff" variant="Outline" />
+                        <span>Add Task</span>
+                    </button>
+                </div>
             </div>
 
-            <DragDropContext onDragEnd={onDragEnd}>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <Column title="To Do" id="todo" tasks={tasks.todo} />
-                    <Column title="In Progress" id="in_progress" tasks={tasks.in_progress} />
-                    <Column title="Completed" id="completed" tasks={tasks.completed} />
+            {!hasTasks && !loading ? (
+                <div className="text-center py-12 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                    <div className="mb-4">
+                        <Flag size="48" className="mx-auto text-slate-300" variant="Bulk" />
+                    </div>
+                    <h3 className="text-lg font-medium text-slate-700 mb-2">No tasks yet</h3>
+                    <p className="text-slate-500 mb-6">Start by adding a task or load a template.</p>
+                    <div className="flex justify-center gap-4">
+                        <button
+                            onClick={handleLoadDefaults}
+                            className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium"
+                        >
+                            Load Wedding Checklist
+                        </button>
+                        <button
+                            onClick={() => setShowModal(true)}
+                            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                        >
+                            Create First Task
+                        </button>
+                    </div>
                 </div>
-            </DragDropContext>
+            ) : (
+                <DragDropContext onDragEnd={onDragEnd}>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <Column title="To Do" id="todo" tasks={filterTasks(tasks.todo)} />
+                        <Column title="In Progress" id="in_progress" tasks={filterTasks(tasks.in_progress)} />
+                        <Column title="Completed" id="completed" tasks={filterTasks(tasks.completed)} />
+                    </div>
+                </DragDropContext>
+            )}
 
             <TaskModal
                 isOpen={showModal}

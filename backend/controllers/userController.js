@@ -11,7 +11,8 @@ const getProfile = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id)
       .select('-password')
-      .populate('organizationId', 'name city')
+      .select('-password')
+      .populate('organizationId', 'name city phone email address website subscribedFeatures')
       .populate('createdBy', 'name email');
 
     if (!user) {

@@ -255,6 +255,57 @@ const sendManualNotification = async (sender, title, message, link, taggedUserId
   }
 };
 
+/**
+ * Send access request notification to Super Admin
+ */
+const sendAccessRequest = async (requester, featureName) => {
+  try {
+    // 1. Find all Super Admins
+    const superAdmins = await User.find({ role: 'SUPER_ADMIN', isActive: true });
+    
+    if (superAdmins.length === 0) return;
+
+    // Fetch requester details with organization to ensure we have the name
+    const fullRequester = await User.findById(requester._id).populate('organizationId');
+    const orgName = fullRequester.organizationId?.name || 'Unknown Org';
+
+    // 2. Create notification for each Super Admin
+    const title = 'Feature Access Request';
+    const message = `${fullRequester.name} (${orgName}) requested access to feature: ${featureName}`;
+    const link = `/admin/organizations/${fullRequester.organizationId?._id}`;
+
+    const notifications = superAdmins.map(admin => ({
+      userId: admin._id,
+      organizationId: admin.organizationId, // Usually null or system org for super admin
+      type: 'system',
+      title,
+      message,
+      link,
+      senderId: requester._id,
+      senderRole: requester.role,
+      isRead: false,
+      metadata: { featureName, requesterId: requester._id }
+    }));
+
+    // Note: Creating notifications requires organizationId.
+    // Ensure Super Admins have an organizationId or handle schema validation if they don't.
+    // Assuming Super Admins are created with a dummy or system org ID as per typical patterns.
+    // If not, we might need to fetch a default one or make it optional in schema (it is required currently).
+    
+    // Safety check: Filter out admins without organizationId if schema requires it
+    const validNotifications = notifications.filter(n => n.organizationId);
+    
+    if (validNotifications.length > 0) {
+        await Notification.insertMany(validNotifications);
+    }
+    
+    return { count: validNotifications.length };
+  } catch (error) {
+    console.error('Failed to send access request:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   createNotification,
   getUserNotifications,
@@ -266,5 +317,6 @@ module.exports = {
   notifyEventUpcoming,
   notifyTeamJoined,
   notifyEventAssigned,
-  sendManualNotification
+  sendManualNotification,
+  sendAccessRequest
 };

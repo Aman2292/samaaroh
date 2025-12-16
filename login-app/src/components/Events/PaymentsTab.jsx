@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Add, MoneyRecive, MoneySend, Edit2, Trash, Refresh } from 'iconsax-react';
+import { Add, MoneyRecive, MoneySend, Edit2, Trash, Refresh, Copy, Danger, Timer1 } from 'iconsax-react';
 import AddPaymentModal from '../Payments/AddPaymentModal';
 import MarkPaidModal from '../Payments/MarkPaidModal';
 import LoadingSkeleton from '../common/LoadingSkeleton';
 import { toast } from 'react-toastify';
 
-const PaymentsTab = ({ eventId, clientId }) => {
+const PaymentsTab = ({ eventId, clientId, eventName, clientName }) => {
     const [loading, setLoading] = useState(true);
     const [paymentsData, setPaymentsData] = useState(null);
     const [showAddModal, setShowAddModal] = useState(false);
@@ -65,17 +65,37 @@ const PaymentsTab = ({ eventId, clientId }) => {
         }
     };
 
+    const handleCopyReminder = (payment) => {
+        const remaining = payment.amount - payment.paidAmount;
+        const text = `Hi ${clientName || 'Client'}, your pending payment of ₹${remaining.toLocaleString('en-IN')} for ${eventName || 'your event'} is due. Please clear it at the earliest.`;
+        navigator.clipboard.writeText(text);
+        toast.success('Reminder copied to clipboard!');
+    };
+
+    const isPaymentOverdue = (payment) => {
+        return payment.status !== 'paid' && new Date(payment.dueDate) < new Date();
+    };
+
+    const getDaysOverdue = (dueDate) => {
+        const diff = new Date() - new Date(dueDate);
+        return Math.floor(diff / (1000 * 60 * 60 * 24));
+    };
+
     const getStatusBadge = (payment) => {
-        const outstandingAmount = payment.amount - payment.paidAmount;
+        const overdue = isPaymentOverdue(payment);
 
         const statusConfig = {
             paid: { bg: 'bg-green-100', text: 'text-green-700', label: 'Paid' },
             partially_paid: { bg: 'bg-yellow-100', text: 'text-yellow-700', label: 'Partial' },
             pending: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Pending' },
-            overdue: { bg: 'bg-red-100', text: 'text-red-700', label: 'Overdue' }
         };
 
-        const config = statusConfig[payment.status] || statusConfig.pending;
+        let config = statusConfig[payment.status] || statusConfig.pending;
+
+        // Override for overdue
+        if (overdue) {
+            config = { bg: 'bg-red-100', text: 'text-red-700', label: 'Overdue' };
+        }
 
         return (
             <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
@@ -101,8 +121,35 @@ const PaymentsTab = ({ eventId, clientId }) => {
 
     const { clientPayments, vendorPayments, summary } = paymentsData;
 
+    // Filter upcoming due payments (within 3 days)
+    const upcomingPayments = clientPayments.filter(p => {
+        if (p.status === 'paid') return false;
+        const diffTime = new Date(p.dueDate) - new Date();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays >= 0 && diffDays <= 3;
+    });
+
     return (
         <div className="space-y-6">
+
+            {/* 1. Payment Reminder Banner */}
+            {upcomingPayments.length > 0 && (
+                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg flex items-start">
+                    <Timer1 size="24" className="text-yellow-600 mr-3 mt-0.5" variant="Bold" />
+                    <div>
+                        <h4 className="text-sm font-bold text-yellow-800 uppercase">Upcoming Payments</h4>
+                        <div className="mt-1 text-sm text-yellow-700">
+                            {upcomingPayments.map(p => (
+                                <p key={p._id}>
+                                    Payment of <strong>₹{(p.amount - p.paidAmount).toLocaleString('en-IN')}</strong> for {p.description} is due in
+                                    <strong> {Math.ceil((new Date(p.dueDate) - new Date()) / (1000 * 60 * 60 * 24))} days</strong>.
+                                </p>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
@@ -170,38 +217,61 @@ const PaymentsTab = ({ eventId, clientId }) => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
-                                {clientPayments.map((payment) => (
-                                    <tr key={payment._id} className="hover:bg-slate-50">
-                                        <td className="px-4 py-3 text-sm text-slate-800">{payment.description}</td>
-                                        <td className="px-4 py-3 text-sm text-right font-medium">₹{payment.amount.toLocaleString('en-IN')}</td>
-                                        <td className="px-4 py-3 text-sm text-slate-600">{new Date(payment.dueDate).toLocaleDateString('en-IN')}</td>
-                                        <td className="px-4 py-3">{getStatusBadge(payment)}</td>
-                                        <td className="px-4 py-3 text-sm text-right text-green-600 font-medium">₹{payment.paidAmount.toLocaleString('en-IN')}</td>
-                                        <td className="px-4 py-3 text-sm text-right text-orange-600 font-medium">₹{(payment.amount - payment.paidAmount).toLocaleString('en-IN')}</td>
-                                        {canManagePayments && (
-                                            <td className="px-4 py-3 text-right">
-                                                <div className="flex items-center justify-end space-x-2">
-                                                    {payment.status !== 'paid' && (
-                                                        <button
-                                                            onClick={() => handleMarkPaid(payment)}
-                                                            className="text-green-600 hover:text-green-700 text-xs font-medium"
-                                                        >
-                                                            Mark Paid
-                                                        </button>
-                                                    )}
-                                                    {userInfo.role === 'PLANNER_OWNER' && (
-                                                        <button
-                                                            onClick={() => handleDelete(payment._id)}
-                                                            className="text-red-600 hover:text-red-700"
-                                                        >
-                                                            <Trash size="16" color="currentColor" />
-                                                        </button>
-                                                    )}
-                                                </div>
+                                {clientPayments.map((payment) => {
+                                    const isOverdue = isPaymentOverdue(payment);
+                                    const daysOverdue = isOverdue ? getDaysOverdue(payment.dueDate) : 0;
+
+                                    return (
+                                        <tr key={payment._id} className={`hover:bg-slate-50 ${isOverdue ? 'bg-red-50/50' : ''}`}>
+                                            <td className="px-4 py-3 text-sm text-slate-800">
+                                                {payment.description}
+                                                {isOverdue && daysOverdue > 0 && (
+                                                    <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                                                        Overdue {daysOverdue}d
+                                                    </span>
+                                                )}
                                             </td>
-                                        )}
-                                    </tr>
-                                ))}
+                                            <td className="px-4 py-3 text-sm text-right font-medium">₹{payment.amount.toLocaleString('en-IN')}</td>
+                                            <td className={`px-4 py-3 text-sm ${isOverdue ? 'text-red-600 font-medium' : 'text-slate-600'}`}>
+                                                {new Date(payment.dueDate).toLocaleDateString('en-IN')}
+                                            </td>
+                                            <td className="px-4 py-3">{getStatusBadge(payment)}</td>
+                                            <td className="px-4 py-3 text-sm text-right text-green-600 font-medium">₹{payment.paidAmount.toLocaleString('en-IN')}</td>
+                                            <td className="px-4 py-3 text-sm text-right text-orange-600 font-medium">₹{(payment.amount - payment.paidAmount).toLocaleString('en-IN')}</td>
+                                            {canManagePayments && (
+                                                <td className="px-4 py-3 text-right">
+                                                    <div className="flex items-center justify-end space-x-2">
+                                                        {payment.status !== 'paid' && (
+                                                            <button
+                                                                onClick={() => handleCopyReminder(payment)}
+                                                                className="p-1.5 text-slate-500 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                                                                title="Copy WhatsApp Reminder"
+                                                            >
+                                                                <Copy size="16" color="currentColor" />
+                                                            </button>
+                                                        )}
+                                                        {payment.status !== 'paid' && (
+                                                            <button
+                                                                onClick={() => handleMarkPaid(payment)}
+                                                                className="text-green-600 hover:text-green-700 text-xs font-medium"
+                                                            >
+                                                                Mark Paid
+                                                            </button>
+                                                        )}
+                                                        {userInfo.role === 'PLANNER_OWNER' && (
+                                                            <button
+                                                                onClick={() => handleDelete(payment._id)}
+                                                                className="text-red-600 hover:text-red-700"
+                                                            >
+                                                                <Trash size="16" color="currentColor" />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            )}
+                                        </tr>
+                                    );
+                                })}
                                 <tr className="bg-slate-50 font-semibold">
                                     <td className="px-4 py-3 text-sm">Total</td>
                                     <td className="px-4 py-3 text-sm text-right">₹{summary.clientTotal.toLocaleString('en-IN')}</td>
@@ -216,8 +286,9 @@ const PaymentsTab = ({ eventId, clientId }) => {
                 )}
             </div>
 
-            {/* Vendor Payments Section */}
+            {/* Vendor Payments Section (Unchanged mostly, but could apply logic if needed) */}
             <div className="bg-white rounded-xl border border-slate-200">
+                {/* ... Header ... */}
                 <div className="flex items-center justify-between p-4 border-b border-slate-200">
                     <div className="flex items-center space-x-2">
                         <MoneySend size="20" color="#f59e0b" variant="Bold" />
@@ -293,6 +364,7 @@ const PaymentsTab = ({ eventId, clientId }) => {
                                         )}
                                     </tr>
                                 ))}
+                                {/* ... Total Row ... */}
                                 <tr className="bg-slate-50 font-semibold">
                                     <td colSpan="3" className="px-4 py-3 text-sm">Total</td>
                                     <td className="px-4 py-3 text-sm text-right">₹{summary.vendorTotal.toLocaleString('en-IN')}</td>
@@ -307,7 +379,7 @@ const PaymentsTab = ({ eventId, clientId }) => {
                 )}
             </div>
 
-            {/* Modals */}
+            {/* Modals ... */}
             {showAddModal && (
                 <AddPaymentModal
                     onClose={() => setShowAddModal(false)}

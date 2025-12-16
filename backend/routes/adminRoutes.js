@@ -19,12 +19,16 @@ router.put('/organizations/:id/unsuspend', adminController.unsuspendOrganization
 router.delete('/organizations/:id', adminController.deleteOrganization);
 router.get('/organizations/:id/users', adminController.getOrganizationUsers);
 router.get('/organizations/:id/events', adminController.getOrganizationEvents);
+router.get('/organizations/:id/activity', adminController.getOrganizationActivityLogs);
 
 // Users management
 router.get('/users', adminController.getAllUsers);
 router.get('/users/:id', adminController.getUserDetails);
 router.get('/users/:id/activity', adminController.getUserActivityLogs);
 router.put('/users/:id/deactivate', adminController.deactivateUser);
+router.put('/users/:id/activate', adminController.activateUser);
 router.post('/users/:id/reset-password', adminController.resetUserPassword);
+
+router.put('/organizations/:id/features', adminController.updateOrganizationFeatures);
 
 module.exports = router;

@@ -6,6 +6,7 @@ import LoadingSkeleton from '../../components/common/LoadingSkeleton';
 import EmptyState from '../../components/common/EmptyState';
 import ErrorMessage from '../../components/common/ErrorMessage';
 import { toast } from 'react-toastify';
+import PrimaryButton from '../../components/common/PrimaryButton';
 
 const TasksPage = () => {
     const [tasks, setTasks] = useState([]);
@@ -150,16 +151,15 @@ const TasksPage = () => {
                         <h1 className="text-3xl font-bold text-slate-800">Global Tasks</h1>
                         <p className="text-slate-500 mt-1">Manage all tasks across events and venues</p>
                     </div>
-                    <button
+                    <PrimaryButton
                         onClick={() => {
                             setSelectedTask(null);
                             setShowTaskModal(true);
                         }}
-                        className="flex items-center space-x-2 px-4 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium shadow-md shadow-primary-200"
+                        icon={Add}
                     >
-                        <Add size="20" color="#FFFFFF" />
-                        <span>Create Task</span>
-                    </button>
+                        Create Task
+                    </PrimaryButton>
                 </div>
 
                 {/* Filters */}
@@ -234,8 +234,8 @@ const TasksPage = () => {
                                         <td className="px-6 py-4">
                                             <div className="flex items-start gap-3">
                                                 <div className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${task.priority === 'urgent' ? 'bg-red-500' :
-                                                        task.priority === 'high' ? 'bg-orange-500' :
-                                                            task.priority === 'medium' ? 'bg-blue-500' : 'bg-slate-400'
+                                                    task.priority === 'high' ? 'bg-orange-500' :
+                                                        task.priority === 'medium' ? 'bg-blue-500' : 'bg-slate-400'
                                                     }`} />
                                                 <div>
                                                     <div className="font-medium text-slate-800">{task.title}</div>
