@@ -16,6 +16,7 @@ const CheckInScanner = () => {
     const [manualCode, setManualCode] = useState('');
     const [showManualInput, setShowManualInput] = useState(false);
     const [recentCheckIns, setRecentCheckIns] = useState([]);
+    const [cameraError, setCameraError] = useState(null);
 
     const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
 
@@ -86,6 +87,12 @@ const CheckInScanner = () => {
         }
     };
 
+    const handleCancelScan = () => {
+        setScannedGuest(null);
+        setHeadcount(1);
+        setNotes('');
+    };
+
     const handleConfirmCheckIn = async () => {
         if (!scannedGuest) return;
 
@@ -131,9 +138,17 @@ const CheckInScanner = () => {
             // Give the DOM a moment to render the #qr-reader element
             const timer = setTimeout(() => {
                 if (document.getElementById('qr-reader')) {
-                    const html5QrcodeScanner = new window.Html5QrcodeScanner(
+                    const html5QrcodeScanner = new Html5QrcodeScanner(
                         "qr-reader",
-                        { fps: 10, qrbox: { width: 250, height: 250 } },
+                        {
+                            fps: 10,
+                            qrbox: { width: 250, height: 250 },
+                            aspectRatio: 1.0,
+                            showTorchButtonIfSupported: true,
+                            videoConstraints: {
+                                facingMode: "environment"
+                            }
+                        },
                         /* verbose= */ false
                     );
 
@@ -282,6 +297,12 @@ const CheckInScanner = () => {
                 ) : (
                     /* Scanner Ready State */
                     <div className="text-center py-6">
+                        {cameraError && (
+                            <div className="mb-4 p-3 bg-red-900/50 border border-red-500 rounded-lg text-white text-sm">
+                                ⚠️ {cameraError}
+                            </div>
+                        )}
+
                         {/* Camera Viewport */}
                         {!showManualInput && (
                             <div className="mb-6 relative bg-black rounded-2xl overflow-hidden aspect-square max-w-sm mx-auto shadow-2xl border-4 border-gray-700">
