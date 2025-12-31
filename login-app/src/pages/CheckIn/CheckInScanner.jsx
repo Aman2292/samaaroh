@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Scan, TickCircle, CloseCircle, Refresh2, People, Add, Minus } from 'iconsax-react';
 import { toast } from 'react-toastify';
 import API_BASE_URL from '../../config/api';
+import { Html5QrcodeScanner } from 'html5-qrcode';
 
 const CheckInScanner = () => {
     const { eventId } = useParams();
@@ -121,11 +122,47 @@ const CheckInScanner = () => {
         }
     };
 
-    const handleCancelScan = () => {
-        setScannedGuest(null);
-        setHeadcount(1);
-        setNotes('');
-    };
+    // Check if scanner is already running to avoid duplicates
+    const scannerRef = useRef(null);
+
+    useEffect(() => {
+        // Only start scanner if we are NOT showing manual input and NOT showing a scanned guest
+        if (!showManualInput && !scannedGuest) {
+            // Give the DOM a moment to render the #qr-reader element
+            const timer = setTimeout(() => {
+                if (document.getElementById('qr-reader')) {
+                    const html5QrcodeScanner = new window.Html5QrcodeScanner(
+                        "qr-reader",
+                        { fps: 10, qrbox: { width: 250, height: 250 } },
+                        /* verbose= */ false
+                    );
+
+                    html5QrcodeScanner.render(
+                        (decodedText) => {
+                            // On Success
+                            html5QrcodeScanner.clear();
+                            handleScanQR(decodedText);
+                        },
+                        (errorMessage) => {
+                            // On Error (ignore for now as it triggers on every frame without QR)
+                        }
+                    );
+                    scannerRef.current = html5QrcodeScanner;
+                }
+            }, 100);
+
+            return () => {
+                clearTimeout(timer);
+                if (scannerRef.current) {
+                    try {
+                        scannerRef.current.clear().catch(err => console.error("Failed to clear scanner", err));
+                    } catch (e) {
+                        // ignore cleanup errors
+                    }
+                }
+            };
+        }
+    }, [showManualInput, scannedGuest]);
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
@@ -244,48 +281,70 @@ const CheckInScanner = () => {
                     </div>
                 ) : (
                     /* Scanner Ready State */
-                    <div className="text-center py-12">
-                        <div className="w-32 h-32 bg-gray-700 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                            <Scan size="64" className="text-gray-400" />
-                        </div>
-                        <h2 className="text-xl font-semibold mb-2">Ready to Scan</h2>
-                        <p className="text-gray-400 mb-6">
-                            Point camera at guest's QR code or enter code manually
-                        </p>
+                    <div className="text-center py-6">
+                        {/* Camera Viewport */}
+                        {!showManualInput && (
+                            <div className="mb-6 relative bg-black rounded-2xl overflow-hidden aspect-square max-w-sm mx-auto shadow-2xl border-4 border-gray-700">
+                                <div id="qr-reader" className="w-full h-full"></div>
+                                {/* Overlay Styling override for html5-qrcode default ugliness */}
+                                <style>{`
+                                    #qr-reader { border: none !important; }
+                                    #qr-reader__scan_region { img { display: none; } }
+                                    #qr-reader__dashboard_section_csr button { 
+                                        color: white; background: #ea580c; border: none; padding: 8px 16px; 
+                                        border-radius: 8px; font-weight: bold; margin-top: 10px; cursor: pointer;
+                                    }
+                                `}</style>
+                            </div>
+                        )}
 
-                        {/* Manual Input Toggle */}
-                        {showManualInput ? (
-                            <div className="flex gap-2 max-w-xs mx-auto">
-                                <input
-                                    type="text"
-                                    placeholder="Enter QR code..."
-                                    value={manualCode}
-                                    onChange={(e) => setManualCode(e.target.value)}
-                                    onKeyPress={(e) => e.key === 'Enter' && handleManualScan()}
-                                    className="flex-1 px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder:text-gray-400 focus:ring-2 focus:ring-primary-500"
-                                    autoFocus
-                                />
+                        {!showManualInput ? (
+                            <>
+                                <h2 className="text-xl font-semibold mb-2">Scanning...</h2>
+                                <p className="text-gray-400 mb-6">
+                                    Point camera at a guest's QR code
+                                </p>
                                 <button
-                                    onClick={handleManualScan}
-                                    disabled={loading}
-                                    className="px-4 py-3 bg-primary-600 rounded-lg hover:bg-primary-700"
+                                    onClick={() => setShowManualInput(true)}
+                                    className="px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600"
                                 >
-                                    Go
+                                    Enter Code Manually
+                                </button>
+                            </>
+                        ) : (
+                            <div className="max-w-sm mx-auto">
+                                <h2 className="text-xl font-semibold mb-4">Manual Entry</h2>
+                                <div className="flex gap-2 mb-4">
+                                    <input
+                                        type="text"
+                                        placeholder="Enter QR code..."
+                                        value={manualCode}
+                                        onChange={(e) => setManualCode(e.target.value)}
+                                        onKeyPress={(e) => e.key === 'Enter' && handleManualScan()}
+                                        className="flex-1 px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder:text-gray-400 focus:ring-2 focus:ring-primary-500"
+                                        autoFocus
+                                    />
+                                    <button
+                                        onClick={handleManualScan}
+                                        disabled={loading}
+                                        className="px-4 py-3 bg-primary-600 rounded-lg hover:bg-primary-700"
+                                    >
+                                        Go
+                                    </button>
+                                </div>
+                                <button
+                                    onClick={() => setShowManualInput(false)}
+                                    className="text-gray-400 hover:text-white text-sm"
+                                >
+                                    Switch back to Camera
                                 </button>
                             </div>
-                        ) : (
-                            <button
-                                onClick={() => setShowManualInput(true)}
-                                className="px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600"
-                            >
-                                Enter Code Manually
-                            </button>
                         )}
                     </div>
                 )}
 
                 {/* Recent Check-Ins */}
-                {recentCheckIns.length > 0 && (
+                {recentCheckIns.length > 0 && !scannedGuest && (
                     <div className="mt-8">
                         <h3 className="text-sm font-semibold text-gray-400 uppercase mb-3">
                             Recent Check-Ins
@@ -318,15 +377,6 @@ const CheckInScanner = () => {
                     </div>
                 )}
             </div>
-
-            {/* Note about camera */}
-            <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700 p-4 text-center">
-                <p className="text-sm text-gray-400">
-                    💡 Camera scanning requires html5-qrcode package. Using manual input for now.
-                </p>
-            </div>
         </div>
     );
 };
-
-export default CheckInScanner;
