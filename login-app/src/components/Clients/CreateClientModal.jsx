@@ -33,7 +33,7 @@ const CreateClientModal = ({ onClose, onSuccess }) => {
                 tags: data.tags ? data.tags.split(',').map(tag => tag.trim()).filter(Boolean) : []
             };
 
-            const response = await fetch('http://localhost:5001/api/clients', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/clients', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -85,7 +85,7 @@ const EditGuestModal = ({ eventId, guest, isOpen, onClose, onSuccess }) => {
         setLoading(true);
 
         try {
-            const response = await fetch(`http://localhost:5001/api/guests/${guest._id}`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/guests/${guest._id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

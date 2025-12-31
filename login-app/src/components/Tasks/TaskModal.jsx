@@ -90,8 +90,8 @@ const TaskModal = ({ isOpen, onClose, task, initialData, events, venueId, teamMe
             };
 
             const url = task
-                ? `http://localhost:5001/api/tasks/${task._id}`
-                : 'http://localhost:5001/api/tasks';
+                ? `https://samaaroh-1.onrender.com/api/tasks/${task._id}`
+                : 'https://samaaroh-1.onrender.com/api/tasks';
 
             const method = task ? 'PUT' : 'POST';
 

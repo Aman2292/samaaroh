@@ -28,7 +28,7 @@ const SuperAdminWidgets = ({ stats, loading }) => {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             console.log('🔍 Fetching system stats for user:', userInfo?.role);
 
-            const response = await fetch('http://localhost:5001/api/admin/stats', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/admin/stats', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
 

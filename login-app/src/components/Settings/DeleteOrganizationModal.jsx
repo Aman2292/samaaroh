@@ -27,7 +27,7 @@ const DeleteOrganizationModal = ({ isOpen, onClose, organization, stats, onSucce
 
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:5001/api/organization', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/organization', {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',

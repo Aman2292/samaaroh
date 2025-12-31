@@ -22,7 +22,7 @@ const NotificationsPanel = ({ isOpen, onClose }) => {
     const fetchNotifications = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:5001/api/notifications', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/notifications', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
 
@@ -40,7 +40,7 @@ const NotificationsPanel = ({ isOpen, onClose }) => {
 
     const handleMarkAsRead = async (notificationId) => {
         try {
-            const response = await fetch(`http://localhost:5001/api/notifications/${notificationId}/read`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/notifications/${notificationId}/read`, {
                 method: 'PUT',
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
@@ -58,7 +58,7 @@ const NotificationsPanel = ({ isOpen, onClose }) => {
 
     const handleMarkAllAsRead = async () => {
         try {
-            const response = await fetch('http://localhost:5001/api/notifications/mark-all-read', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/notifications/mark-all-read', {
                 method: 'PUT',
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });

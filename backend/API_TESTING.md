@@ -10,7 +10,7 @@ node d:\AMAN\Samaaroh\backend\scripts\createSuperAdmin.js
 
 ### Register a PLANNER_OWNER (Business Owner)
 ```bash
-curl -X POST http://localhost:5001/api/auth/register \
+curl -X POST https://samaaroh-1.onrender.com/api/auth/register \
   -H "Content-Type: application/json" \
   -d "{
     \"name\": \"Rajesh Kumar\",
@@ -24,7 +24,7 @@ curl -X POST http://localhost:5001/api/auth/register \
 
 ### Login as PLANNER_OWNER
 ```bash
-curl -X POST http://localhost:5001/api/auth/login \
+curl -X POST https://samaaroh-1.onrender.com/api/auth/login \
   -H "Content-Type: application/json" \
   -d "{
     \"email\": \"rajesh@weddingplanner.com\",
@@ -34,7 +34,7 @@ curl -X POST http://localhost:5001/api/auth/login \
 
 ### Login as SUPER_ADMIN
 ```bash
-curl -X POST http://localhost:5001/api/auth/login \
+curl -X POST https://samaaroh-1.onrender.com/api/auth/login \
   -H "Content-Type: application/json" \
   -d "{
     \"email\": \"admin@samaaroh.com\",
@@ -48,7 +48,7 @@ curl -X POST http://localhost:5001/api/auth/login \
 
 ### Create a Client
 ```bash
-curl -X POST http://localhost:5001/api/clients \
+curl -X POST https://samaaroh-1.onrender.com/api/clients \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN_HERE" \
   -d "{
@@ -63,37 +63,37 @@ curl -X POST http://localhost:5001/api/clients \
 
 ### Get All Clients (with pagination)
 ```bash
-curl -X GET "http://localhost:5001/api/clients?page=1&limit=10" \
+curl -X GET "https://samaaroh-1.onrender.com/api/clients?page=1&limit=10" \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 ### Search Clients by Name
 ```bash
-curl -X GET "http://localhost:5001/api/clients?search=Priya" \
+curl -X GET "https://samaaroh-1.onrender.com/api/clients?search=Priya" \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 ### Search Clients by Phone
 ```bash
-curl -X GET "http://localhost:5001/api/clients?search=9123456789" \
+curl -X GET "https://samaaroh-1.onrender.com/api/clients?search=9123456789" \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 ### Filter Clients by Tags
 ```bash
-curl -X GET "http://localhost:5001/api/clients?tags=VIP,Referral" \
+curl -X GET "https://samaaroh-1.onrender.com/api/clients?tags=VIP,Referral" \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 ### Get Single Client
 ```bash
-curl -X GET http://localhost:5001/api/clients/CLIENT_ID_HERE \
+curl -X GET https://samaaroh-1.onrender.com/api/clients/CLIENT_ID_HERE \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 ### Update Client
 ```bash
-curl -X PUT http://localhost:5001/api/clients/CLIENT_ID_HERE \
+curl -X PUT https://samaaroh-1.onrender.com/api/clients/CLIENT_ID_HERE \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN_HERE" \
   -d "{
@@ -105,7 +105,7 @@ curl -X PUT http://localhost:5001/api/clients/CLIENT_ID_HERE \
 
 ### Delete Client (soft delete)
 ```bash
-curl -X DELETE http://localhost:5001/api/clients/CLIENT_ID_HERE \
+curl -X DELETE https://samaaroh-1.onrender.com/api/clients/CLIENT_ID_HERE \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
@@ -113,7 +113,7 @@ curl -X DELETE http://localhost:5001/api/clients/CLIENT_ID_HERE \
 
 ### Create an Event
 ```bash
-curl -X POST http://localhost:5001/api/events \
+curl -X POST https://samaaroh-1.onrender.com/api/events \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN_HERE" \
   -d "{
@@ -130,49 +130,49 @@ curl -X POST http://localhost:5001/api/events \
 
 ### Get All Events (with filters)
 ```bash
-curl -X GET "http://localhost:5001/api/events?page=1&limit=20" \
+curl -X GET "https://samaaroh-1.onrender.com/api/events?page=1&limit=20" \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 ### Filter Events by Status
 ```bash
-curl -X GET "http://localhost:5001/api/events?status=booked" \
+curl -X GET "https://samaaroh-1.onrender.com/api/events?status=booked" \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 ### Filter Events by Type
 ```bash
-curl -X GET "http://localhost:5001/api/events?eventType=wedding" \
+curl -X GET "https://samaaroh-1.onrender.com/api/events?eventType=wedding" \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 ### Filter Events by Date Range
 ```bash
-curl -X GET "http://localhost:5001/api/events?dateFrom=2025-11-01&dateTo=2025-12-31" \
+curl -X GET "https://samaaroh-1.onrender.com/api/events?dateFrom=2025-11-01&dateTo=2025-12-31" \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 ### Get Upcoming Events (Next 7 days)
 ```bash
-curl -X GET http://localhost:5001/api/events/upcoming \
+curl -X GET https://samaaroh-1.onrender.com/api/events/upcoming \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 ### Get Event Statistics (for Dashboard)
 ```bash
-curl -X GET http://localhost:5001/api/events/stats \
+curl -X GET https://samaaroh-1.onrender.com/api/events/stats \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 ### Get Single Event
 ```bash
-curl -X GET http://localhost:5001/api/events/EVENT_ID_HERE \
+curl -X GET https://samaaroh-1.onrender.com/api/events/EVENT_ID_HERE \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 ### Update Event
 ```bash
-curl -X PUT http://localhost:5001/api/events/EVENT_ID_HERE \
+curl -X PUT https://samaaroh-1.onrender.com/api/events/EVENT_ID_HERE \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN_HERE" \
   -d "{
@@ -185,7 +185,7 @@ curl -X PUT http://localhost:5001/api/events/EVENT_ID_HERE \
 
 ### Delete Event (soft delete)
 ```bash
-curl -X DELETE http://localhost:5001/api/events/EVENT_ID_HERE \
+curl -X DELETE https://samaaroh-1.onrender.com/api/events/EVENT_ID_HERE \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
@@ -198,21 +198,21 @@ node d:\AMAN\Samaaroh\backend\scripts\createSuperAdmin.js
 
 ### Step 2: Register a Business Owner
 ```bash
-curl -X POST http://localhost:5001/api/auth/register \
+curl -X POST https://samaaroh-1.onrender.com/api/auth/register \
   -H "Content-Type: application/json" \
   -d "{\"name\":\"Test Owner\",\"email\":\"owner@test.com\",\"password\":\"test123\",\"phone\":\"9876543210\",\"organizationName\":\"Test Events\",\"city\":\"Mumbai\"}"
 ```
 
 ### Step 3: Login and Get Token
 ```bash
-curl -X POST http://localhost:5001/api/auth/login \
+curl -X POST https://samaaroh-1.onrender.com/api/auth/login \
   -H "Content-Type: application/json" \
   -d "{\"email\":\"owner@test.com\",\"password\":\"test123\"}"
 ```
 
 ### Step 4: Create a Client (use token from Step 3)
 ```bash
-curl -X POST http://localhost:5001/api/clients \
+curl -X POST https://samaaroh-1.onrender.com/api/clients \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -d "{\"name\":\"Test Client\",\"phone\":\"9123456789\",\"email\":\"client@test.com\",\"city\":\"Delhi\"}"
@@ -220,7 +220,7 @@ curl -X POST http://localhost:5001/api/clients \
 
 ### Step 5: Create an Event (use clientId from Step 4 and userId from Step 3)
 ```bash
-curl -X POST http://localhost:5001/api/events \
+curl -X POST https://samaaroh-1.onrender.com/api/events \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -d "{\"clientId\":\"CLIENT_ID\",\"eventName\":\"Test Wedding\",\"eventType\":\"wedding\",\"eventDate\":\"2025-12-25\",\"venue\":\"Test Venue\",\"estimatedBudget\":1000000,\"leadPlannerId\":\"USER_ID\"}"
@@ -230,7 +230,7 @@ curl -X POST http://localhost:5001/api/events \
 
 ### Try to create duplicate client (same phone in organization)
 ```bash
-curl -X POST http://localhost:5001/api/clients \
+curl -X POST https://samaaroh-1.onrender.com/api/clients \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -d "{\"name\":\"Duplicate Client\",\"phone\":\"9123456789\",\"email\":\"duplicate@test.com\"}"
@@ -239,7 +239,7 @@ curl -X POST http://localhost:5001/api/clients \
 
 ### Try to create event with past date
 ```bash
-curl -X POST http://localhost:5001/api/events \
+curl -X POST https://samaaroh-1.onrender.com/api/events \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -d "{\"clientId\":\"CLIENT_ID\",\"eventName\":\"Past Event\",\"eventType\":\"wedding\",\"eventDate\":\"2020-01-01\",\"venue\":\"Test\",\"estimatedBudget\":100000,\"leadPlannerId\":\"USER_ID\"}"
@@ -248,7 +248,7 @@ curl -X POST http://localhost:5001/api/events \
 
 ### Try to delete client with active events
 ```bash
-curl -X DELETE http://localhost:5001/api/clients/CLIENT_ID_WITH_EVENTS \
+curl -X DELETE https://samaaroh-1.onrender.com/api/clients/CLIENT_ID_WITH_EVENTS \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 **Expected:** 400 error - "Cannot delete client with active events"
@@ -258,4 +258,4 @@ curl -X DELETE http://localhost:5001/api/clients/CLIENT_ID_WITH_EVENTS \
 - Replace `CLIENT_ID_HERE`, `EVENT_ID_HERE`, `USER_ID_HERE` with actual IDs
 - All dates should be in ISO format: YYYY-MM-DD
 - Phone numbers must be 10 digits starting with 6-9 (Indian format)
-- The backend runs on http://localhost:5001
+- The backend runs on https://samaaroh-1.onrender.com

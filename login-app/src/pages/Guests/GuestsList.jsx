@@ -55,7 +55,7 @@ const GuestsList = () => {
     const fetchEventDetails = async () => {
         try {
             const response = await fetch(
-                `http://localhost:5001/api/events/${eventId}`,
+                `https://samaaroh-1.onrender.com/api/events/${eventId}`,
                 { headers: { 'Authorization': `Bearer ${userInfo.token}` } }
             );
             const data = await response.json();
@@ -77,7 +77,7 @@ const GuestsList = () => {
             if (filters.guestType) queryParams.append('guestType', filters.guestType);
 
             const response = await fetch(
-                `http://localhost:5001/api/guests/event/${eventId}?${queryParams}`,
+                `https://samaaroh-1.onrender.com/api/guests/event/${eventId}?${queryParams}`,
                 { headers: { 'Authorization': `Bearer ${userInfo.token}` } }
             );
 
@@ -97,7 +97,7 @@ const GuestsList = () => {
     const fetchStats = async () => {
         try {
             const response = await fetch(
-                `http://localhost:5001/api/guests/event/${eventId}/stats`,
+                `https://samaaroh-1.onrender.com/api/guests/event/${eventId}/stats`,
                 { headers: { 'Authorization': `Bearer ${userInfo.token}` } }
             );
 
@@ -113,7 +113,7 @@ const GuestsList = () => {
     const fetchCheckInStats = async () => {
         try {
             const response = await fetch(
-                `http://localhost:5001/api/guests/event/${eventId}/check-in-stats`,
+                `https://samaaroh-1.onrender.com/api/guests/event/${eventId}/check-in-stats`,
                 { headers: { 'Authorization': `Bearer ${userInfo.token}` } }
             );
             const data = await response.json();
@@ -137,7 +137,7 @@ const GuestsList = () => {
         setGeneratingQRs(true);
         try {
             const response = await fetch(
-                `http://localhost:5001/api/guests/event/${eventId}/generate-all-qrs`,
+                `https://samaaroh-1.onrender.com/api/guests/event/${eventId}/generate-all-qrs`,
                 {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${userInfo.token}` }
@@ -173,7 +173,7 @@ const GuestsList = () => {
         if (!window.confirm('Are you sure you want to delete this guest?')) return;
 
         try {
-            const response = await fetch(`http://localhost:5001/api/guests/${guestId}`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/guests/${guestId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
@@ -200,7 +200,7 @@ const GuestsList = () => {
         if (!window.confirm(`Delete ${selectedGuests.length} selected guests?`)) return;
 
         try {
-            const response = await fetch('http://localhost:5001/api/guests/bulk-delete', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/guests/bulk-delete', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -226,7 +226,7 @@ const GuestsList = () => {
     const handleExport = async () => {
         try {
             const response = await fetch(
-                `http://localhost:5001/api/guests/event/${eventId}/export`,
+                `https://samaaroh-1.onrender.com/api/guests/event/${eventId}/export`,
                 { headers: { 'Authorization': `Bearer ${userInfo.token}` } }
             );
 
@@ -395,8 +395,8 @@ const GuestsList = () => {
                         <button
                             onClick={() => navigate(`/events/${eventId}/check-in`)}
                             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-white shadow-sm transition-all ${isEventToday()
-                                    ? 'bg-green-600 hover:bg-green-700 ring-2 ring-green-500 ring-offset-1 animate-pulse'
-                                    : 'bg-gray-700 hover:bg-gray-800'
+                                ? 'bg-green-600 hover:bg-green-700 ring-2 ring-green-500 ring-offset-1 animate-pulse'
+                                : 'bg-gray-700 hover:bg-gray-800'
                                 }`}
                         >
                             <Scan size="20" />

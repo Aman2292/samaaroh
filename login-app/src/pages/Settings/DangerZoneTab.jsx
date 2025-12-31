@@ -18,7 +18,7 @@ const DangerZoneTab = ({ organization }) => {
 
     const fetchTeamMembers = async () => {
         try {
-            const response = await fetch('http://localhost:5001/api/team', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/team', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
             const data = await response.json();
@@ -33,16 +33,16 @@ const DangerZoneTab = ({ organization }) => {
     const fetchStats = async () => {
         try {
             const [clientsRes, eventsRes, paymentsRes, usersRes] = await Promise.all([
-                fetch('http://localhost:5001/api/clients?limit=1', {
+                fetch('https://samaaroh-1.onrender.com/api/clients?limit=1', {
                     headers: { 'Authorization': `Bearer ${userInfo.token}` }
                 }),
-                fetch('http://localhost:5001/api/events?limit=1', {
+                fetch('https://samaaroh-1.onrender.com/api/events?limit=1', {
                     headers: { 'Authorization': `Bearer ${userInfo.token}` }
                 }),
-                fetch('http://localhost:5001/api/payments/outstanding', {
+                fetch('https://samaaroh-1.onrender.com/api/payments/outstanding', {
                     headers: { 'Authorization': `Bearer ${userInfo.token}` }
                 }),
-                fetch('http://localhost:5001/api/team', {
+                fetch('https://samaaroh-1.onrender.com/api/team', {
                     headers: { 'Authorization': `Bearer ${userInfo.token}` }
                 })
             ]);

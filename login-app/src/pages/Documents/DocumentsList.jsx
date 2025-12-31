@@ -33,7 +33,7 @@ const DocumentsList = () => {
                 ...(filters.entityType && { entityType: filters.entityType })
             });
 
-            const response = await fetch(`http://localhost:5001/api/documents?${params}`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/documents?${params}`, {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
 
@@ -54,7 +54,7 @@ const DocumentsList = () => {
         if (!window.confirm('Are you sure you want to delete this document?')) return;
 
         try {
-            const response = await fetch(`http://localhost:5001/api/documents/${id}`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/documents/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
@@ -243,7 +243,7 @@ const DocumentsList = () => {
                                     View
                                 </button>
                                 <a
-                                    href={`http://localhost:5001${doc.fileUrl}`}
+                                    href={`https://samaaroh-1.onrender.com${doc.fileUrl}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="flex items-center justify-center gap-2 px-3 py-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"

@@ -20,7 +20,7 @@ const InvoiceDetailSidebar = ({ invoiceId, isOpen, onClose, onUpdate }) => {
     const fetchInvoiceDetails = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`http://localhost:5001/api/invoices/${invoiceId}`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/invoices/${invoiceId}`, {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
 
@@ -41,14 +41,14 @@ const InvoiceDetailSidebar = ({ invoiceId, isOpen, onClose, onUpdate }) => {
 
     const handleDownloadPDF = async () => {
         try {
-            const response = await fetch(`http://localhost:5001/api/invoices/${invoiceId}/generate-pdf`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/invoices/${invoiceId}/generate-pdf`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
 
             const data = await response.json();
             if (response.ok) {
-                window.open(`http://localhost:5001${data.data.pdfUrl}`, '_blank');
+                window.open(`https://samaaroh-1.onrender.com${data.data.pdfUrl}`, '_blank');
                 toast.success('PDF generated successfully');
             } else {
                 toast.error(data.error || 'Failed to generate PDF');
@@ -67,7 +67,7 @@ const InvoiceDetailSidebar = ({ invoiceId, isOpen, onClose, onUpdate }) => {
 
         setSendingEmail(true);
         try {
-            const response = await fetch(`http://localhost:5001/api/invoices/${invoiceId}/send-email`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/invoices/${invoiceId}/send-email`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -96,7 +96,7 @@ const InvoiceDetailSidebar = ({ invoiceId, isOpen, onClose, onUpdate }) => {
 
     const updateStatus = async (newStatus) => {
         try {
-            const response = await fetch(`http://localhost:5001/api/invoices/${invoiceId}/status`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/invoices/${invoiceId}/status`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

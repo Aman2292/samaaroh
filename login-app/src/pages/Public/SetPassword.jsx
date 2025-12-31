@@ -23,7 +23,7 @@ const SetPassword = () => {
     const verifyToken = async () => {
         try {
             setLoading(true);
-            const response = await fetch(`http://localhost:5001/api/team/verify-invitation/${token}`);
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/team/verify-invitation/${token}`);
             const data = await response.json();
 
             if (response.ok) {
@@ -55,7 +55,7 @@ const SetPassword = () => {
 
         try {
             setSubmitting(true);
-            const response = await fetch('http://localhost:5001/api/team/accept-invitation', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/team/accept-invitation', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ token, password })

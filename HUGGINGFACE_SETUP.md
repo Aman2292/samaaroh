@@ -133,7 +133,7 @@ Returns list of all supported language codes.
 ### 2. Test Translation API (Optional - Postman/curl)
 
 ```bash
-curl -X POST http://localhost:5001/api/translate/text \
+curl -X POST https://samaaroh-1.onrender.com/api/translate/text \
   -H "Content-Type: application/json" \
   -d '{
     "text": "Hello World",

@@ -19,7 +19,7 @@ const VenueTasks = ({ venueData, onUpdate }) => {
 
     const fetchTeamMembers = async () => {
         try {
-            const response = await fetch('http://localhost:5001/api/team', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/team', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
             const data = await response.json();
@@ -33,7 +33,7 @@ const VenueTasks = ({ venueData, onUpdate }) => {
 
     const fetchTasks = async () => {
         try {
-            const response = await fetch(`http://localhost:5001/api/tasks?venueId=${venueData._id}`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/tasks?venueId=${venueData._id}`, {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
             const data = await response.json();
@@ -83,7 +83,7 @@ const VenueTasks = ({ venueData, onUpdate }) => {
 
         // API Call
         try {
-            const response = await fetch(`http://localhost:5001/api/tasks/${draggableId}/status`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/tasks/${draggableId}/status`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',

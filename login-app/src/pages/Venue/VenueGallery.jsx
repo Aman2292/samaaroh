@@ -110,7 +110,7 @@ const VenueGallery = ({ venueData, onUpdate }) => {
     const handleSave = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`http://localhost:5001/api/venue/${venueData._id}`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/venue/${venueData._id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

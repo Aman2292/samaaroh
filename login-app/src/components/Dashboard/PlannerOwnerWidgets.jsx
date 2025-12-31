@@ -13,7 +13,7 @@ const PlannerOwnerWidgets = ({ stats, loading }) => {
     const fetchPaymentStats = async () => {
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-            const response = await fetch('http://localhost:5001/api/payments/stats', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/payments/stats', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
 
@@ -77,18 +77,18 @@ const PlannerOwnerWidgets = ({ stats, loading }) => {
             <div
                 onClick={() => navigate('/payments/outstanding')}
                 className={`p-6 rounded-xl shadow-sm border cursor-pointer hover:shadow-md transition-all ${isHighOutstanding
-                        ? 'bg-red-50 border-red-200'
-                        : isCriticalOutstanding
-                            ? 'bg-orange-50 border-orange-200'
-                            : 'bg-white border-slate-100'
+                    ? 'bg-red-50 border-red-200'
+                    : isCriticalOutstanding
+                        ? 'bg-orange-50 border-orange-200'
+                        : 'bg-white border-slate-100'
                     }`}
             >
                 <div className="flex items-center justify-between mb-2">
                     <h3 className={`font-semibold ${isHighOutstanding
-                            ? 'text-red-700'
-                            : isCriticalOutstanding
-                                ? 'text-orange-700'
-                                : 'text-slate-600'
+                        ? 'text-red-700'
+                        : isCriticalOutstanding
+                            ? 'text-orange-700'
+                            : 'text-slate-600'
                         }`}>Outstanding Payments</h3>
                     <MoneyRecive
                         size="24"
@@ -103,10 +103,10 @@ const PlannerOwnerWidgets = ({ stats, loading }) => {
                     />
                 </div>
                 <div className={`text-3xl font-bold ${isHighOutstanding
-                        ? 'text-red-700'
-                        : isCriticalOutstanding
-                            ? 'text-orange-700'
-                            : 'text-slate-900'
+                    ? 'text-red-700'
+                    : isCriticalOutstanding
+                        ? 'text-orange-700'
+                        : 'text-slate-900'
                     }`}>
                     ₹{outstandingAmount.toLocaleString('en-IN')}
                 </div>

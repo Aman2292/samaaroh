@@ -37,7 +37,7 @@ const TasksPage = () => {
     const fetchTasks = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:5001/api/tasks', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/tasks', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
             const data = await response.json();
@@ -56,9 +56,9 @@ const TasksPage = () => {
     const fetchAuxiliaryData = async () => {
         try {
             const [eventsRes, teamRes, venuesRes] = await Promise.all([
-                fetch('http://localhost:5001/api/events?limit=100', { headers: { 'Authorization': `Bearer ${userInfo.token}` } }),
-                fetch('http://localhost:5001/api/team', { headers: { 'Authorization': `Bearer ${userInfo.token}` } }),
-                fetch('http://localhost:5001/api/venue', { headers: { 'Authorization': `Bearer ${userInfo.token}` } })
+                fetch('https://samaaroh-1.onrender.com/api/events?limit=100', { headers: { 'Authorization': `Bearer ${userInfo.token}` } }),
+                fetch('https://samaaroh-1.onrender.com/api/team', { headers: { 'Authorization': `Bearer ${userInfo.token}` } }),
+                fetch('https://samaaroh-1.onrender.com/api/venue', { headers: { 'Authorization': `Bearer ${userInfo.token}` } })
             ]);
 
             if (eventsRes.ok) {
@@ -86,7 +86,7 @@ const TasksPage = () => {
     const handleDeleteConfirm = async () => {
         if (!taskToDelete) return;
         try {
-            const response = await fetch(`http://localhost:5001/api/tasks/${taskToDelete._id}`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/tasks/${taskToDelete._id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });

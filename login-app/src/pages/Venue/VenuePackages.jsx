@@ -76,8 +76,8 @@ const VenuePackages = ({ venueData, onUpdate }) => {
 
         try {
             const url = editingPackage
-                ? `http://localhost:5001/api/venue/${venueData._id}/packages/${editingPackage._id}`
-                : `http://localhost:5001/api/venue/${venueData._id}/packages`;
+                ? `https://samaaroh-1.onrender.com/api/venue/${venueData._id}/packages/${editingPackage._id}`
+                : `https://samaaroh-1.onrender.com/api/venue/${venueData._id}/packages`;
 
             const method = editingPackage ? 'PUT' : 'POST';
 
@@ -109,7 +109,7 @@ const VenuePackages = ({ venueData, onUpdate }) => {
         if (!window.confirm('Are you sure you want to delete this package?')) return;
 
         try {
-            const response = await fetch(`http://localhost:5001/api/venue/${venueData._id}/packages/${packageId}`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/venue/${venueData._id}/packages/${packageId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${userInfo.token}`

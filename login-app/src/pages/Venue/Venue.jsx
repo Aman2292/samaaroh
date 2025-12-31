@@ -29,7 +29,7 @@ const Venue = () => {
     const fetchVenues = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:5001/api/venue', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/venue', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
             const data = await response.json();

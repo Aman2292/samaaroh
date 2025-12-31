@@ -14,7 +14,7 @@ const FinanceWidgets = ({ stats, loading }) => {
     const fetchPaymentStats = async () => {
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-            const response = await fetch('http://localhost:5001/api/payments/stats', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/payments/stats', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
 

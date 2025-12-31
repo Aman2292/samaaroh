@@ -45,13 +45,13 @@ const GlobalSearch = () => {
 
             // Search events, clients, and invoices in parallel
             const [eventsRes, clientsRes, invoicesRes] = await Promise.all([
-                fetch(`http://localhost:5001/api/events?search=${encodeURIComponent(query)}`, {
+                fetch(`https://samaaroh-1.onrender.com/api/events?search=${encodeURIComponent(query)}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 }),
-                fetch(`http://localhost:5001/api/clients?search=${encodeURIComponent(query)}`, {
+                fetch(`https://samaaroh-1.onrender.com/api/clients?search=${encodeURIComponent(query)}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 }),
-                fetch(`http://localhost:5001/api/invoices?search=${encodeURIComponent(query)}`, {
+                fetch(`https://samaaroh-1.onrender.com/api/invoices?search=${encodeURIComponent(query)}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 })
             ]);

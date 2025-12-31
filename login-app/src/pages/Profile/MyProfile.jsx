@@ -28,7 +28,7 @@ const MyProfile = () => {
     const fetchProfile = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:5001/api/users/profile', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/users/profile', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
 
@@ -52,7 +52,7 @@ const MyProfile = () => {
     const handleSave = async () => {
         try {
             setSaveLoading(true);
-            const response = await fetch('http://localhost:5001/api/users/profile', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/users/profile', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

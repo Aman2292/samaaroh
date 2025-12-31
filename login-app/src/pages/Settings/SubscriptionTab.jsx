@@ -104,7 +104,7 @@ const SubscriptionTab = ({ organization }) => {
     const handleRequestAccess = async (featureName) => {
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-            const response = await fetch('http://localhost:5001/api/notifications/request-access', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/notifications/request-access', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

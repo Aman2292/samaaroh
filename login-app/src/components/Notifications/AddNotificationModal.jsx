@@ -23,7 +23,7 @@ const AddNotificationModal = ({ isOpen, onClose, onNotificationAdded }) => {
 
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:5001/api/notifications', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/notifications', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

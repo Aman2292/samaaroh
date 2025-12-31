@@ -46,7 +46,7 @@ const CreateInvoice = ({ mode = 'create' }) => {
 
     const fetchClients = async () => {
         try {
-            const response = await fetch('http://localhost:5001/api/clients', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/clients', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
             const data = await response.json();
@@ -60,7 +60,7 @@ const CreateInvoice = ({ mode = 'create' }) => {
 
     const fetchEvents = async () => {
         try {
-            const response = await fetch('http://localhost:5001/api/events', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/events', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
             const data = await response.json();
@@ -75,7 +75,7 @@ const CreateInvoice = ({ mode = 'create' }) => {
     const fetchInvoiceData = async () => {
         try {
             setLoading(true);
-            const response = await fetch(`http://localhost:5001/api/invoices/${invoiceId}`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/invoices/${invoiceId}`, {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
             const data = await response.json();
@@ -203,8 +203,8 @@ const CreateInvoice = ({ mode = 'create' }) => {
             };
 
             const url = isEditMode
-                ? `http://localhost:5001/api/invoices/${invoiceId}`
-                : 'http://localhost:5001/api/invoices';
+                ? `https://samaaroh-1.onrender.com/api/invoices/${invoiceId}`
+                : 'https://samaaroh-1.onrender.com/api/invoices';
 
             const method = isEditMode ? 'PUT' : 'POST';
 

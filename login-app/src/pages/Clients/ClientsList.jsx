@@ -35,7 +35,7 @@ const ClientsList = () => {
                 ...(debouncedSearch && { search: debouncedSearch })
             });
 
-            const response = await fetch(`http://localhost:5001/api/clients?${queryParams}`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/clients?${queryParams}`, {
                 headers: {
                     'Authorization': `Bearer ${userInfo.token}`
                 }
@@ -65,7 +65,7 @@ const ClientsList = () => {
 
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-            const response = await fetch(`http://localhost:5001/api/clients/${clientId}`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/clients/${clientId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${userInfo.token}`

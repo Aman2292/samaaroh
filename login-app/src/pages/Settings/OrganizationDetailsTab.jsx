@@ -32,7 +32,7 @@ const OrganizationDetailsTab = ({ organization, onUpdate }) => {
     const handleSave = async () => {
         try {
             setSaveLoading(true);
-            const response = await fetch('http://localhost:5001/api/organization/settings', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/organization/settings', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

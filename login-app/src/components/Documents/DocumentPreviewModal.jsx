@@ -15,7 +15,7 @@ const DocumentPreviewModal = ({ document, onClose }) => {
                     </div>
                     <div className="flex items-center gap-3">
                         <a
-                            href={`http://localhost:5001${document.fileUrl}`}
+                            href={`https://samaaroh-1.onrender.com${document.fileUrl}`}
                             download
                             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                         >
@@ -36,14 +36,14 @@ const DocumentPreviewModal = ({ document, onClose }) => {
                     <div className="flex-1 bg-gray-100 p-4 overflow-auto">
                         {isPDF ? (
                             <iframe
-                                src={`http://localhost:5001${document.fileUrl}`}
+                                src={`https://samaaroh-1.onrender.com${document.fileUrl}`}
                                 className="w-full h-full border-0 rounded-lg bg-white"
                                 title={document.name}
                             />
                         ) : isImage ? (
                             <div className="flex items-center justify-center h-full">
                                 <img
-                                    src={`http://localhost:5001${document.fileUrl}`}
+                                    src={`https://samaaroh-1.onrender.com${document.fileUrl}`}
                                     alt={document.name}
                                     className="max-w-full max-h-full object-contain rounded-lg"
                                 />
@@ -53,7 +53,7 @@ const DocumentPreviewModal = ({ document, onClose }) => {
                                 <div className="text-center">
                                     <p className="text-gray-600 mb-4">Preview not available for this file type</p>
                                     <a
-                                        href={`http://localhost:5001${document.fileUrl}`}
+                                        href={`https://samaaroh-1.onrender.com${document.fileUrl}`}
                                         download
                                         className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                                     >
@@ -136,8 +136,8 @@ const DocumentPreviewModal = ({ document, onClose }) => {
                                         <div className="flex justify-between text-sm">
                                             <span className="text-gray-600">Status</span>
                                             <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${document.invoiceMetadata.status === 'paid'
-                                                    ? 'bg-green-100 text-green-700'
-                                                    : 'bg-yellow-100 text-yellow-700'
+                                                ? 'bg-green-100 text-green-700'
+                                                : 'bg-yellow-100 text-yellow-700'
                                                 }`}>
                                                 {document.invoiceMetadata.status}
                                             </span>

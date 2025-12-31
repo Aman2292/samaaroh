@@ -80,7 +80,7 @@ const ImportGuestsModal = ({ eventId, isOpen, onClose, onSuccess }) => {
 
         setLoading(true);
         try {
-            const response = await fetch(`http://localhost:5001/api/events/${eventId}/guests/import`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/events/${eventId}/guests/import`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

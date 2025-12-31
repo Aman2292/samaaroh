@@ -22,7 +22,7 @@ const EventTasksTab = ({ eventId, event }) => {
 
     const fetchTasks = async () => {
         try {
-            const response = await fetch(`http://localhost:5001/api/tasks?eventId=${eventId}`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/tasks?eventId=${eventId}`, {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
             const data = await response.json();
@@ -72,7 +72,7 @@ const EventTasksTab = ({ eventId, event }) => {
 
         // API Call
         try {
-            const response = await fetch(`http://localhost:5001/api/tasks/${draggableId}/status`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/tasks/${draggableId}/status`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -133,7 +133,7 @@ const EventTasksTab = ({ eventId, event }) => {
         try {
             setLoading(true);
             const promises = defaultTasks.map(task =>
-                fetch('http://localhost:5001/api/tasks', {
+                fetch('https://samaaroh-1.onrender.com/api/tasks', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

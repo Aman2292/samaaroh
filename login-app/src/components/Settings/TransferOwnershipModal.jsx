@@ -28,7 +28,7 @@ const TransferOwnershipModal = ({ isOpen, onClose, teamMembers, onSuccess }) => 
 
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:5001/api/organization/transfer-ownership', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/organization/transfer-ownership', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -40,7 +40,7 @@ const OrganizationsList = () => {
                 params.append('search', debouncedSearch);
             }
 
-            const response = await fetch(`http://localhost:5001/api/admin/organizations?${params}`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/admin/organizations?${params}`, {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
 
@@ -67,7 +67,7 @@ const OrganizationsList = () => {
         try {
             setActionLoading(true);
             const response = await fetch(
-                `http://localhost:5001/api/admin/organizations/${selectedOrg._id}/suspend`,
+                `https://samaaroh-1.onrender.com/api/admin/organizations/${selectedOrg._id}/suspend`,
                 {
                     method: 'PUT',
                     headers: {
@@ -97,7 +97,7 @@ const OrganizationsList = () => {
     const handleUnsuspend = async (org) => {
         try {
             const response = await fetch(
-                `http://localhost:5001/api/admin/organizations/${org._id}/unsuspend`,
+                `https://samaaroh-1.onrender.com/api/admin/organizations/${org._id}/unsuspend`,
                 {
                     method: 'PUT',
                     headers: { 'Authorization': `Bearer ${userInfo.token}` }
@@ -120,7 +120,7 @@ const OrganizationsList = () => {
         try {
             setActionLoading(true);
             const response = await fetch(
-                `http://localhost:5001/api/admin/organizations/${selectedOrg._id}`,
+                `https://samaaroh-1.onrender.com/api/admin/organizations/${selectedOrg._id}`,
                 {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${userInfo.token}` }
@@ -179,7 +179,7 @@ const OrganizationsList = () => {
         try {
             setActionLoading(true);
             const response = await fetch(
-                `http://localhost:5001/api/admin/organizations/${selectedOrg._id}/features`,
+                `https://samaaroh-1.onrender.com/api/admin/organizations/${selectedOrg._id}/features`,
                 {
                     method: 'PUT',
                     headers: {

@@ -48,7 +48,7 @@ const OutstandingPayments = () => {
         try {
             setLoading(true);
             const typeParam = activeTab === 'all' ? '' : `?type=${activeTab}`;
-            const response = await fetch(`http://localhost:5001/api/payments/outstanding${typeParam}`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/payments/outstanding${typeParam}`, {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
 
@@ -73,7 +73,7 @@ const OutstandingPayments = () => {
         try {
             setLoading(true);
             // Fetch ALL invoices, not just unpaid - users want to see complete invoice list
-            const response = await fetch('http://localhost:5001/api/invoices', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/invoices', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
             const data = await response.json();

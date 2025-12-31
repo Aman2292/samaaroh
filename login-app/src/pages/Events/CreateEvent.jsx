@@ -43,7 +43,7 @@ const CreateEvent = () => {
 
     const fetchClients = async () => {
         try {
-            const response = await fetch('http://localhost:5001/api/clients?limit=100', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/clients?limit=100', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
             const data = await response.json();
@@ -55,7 +55,7 @@ const CreateEvent = () => {
 
     const fetchPlanners = async () => {
         try {
-            const response = await fetch('http://localhost:5001/api/team', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/team', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
             const data = await response.json();
@@ -70,7 +70,7 @@ const CreateEvent = () => {
 
     const fetchVenues = async () => {
         try {
-            const response = await fetch('http://localhost:5001/api/venue', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/venue', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
             const data = await response.json();
@@ -83,7 +83,7 @@ const CreateEvent = () => {
     const onSubmit = async (data) => {
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:5001/api/events', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/events', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

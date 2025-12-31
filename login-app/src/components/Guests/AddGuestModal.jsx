@@ -39,8 +39,8 @@ const AddGuestModal = ({ eventId, guest, onClose, onSuccess }) => {
 
         try {
             const url = guest
-                ? `http://localhost:5001/api/guests/${guest._id}`
-                : 'http://localhost:5001/api/guests';
+                ? `https://samaaroh-1.onrender.com/api/guests/${guest._id}`
+                : 'https://samaaroh-1.onrender.com/api/guests';
 
             const method = guest ? 'PUT' : 'POST';
 

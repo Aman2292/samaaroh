@@ -29,7 +29,7 @@ const AddTeamMemberModal = ({ onClose, onSuccess }) => {
             setLoading(true);
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
 
-            const response = await fetch('http://localhost:5001/api/team', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/team', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

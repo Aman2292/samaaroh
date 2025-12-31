@@ -30,13 +30,13 @@ const UploadDocumentModal = ({ onClose, onSuccess }) => {
 
             switch (formData.entityType) {
                 case 'event':
-                    endpoint = 'http://localhost:5001/api/events';
+                    endpoint = 'https://samaaroh-1.onrender.com/api/events';
                     break;
                 case 'client':
-                    endpoint = 'http://localhost:5001/api/clients';
+                    endpoint = 'https://samaaroh-1.onrender.com/api/clients';
                     break;
                 case 'venue':
-                    endpoint = 'http://localhost:5001/api/venue';
+                    endpoint = 'https://samaaroh-1.onrender.com/api/venue';
                     break;
                 default:
                     setEntities([]);
@@ -152,7 +152,7 @@ const UploadDocumentModal = ({ onClose, onSuccess }) => {
             uploadFormData.append('entityId', formData.entityId);
             if (formData.description) uploadFormData.append('description', formData.description);
 
-            const response = await fetch('http://localhost:5001/api/documents', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/documents', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${userInfo.token}`

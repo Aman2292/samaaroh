@@ -92,7 +92,7 @@ const ActivityLogs = () => {
 
     const fetchTeamMembers = async () => {
         try {
-            const response = await fetch('http://localhost:5001/api/team', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/team', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
             const data = await response.json();
@@ -106,7 +106,7 @@ const ActivityLogs = () => {
 
     const fetchOrganizations = async () => {
         try {
-            const response = await fetch('http://localhost:5001/api/admin/organizations', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/admin/organizations', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
             const data = await response.json();
@@ -127,7 +127,7 @@ const ActivityLogs = () => {
                 ...filters
             });
 
-            const response = await fetch(`http://localhost:5001/api/activity-logs?${queryParams}`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/activity-logs?${queryParams}`, {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
             const data = await response.json();
@@ -159,7 +159,7 @@ const ActivityLogs = () => {
                 endDate: filters.endDate
             });
 
-            const response = await fetch(`http://localhost:5001/api/activity-logs?${queryParams}`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/activity-logs?${queryParams}`, {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
 

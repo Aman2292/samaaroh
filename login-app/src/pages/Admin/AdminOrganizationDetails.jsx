@@ -29,7 +29,7 @@ const AdminOrganizationDetails = () => {
     const fetchOrgDetails = async () => {
         try {
             setLoading(true);
-            const response = await fetch(`http://localhost:5001/api/admin/organizations/${id}`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/admin/organizations/${id}`, {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
             const data = await response.json();
@@ -50,7 +50,7 @@ const AdminOrganizationDetails = () => {
 
     const fetchLogs = async () => {
         try {
-            const response = await fetch(`http://localhost:5001/api/admin/organizations/${id}/activity`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/admin/organizations/${id}/activity`, {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
             const data = await response.json();
@@ -112,7 +112,7 @@ const AdminOrganizationDetails = () => {
     const handleUpdateFeatures = async () => {
         try {
             setActionLoading(true);
-            const response = await fetch(`http://localhost:5001/api/admin/organizations/${id}/features`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/admin/organizations/${id}/features`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

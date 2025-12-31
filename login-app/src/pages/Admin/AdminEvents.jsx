@@ -44,7 +44,7 @@ const AdminEvents = () => {
 
     const fetchOrganizations = async () => {
         try {
-            const response = await fetch('http://localhost:5001/api/admin/organizations?limit=100', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/admin/organizations?limit=100', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
             const data = await response.json();
@@ -71,7 +71,7 @@ const AdminEvents = () => {
                 ...(filters.dateTo && { dateTo: filters.dateTo })
             });
 
-            const response = await fetch(`http://localhost:5001/api/events?${params}`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/events?${params}`, {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
 

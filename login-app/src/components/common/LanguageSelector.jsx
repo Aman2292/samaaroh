@@ -15,7 +15,7 @@ const LanguageSelector = ({ currentLanguage = 'en', onLanguageChange }) => {
         setLoading(true);
         try {
             // Update language preference in backend
-            const response = await fetch('http://localhost:5001/api/users/language', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/users/language', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

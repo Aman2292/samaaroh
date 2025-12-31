@@ -23,7 +23,7 @@ const MemberProfileModal = ({ isOpen, onClose, member, onUpdate }) => {
     const fetchMemberTasks = async () => {
         try {
             setLoadingTasks(true);
-            const response = await fetch(`http://localhost:5001/api/tasks?assignedTo=${member._id}`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/tasks?assignedTo=${member._id}`, {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
             const data = await response.json();
@@ -39,7 +39,7 @@ const MemberProfileModal = ({ isOpen, onClose, member, onUpdate }) => {
 
     const fetchEvents = async () => {
         try {
-            const response = await fetch('http://localhost:5001/api/events?limit=100', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/events?limit=100', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
             const data = await response.json();
@@ -51,7 +51,7 @@ const MemberProfileModal = ({ isOpen, onClose, member, onUpdate }) => {
 
     const fetchTeamMembers = async () => {
         try {
-            const response = await fetch('http://localhost:5001/api/team', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/team', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
             const data = await response.json();

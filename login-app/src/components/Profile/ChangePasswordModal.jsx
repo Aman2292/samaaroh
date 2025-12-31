@@ -51,7 +51,7 @@ const ChangePasswordModal = ({ isOpen, onClose, onSuccess }) => {
 
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:5001/api/users/change-password', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/users/change-password', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

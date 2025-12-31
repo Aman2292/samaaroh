@@ -63,7 +63,7 @@ const GuestListTab = ({ eventId, event }) => {
                 ...(filters.search && { search: filters.search })
             });
 
-            const response = await fetch(`http://localhost:5001/api/guests/event/${eventId}?${params}`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/guests/event/${eventId}?${params}`, {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
 
@@ -80,7 +80,7 @@ const GuestListTab = ({ eventId, event }) => {
 
     const fetchStats = async () => {
         try {
-            const response = await fetch(`http://localhost:5001/api/guests/event/${eventId}/stats`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/guests/event/${eventId}/stats`, {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
 
@@ -144,7 +144,7 @@ const GuestListTab = ({ eventId, event }) => {
                 ...(filters.rsvpStatus && { rsvpStatus: filters.rsvpStatus })
             });
 
-            const response = await fetch(`http://localhost:5001/api/guests/event/${eventId}/export?${params}`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/guests/event/${eventId}/export?${params}`, {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
 
@@ -177,7 +177,7 @@ const GuestListTab = ({ eventId, event }) => {
 
         try {
             setDeleteLoading(true);
-            const response = await fetch(`http://localhost:5001/api/guests/${guestToDelete._id}`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/guests/${guestToDelete._id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${userInfo.token}`
@@ -232,7 +232,7 @@ const GuestListTab = ({ eventId, event }) => {
         }
 
         try {
-            const response = await fetch(`http://localhost:5001/api/events/${eventId}/guests/${guestId}/check-in`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/events/${eventId}/guests/${guestId}/check-in`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${userInfo.token}`,
@@ -259,7 +259,7 @@ const GuestListTab = ({ eventId, event }) => {
         setGeneratingQRs(true);
         try {
             const response = await fetch(
-                `http://localhost:5001/api/guests/event/${eventId}/generate-all-qrs`,
+                `https://samaaroh-1.onrender.com/api/guests/event/${eventId}/generate-all-qrs`,
                 {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${userInfo.token}` }

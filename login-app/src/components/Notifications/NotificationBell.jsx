@@ -17,7 +17,7 @@ const NotificationBell = ({ onClick }) => {
 
     const fetchUnreadCount = async () => {
         try {
-            const response = await fetch('http://localhost:5001/api/notifications?limit=1', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/notifications?limit=1', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
 

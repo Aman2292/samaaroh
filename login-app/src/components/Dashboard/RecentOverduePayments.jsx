@@ -14,7 +14,7 @@ const RecentOverduePayments = () => {
 
     const fetchOverduePayments = async () => {
         try {
-            const response = await fetch('http://localhost:5001/api/payments/outstanding?status=overdue&limit=5', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/payments/outstanding?status=overdue&limit=5', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
             const data = await response.json();
@@ -108,8 +108,8 @@ const RecentOverduePayments = () => {
                                 </td>
                                 <td className="px-6 py-4">
                                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${payment.paymentType === 'client_payment'
-                                            ? 'bg-green-100 text-green-700'
-                                            : 'bg-orange-100 text-orange-700'
+                                        ? 'bg-green-100 text-green-700'
+                                        : 'bg-orange-100 text-orange-700'
                                         }`}>
                                         {payment.paymentType === 'client_payment' ? 'Client' : 'Vendor'}
                                     </span>

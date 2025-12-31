@@ -22,7 +22,7 @@ const PaymentsTab = ({ eventId, clientId, eventName, clientName }) => {
     const fetchPayments = async () => {
         try {
             setLoading(true);
-            const response = await fetch(`http://localhost:5001/api/payments/event/${eventId}`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/payments/event/${eventId}`, {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
 
@@ -48,7 +48,7 @@ const PaymentsTab = ({ eventId, clientId, eventName, clientName }) => {
         if (!window.confirm('Are you sure you want to delete this payment?')) return;
 
         try {
-            const response = await fetch(`http://localhost:5001/api/payments/${paymentId}`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/payments/${paymentId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });

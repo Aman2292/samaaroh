@@ -29,7 +29,7 @@ const EventDetail = () => {
     const fetchEventDetails = async () => {
         try {
             setLoading(true);
-            const response = await fetch(`http://localhost:5001/api/events/${id}`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/events/${id}`, {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
 

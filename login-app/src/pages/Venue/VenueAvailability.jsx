@@ -129,7 +129,7 @@ const VenueAvailability = ({ venueData, onUpdate }) => {
                 notes: item.notes
             }));
 
-            const response = await fetch(`http://localhost:5001/api/venue/${venueData._id}/availability`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/venue/${venueData._id}/availability`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

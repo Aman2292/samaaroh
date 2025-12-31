@@ -121,7 +121,7 @@ const CreateVenueModal = ({ isOpen, onClose, onSuccess }) => {
     const handleSubmit = async () => {
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:5001/api/venue', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/venue', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -4,7 +4,7 @@
 const getBaseUrl = () => {
     // If running on localhost (dev machine), use local backend port
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        return 'http://localhost:5001';
+        return 'https://samaaroh-1.onrender.com';
     }
     // For Production (Netlify, Mobile, etc.), use the live Render Backend
     return 'https://samaaroh-1.onrender.com';

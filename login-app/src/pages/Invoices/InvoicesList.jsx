@@ -30,7 +30,7 @@ const InvoicesList = () => {
 
     const fetchInvoices = async () => {
         try {
-            const response = await fetch('http://localhost:5001/api/invoices', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/invoices', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
 
@@ -51,7 +51,7 @@ const InvoicesList = () => {
 
     const fetchStats = async () => {
         try {
-            const response = await fetch('http://localhost:5001/api/invoices/stats', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/invoices/stats', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
 
@@ -108,7 +108,7 @@ const InvoicesList = () => {
 
     const handleDownloadPDF = async (invoiceId) => {
         try {
-            const response = await fetch(`http://localhost:5001/api/invoices/${invoiceId}/generate-pdf`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/invoices/${invoiceId}/generate-pdf`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
@@ -116,7 +116,7 @@ const InvoicesList = () => {
             const data = await response.json();
             if (response.ok) {
                 // Open PDF in new tab
-                window.open(`http://localhost:5001${data.data.pdfUrl}`, '_blank');
+                window.open(`https://samaaroh-1.onrender.com${data.data.pdfUrl}`, '_blank');
                 toast.success('PDF generated successfully');
             } else {
                 toast.error(data.error || 'Failed to generate PDF');

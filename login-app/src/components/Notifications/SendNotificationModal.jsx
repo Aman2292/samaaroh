@@ -22,7 +22,7 @@ const SendNotificationModal = ({ isOpen, onClose }) => {
     const fetchUsers = async () => {
         try {
             setFetchingUsers(true);
-            const response = await fetch('http://localhost:5001/api/team', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/team', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
             const data = await response.json();
@@ -65,7 +65,7 @@ const SendNotificationModal = ({ isOpen, onClose }) => {
 
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:5001/api/notifications/send', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/notifications/send', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

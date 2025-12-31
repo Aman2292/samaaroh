@@ -56,7 +56,7 @@ const EventsList = () => {
                 ...(filters.plannerId && { plannerId: filters.plannerId })
             });
 
-            const response = await fetch(`http://localhost:5001/api/events?${params}`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/events?${params}`, {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
 
@@ -77,7 +77,7 @@ const EventsList = () => {
 
     const fetchTeamMembers = async () => {
         try {
-            const response = await fetch('http://localhost:5001/api/team', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/team', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
             const data = await response.json();
@@ -101,7 +101,7 @@ const EventsList = () => {
 
     const handleStatusChange = async (eventId, newStatus) => {
         try {
-            const response = await fetch(`http://localhost:5001/api/events/${eventId}`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/events/${eventId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

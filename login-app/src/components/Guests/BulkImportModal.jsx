@@ -52,7 +52,7 @@ const BulkImportModal = ({ eventId, onClose, onSuccess }) => {
             formData.append('file', file);
             formData.append('eventId', eventId);
 
-            const response = await fetch('http://localhost:5001/api/guests/import-excel', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/guests/import-excel', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${userInfo.token}`

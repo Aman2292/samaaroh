@@ -34,7 +34,7 @@ const UsersList = () => {
 
     const fetchOrganizations = async () => {
         try {
-            const response = await fetch('http://localhost:5001/api/admin/organizations?limit=100', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/admin/organizations?limit=100', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
             const data = await response.json();
@@ -59,7 +59,7 @@ const UsersList = () => {
             if (filters.role) params.append('role', filters.role);
             if (filters.status) params.append('status', filters.status);
 
-            const response = await fetch(`http://localhost:5001/api/admin/users?${params}`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/admin/users?${params}`, {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
 
@@ -81,7 +81,7 @@ const UsersList = () => {
         try {
             setActionLoading(true);
             const response = await fetch(
-                `http://localhost:5001/api/admin/users/${selectedUser._id}/deactivate`,
+                `https://samaaroh-1.onrender.com/api/admin/users/${selectedUser._id}/deactivate`,
                 {
                     method: 'PUT',
                     headers: { 'Authorization': `Bearer ${userInfo.token}` }
@@ -107,7 +107,7 @@ const UsersList = () => {
         try {
             setActionLoading(true);
             const response = await fetch(
-                `http://localhost:5001/api/admin/users/${selectedUser._id}/activate`,
+                `https://samaaroh-1.onrender.com/api/admin/users/${selectedUser._id}/activate`,
                 {
                     method: 'PUT',
                     headers: { 'Authorization': `Bearer ${userInfo.token}` }
@@ -132,7 +132,7 @@ const UsersList = () => {
     const handleResetPassword = async (user) => {
         try {
             const response = await fetch(
-                `http://localhost:5001/api/admin/users/${user._id}/reset-password`,
+                `https://samaaroh-1.onrender.com/api/admin/users/${user._id}/reset-password`,
                 {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${userInfo.token}` }

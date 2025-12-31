@@ -14,7 +14,7 @@ const RecentEventsTable = () => {
 
     const fetchRecentEvents = async () => {
         try {
-            const response = await fetch('http://localhost:5001/api/events?page=1&limit=5', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/events?page=1&limit=5', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
             const data = await response.json();

@@ -39,7 +39,7 @@ const MarkPaidModal = ({ onClose, onSuccess, payment }) => {
         try {
             setLoading(true);
 
-            const response = await fetch(`http://localhost:5001/api/payments/${payment._id}/mark-paid`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/payments/${payment._id}/mark-paid`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

@@ -43,7 +43,7 @@ const TeamList = () => {
             setLoading(true);
             setError(null);
 
-            const response = await fetch('http://localhost:5001/api/team', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/team', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
 
@@ -63,7 +63,7 @@ const TeamList = () => {
 
     const handleExportCSV = async () => {
         try {
-            const response = await fetch('http://localhost:5001/api/team/export-csv', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/team/export-csv', {
                 headers: {
                     'Authorization': `Bearer ${userInfo.token}`
                 }
@@ -98,7 +98,7 @@ const TeamList = () => {
         if (!memberToDelete) return;
 
         try {
-            const response = await fetch(`http://localhost:5001/api/team/${memberToDelete._id}/hard`, {
+            const response = await fetch(`https://samaaroh-1.onrender.com/api/team/${memberToDelete._id}/hard`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${userInfo.token}`

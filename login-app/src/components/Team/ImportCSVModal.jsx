@@ -24,7 +24,7 @@ const ImportCSVModal = ({ isOpen, onClose, onSuccess }) => {
 
     const handleDownloadTemplate = async () => {
         try {
-            const response = await fetch('http://localhost:5001/api/team/csv-template', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/team/csv-template', {
                 headers: {
                     'Authorization': `Bearer ${userInfo.token}`
                 }
@@ -62,7 +62,7 @@ const ImportCSVModal = ({ isOpen, onClose, onSuccess }) => {
             const formData = new FormData();
             formData.append('file', file);
 
-            const response = await fetch('http://localhost:5001/api/team/import-csv', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/team/import-csv', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${userInfo.token}`

@@ -34,7 +34,7 @@ const Dashboard = () => {
 
             // Fetch clients count (not for COORDINATOR)
             if (userInfo.role !== 'COORDINATOR') {
-                const clientsRes = await fetch('http://localhost:5001/api/clients?page=1&limit=1', {
+                const clientsRes = await fetch('https://samaaroh-1.onrender.com/api/clients?page=1&limit=1', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const clientsData = await clientsRes.json();
@@ -44,7 +44,7 @@ const Dashboard = () => {
             }
 
             // Fetch event stats
-            const statsRes = await fetch('http://localhost:5001/api/events/stats', {
+            const statsRes = await fetch('https://samaaroh-1.onrender.com/api/events/stats', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const statsData = await statsRes.json();
@@ -58,7 +58,7 @@ const Dashboard = () => {
 
             // Fetch team members count (PLANNER_OWNER only)
             if (userInfo.role === 'PLANNER_OWNER') {
-                const teamRes = await fetch('http://localhost:5001/api/team', {
+                const teamRes = await fetch('https://samaaroh-1.onrender.com/api/team', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const teamData = await teamRes.json();

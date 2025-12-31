@@ -31,10 +31,10 @@ const PlannerDashboard = () => {
 
             // Fetch stats and recent events in parallel
             const [statsRes, eventsRes] = await Promise.all([
-                fetch('http://localhost:5001/api/events/stats', {
+                fetch('https://samaaroh-1.onrender.com/api/events/stats', {
                     headers: { 'Authorization': `Bearer ${userInfo.token}` }
                 }),
-                fetch('http://localhost:5001/api/events?page=1&limit=5', {
+                fetch('https://samaaroh-1.onrender.com/api/events?page=1&limit=5', {
                     headers: { 'Authorization': `Bearer ${userInfo.token}` }
                 })
             ]);

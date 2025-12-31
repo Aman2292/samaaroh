@@ -25,7 +25,7 @@ const EnhancedDashboard = () => {
     const fetchDashboardData = async () => {
         try {
             console.log('Fetching dashboard data...', userInfo.token);
-            const response = await fetch('http://localhost:5001/api/dashboard/stats', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/dashboard/stats', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
 

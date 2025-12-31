@@ -21,7 +21,7 @@ const OrganizationSettings = () => {
         try {
             setLoading(true);
             // Fetch organization details from user profile
-            const response = await fetch('http://localhost:5001/api/users/profile', {
+            const response = await fetch('https://samaaroh-1.onrender.com/api/users/profile', {
                 headers: { 'Authorization': `Bearer ${userInfo.token}` }
             });
 
