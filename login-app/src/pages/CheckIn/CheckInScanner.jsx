@@ -380,3 +380,5 @@ const CheckInScanner = () => {
         </div>
     );
 };
+
+export default CheckInScanner;
