@@ -83,20 +83,9 @@ const Dashboard = () => {
 
     return (
         <div className="p-8">
-            <header className="flex justify-between items-center mb-8">
-                <div>
-                    <h2 className="text-2xl font-bold text-slate-800">Dashboard</h2>
-                    <p className="text-slate-500">Welcome back, {userInfo.name || 'User'}</p>
-                </div>
-                <div className="flex items-center space-x-4">
-                    <div className="text-right hidden md:block">
-                        <div className="text-sm font-bold text-slate-700">{userInfo.name || 'User'}</div>
-                        <div className="text-xs text-slate-500">{userInfo.role?.replace('_', ' ') || 'User'}</div>
-                    </div>
-                    <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold">
-                        {userInfo.name?.charAt(0).toUpperCase() || 'U'}
-                    </div>
-                </div>
+            <header className="mb-8">
+                <h2 className="text-2xl font-bold text-slate-800">Dashboard</h2>
+                <p className="text-slate-500">Welcome back, {userInfo.name || 'User'}</p>
             </header>
 
             {/* Role-Based Widgets */}

@@ -150,8 +150,48 @@ const changePassword = async (req, res, next) => {
   }
 };
 
+/**
+ * @route   PUT /api/users/language
+ * @desc    Update user language preference
+ * @access  Private
+ */
+const updateLanguagePreference = async (req, res, next) => {
+  try {
+    const { preferredLanguage } = req.body;
+
+    const supportedLanguages = ['en', 'hi', 'mr', 'gu', 'bn', 'ta', 'te', 'kn', 'ml'];
+    if (!preferredLanguage || !supportedLanguages.includes(preferredLanguage)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid language. Supported languages: en, hi, mr, gu, bn, ta, te, kn, ml'
+      });
+    }
+
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    user.preferredLanguage = preferredLanguage;
+    await user.save();
+
+    res.json({
+      success: true,
+      data: { preferredLanguage: user.preferredLanguage },
+      message: 'Language preference updated successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getProfile,
   updateProfile,
-  changePassword
+  changePassword,
+  updateLanguagePreference
 };

@@ -61,6 +61,12 @@ const userSchema = mongoose.Schema({
   invitationToken: String,
   invitationSentAt: Date,
   invitationExpiresAt: Date,
+  // Language preference
+  preferredLanguage: {
+    type: String,
+    enum: ['en', 'hi', 'mr', 'gu', 'bn', 'ta', 'te', 'kn', 'ml'],
+    default: 'en'
+  },
   // Legacy fields (optional, kept if needed for migration or specific logic)
   businessName: String,
   serviceType: String,

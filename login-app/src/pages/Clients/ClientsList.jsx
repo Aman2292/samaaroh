@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Add, SearchNormal1, User, Call } from 'iconsax-react';
 import LoadingSkeleton from '../../components/common/LoadingSkeleton';
 import EmptyState from '../../components/common/EmptyState';
@@ -9,6 +10,7 @@ import useDebounce from '../../hooks/useDebounce';
 import { toast } from 'react-toastify';
 
 const ClientsList = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [clients, setClients] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -45,10 +47,10 @@ const ClientsList = () => {
                 setClients(data.data);
                 setPagination(data.pagination);
             } else {
-                setError(data.error || 'Failed to fetch clients');
+                setError(data.error || t('clients.fetchError') || 'Failed to fetch clients');
             }
         } catch (err) {
-            setError('Failed to connect to server');
+            setError(t('clients.serverError') || 'Failed to connect to server');
         } finally {
             setLoading(false);
         }
@@ -59,7 +61,7 @@ const ClientsList = () => {
     }, [page, debouncedSearch]);
 
     const handleDelete = async (clientId) => {
-        if (!window.confirm('Are you sure you want to delete this client?')) return;
+        if (!window.confirm(t('clients.confirmDelete') || 'Are you sure you want to delete this client?')) return;
 
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
@@ -73,13 +75,13 @@ const ClientsList = () => {
             const data = await response.json();
 
             if (response.ok) {
-                toast.success('Client deleted successfully');
+                toast.success(t('clients.deleteSuccess') || 'Client deleted successfully');
                 fetchClients();
             } else {
-                toast.error(data.error || 'Failed to delete client');
+                toast.error(data.error || t('clients.deleteFailed') || 'Failed to delete client');
             }
         } catch (err) {
-            toast.error('Failed to connect to server');
+            toast.error(t('clients.serverError') || 'Failed to connect to server');
         }
     };
 
@@ -89,8 +91,8 @@ const ClientsList = () => {
                 {/* Header */}
                 <div className="flex justify-between items-center mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-800">Clients</h1>
-                        <p className="text-slate-500 mt-1">Manage your client database</p>
+                        <h1 className="text-3xl font-bold text-slate-800">{t('clients.title')}</h1>
+                        <p className="text-slate-500 mt-1">{t('clients.manage')}</p>
                     </div>
                     {userInfo.role !== 'FINANCE' && (
                         <button
@@ -98,7 +100,7 @@ const ClientsList = () => {
                             className="flex items-center space-x-2 px-4 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
                         >
                             <Add size="20" color="currentColor" />
-                            <span>Add Client</span>
+                            <span>{t('clients.addClient')}</span>
                         </button>
                     )}
                 </div>
@@ -112,9 +114,9 @@ const ClientsList = () => {
                             </svg>
                         </div>
                         <div className="flex-1">
-                            <h3 className="text-sm font-medium text-blue-800">Read-Only Access</h3>
+                            <h3 className="text-sm font-medium text-blue-800">{t('events.readOnlyAccess')}</h3>
                             <p className="text-sm text-blue-700 mt-1">
-                                You have read-only access to clients for financial tracking purposes. Contact your organization owner to make changes.
+                                {t('clients.financeOnlyDesc')}
                             </p>
                         </div>
                     </div>
@@ -126,7 +128,7 @@ const ClientsList = () => {
                         <SearchNormal1 size="20" className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" color="currentColor" />
                         <input
                             type="text"
-                            placeholder="Search by name or phone..."
+                            placeholder={t('clients.searchPlaceholder')}
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
@@ -142,9 +144,9 @@ const ClientsList = () => {
                 ) : clients.length === 0 ? (
                     <EmptyState
                         icon={User}
-                        title="No clients found"
-                        description={debouncedSearch ? "No clients match your search" : "Get started by adding your first client"}
-                        actionLabel={!debouncedSearch ? "+ Add First Client" : undefined}
+                        title={t('clients.noClients')}
+                        description={debouncedSearch ? t('clients.noMatch') : t('clients.getStarted')}
+                        actionLabel={!debouncedSearch ? t('clients.addFirstClient') : undefined}
                         onAction={!debouncedSearch ? () => setShowCreateModal(true) : undefined}
                     />
                 ) : (
@@ -154,12 +156,12 @@ const ClientsList = () => {
                             <table className="w-full">
                                 <thead className="bg-slate-50 border-b border-slate-100">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Name</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Phone</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Email</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">City</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Tags</th>
-                                        <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Actions</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">{t('common.name')}</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">{t('clients.phone')}</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">{t('clients.email')}</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">{t('clients.city')}</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">{t('clients.tags')}</th>
+                                        <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">{t('common.actions')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
@@ -199,7 +201,7 @@ const ClientsList = () => {
                                                         onClick={() => handleDelete(client._id)}
                                                         className="text-red-600 hover:text-red-800 transition-colors"
                                                     >
-                                                        Delete
+                                                        {t('common.delete')}
                                                     </button>
                                                 )}
                                             </td>
@@ -213,7 +215,7 @@ const ClientsList = () => {
                         {pagination && pagination.pages > 1 && (
                             <div className="mt-6 flex items-center justify-between">
                                 <p className="text-sm text-slate-600">
-                                    Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} clients
+                                    {t('clients.showing', { from: ((pagination.page - 1) * pagination.limit) + 1, to: Math.min(pagination.page * pagination.limit, pagination.total), total: pagination.total })}
                                 </p>
                                 <div className="flex space-x-2">
                                     <button
@@ -221,14 +223,14 @@ const ClientsList = () => {
                                         disabled={page === 1}
                                         className="px-4 py-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                     >
-                                        Previous
+                                        {t('common.previous')}
                                     </button>
                                     <button
                                         onClick={() => setPage(page + 1)}
                                         disabled={page === pagination.pages}
                                         className="px-4 py-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                     >
-                                        Next
+                                        {t('common.next')}
                                     </button>
                                 </div>
                             </div>

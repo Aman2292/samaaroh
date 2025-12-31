@@ -10,7 +10,7 @@ const generateToken = (id, role, organizationId) => {
 };
 
 const registerUser = async (userData) => {
-  const { email, password, name, phone, role, organizationName, city } = userData;
+  const { email, password, name, phone, role, organizationName, city, preferredLanguage } = userData;
 
   // Only allow PLANNER_OWNER via public registration
   const effectiveRole = role || 'PLANNER_OWNER';
@@ -46,6 +46,7 @@ const registerUser = async (userData) => {
     phone,
     role: 'PLANNER_OWNER',
     organizationId: organization._id,
+    preferredLanguage: preferredLanguage || 'en',
     isActive: true,
   });
 
@@ -61,6 +62,7 @@ const registerUser = async (userData) => {
       role: user.role,
       organizationId: user.organizationId,
       organizationName: organization.name,
+      preferredLanguage: user.preferredLanguage,
       token: generateToken(user._id, user.role, user.organizationId),
     };
   } else {
@@ -130,6 +132,7 @@ const loginUser = async (userData, ipAddress, userAgent) => {
     organizationId: user.organizationId?._id,
     organizationName: user.organizationId?.name,
     subscribedFeatures: user.organizationId?.subscribedFeatures,
+    preferredLanguage: user.preferredLanguage,
     token: generateToken(user._id, user.role, user.organizationId?._id),
   };
 };

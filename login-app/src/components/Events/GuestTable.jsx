@@ -4,6 +4,11 @@ import { User } from 'iconsax-react';
 const GuestTable = ({ guests, loading, onEdit, onDelete, onCheckIn }) => {
     const getRSVPColor = (status) => {
         const colors = {
+            pending: 'bg-gray-100 text-gray-700',
+            attending: 'bg-green-100 text-green-700',
+            not_attending: 'bg-red-100 text-red-700',
+            maybe: 'bg-yellow-100 text-yellow-700',
+            // Old statuses for backward compatibility
             invited: 'bg-gray-100 text-gray-700',
             confirmed: 'bg-green-100 text-green-700',
             declined: 'bg-red-100 text-red-700',
@@ -47,7 +52,7 @@ const GuestTable = ({ guests, loading, onEdit, onDelete, onCheckIn }) => {
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center">
                                             <div>
-                                                <div className="font-medium text-slate-900">{guest.name}</div>
+                                                <div className="font-medium text-slate-900">{guest.firstName} {guest.lastName}</div>
                                                 {guest.addedOnsite && (
                                                     <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded">On-site</span>
                                                 )}
@@ -56,13 +61,15 @@ const GuestTable = ({ guests, loading, onEdit, onDelete, onCheckIn }) => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{guest.phone || '-'}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm capitalize">{guest.side}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm capitalize">{guest.group}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm capitalize">{guest.guestType}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={`px-2.5 py-1 text-xs font-medium rounded-full capitalize ${getRSVPColor(guest.rsvpStatus)}`}>
                                             {guest.rsvpStatus.replace('_', ' ')}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{guest.headcount}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                                        {guest.rsvpStatus === 'attending' ? (guest.plusOne && guest.plusOneAttending ? 2 : 1) : 0}
+                                    </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                                         {guest.rsvpStatus !== 'checked_in' ? (
                                             <button

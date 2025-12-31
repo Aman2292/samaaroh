@@ -16,6 +16,9 @@ const taskRoutes = require('./routes/taskRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const venueRoutes = require('./routes/venueRoutes');
 const invoiceRoutes = require('./routes/invoiceRoutes');
+const guestRoutes = require('./routes/guestRoutes');
+const documentRoutes = require('./routes/documentRoutes');
+const translationRoutes = require('./routes/translationRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
 dotenv.config();
@@ -23,7 +26,10 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: '*', // Allow all origins for mobile testing via ngrok
+  credentials: true
+}));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
@@ -54,9 +60,28 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/venue', venueRoutes);
 app.use('/api/invoices', invoiceRoutes);
+app.use('/api/guests', guestRoutes);
+app.use('/api/documents', documentRoutes);
+app.use('/api/translate', translationRoutes);
 
-// Serve static files (invoices PDFs)
+// Serve static files
 app.use('/invoices', express.static('public/invoices'));
+app.use('/documents', express.static('public/documents'));
+
+// Serve Frontend Static Files (from login-app/dist)
+const path = require('path');
+const frontendPath = path.join(__dirname, '../login-app/dist');
+app.use(express.static(frontendPath));
+
+// Handle React Routing (fallback to index.html for non-API routes)
+app.get('*', (req, res, next) => {
+    // If request path starts with /api or /invoices, skip to 404 handler
+    if (req.path.startsWith('/api') || req.path.startsWith('/invoices')) {
+        return next();
+    }
+    // Otherwise serve index.html for client-side routing
+    res.sendFile(path.join(frontendPath, 'index.html'));
+});
 
 // Error Handler (must be last)
 app.use(errorHandler);

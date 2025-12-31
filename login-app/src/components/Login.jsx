@@ -1,15 +1,26 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Lock, Eye, EyeSlash, Sms, ArrowLeft, ArrowRight } from 'iconsax-react';
 import PrimaryButton from './common/PrimaryButton';
 import TertiaryButton from './common/TertiaryButton';
 import registerBg from '../assets/register-bg.png';
 
 const Login = ({ onLogin, onNavigate }) => {
+    const { t, i18n } = useTranslation();
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+
+    // Load preferred language from localStorage on mount
+    useEffect(() => {
+        const savedLanguage = localStorage.getItem('preferredLanguage');
+        if (savedLanguage) {
+            i18n.changeLanguage(savedLanguage);
+        }
+    }, [i18n]);
 
     const testimonials = [
         {
@@ -67,9 +78,14 @@ const Login = ({ onLogin, onNavigate }) => {
 
             if (response.ok) {
                 localStorage.setItem('userInfo', JSON.stringify(data));
+                // Save and set language preference from user profile
+                if (data.preferredLanguage) {
+                    localStorage.setItem('preferredLanguage', data.preferredLanguage);
+                    i18n.changeLanguage(data.preferredLanguage);
+                }
                 onLogin();
             } else {
-                setError(data.message || 'Something went wrong');
+                setError(data.message || t('auth.login.invalidCredentials'));
             }
         } catch (err) {
             setError('Failed to connect to server');
@@ -85,13 +101,13 @@ const Login = ({ onLogin, onNavigate }) => {
             <div className="w-full md:w-1/2 p-6 md:p-8 flex flex-col justify-center overflow-y-auto">
                 <div className="max-w-md mx-auto w-full">
                     <div className="mb-8">
-                        <h3 className="text-3xl font-bold text-slate-900">Welcome Back</h3>
-                        <p className="text-slate-500 mt-2">Sign in to access your dashboard.</p>
+                        <h3 className="text-3xl font-bold text-slate-900">{t('auth.login.title')}</h3>
+                        <p className="text-slate-500 mt-2">{t('auth.login.subtitle')}</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <InputField
-                            label="Email"
+                            label={t('auth.login.email')}
                             name="email"
                             type="email"
                             value={email}
@@ -101,7 +117,7 @@ const Login = ({ onLogin, onNavigate }) => {
                         />
 
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
+                            <label className="block text-sm font-medium text-slate-700 mb-1.5">{t('auth.login.password')}</label>
                             <div className="relative">
                                 <Lock size="20" color="#64748b" className="absolute left-3.5 top-1/2 -translate-y-1/2 z-10" variant="Outline" />
                                 <input
@@ -125,9 +141,9 @@ const Login = ({ onLogin, onNavigate }) => {
                         <div className="flex items-center justify-between text-sm">
                             <label className="flex items-center text-slate-600 cursor-pointer">
                                 <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-purple-600 focus:ring-purple-500 mr-2" />
-                                Remember me
+                                {t('auth.login.rememberMe')}
                             </label>
-                            <a href="#" className="text-purple-600 hover:text-purple-700 font-medium">Forgot password?</a>
+                            <a href="#" className="text-purple-600 hover:text-purple-700 font-medium">{t('auth.login.forgotPassword')}</a>
                         </div>
 
                         {error && (
@@ -137,15 +153,15 @@ const Login = ({ onLogin, onNavigate }) => {
                         )}
 
                         <PrimaryButton type="submit" disabled={loading} fullWidth className="!py-3 !text-base !rounded-xl">
-                            {loading ? 'Signing In...' : 'Sign In'}
+                            {loading ? t('auth.login.signingIn') : t('auth.login.signIn')}
                         </PrimaryButton>
                     </form>
 
                     <div className="mt-8 text-center">
                         <span className="text-slate-500">
-                            Don't have an account?{' '}
+                            {t('auth.login.noAccount')}{' '}
                             <TertiaryButton onClick={() => onNavigate('register')} className="!px-1 !py-0 !inline-flex !font-semibold !text-[#7F5EFF] hover:!bg-transparent hover:!underline">
-                                Sign up
+                                {t('auth.login.register')}
                             </TertiaryButton>
                         </span>
                     </div>

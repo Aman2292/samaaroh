@@ -1,411 +1,395 @@
+const Guest = require('../models/Guest');
+const GuestGroup = require('../models/GuestGroup');
 const Event = require('../models/Event');
+const xlsx = require('xlsx');
 
 /**
- * Add guest to event
+ * Create a single guest
  */
-const addGuest = async (eventId, guestData, organizationId, userId) => {
-  const event = await Event.findOne({ _id: eventId, organizationId });
-  
+const createGuest = async (guestData, userId, organizationId) => {
+  // Verify event exists and belongs to organization
+  const event = await Event.findOne({
+    _id: guestData.eventId,
+    organizationId,
+    isActive: true
+  });
+
   if (!event) {
     throw new Error('Event not found or does not belong to your organization');
   }
 
-  // Create guest object
-  const newGuest = {
+  const guest = await Guest.create({
     ...guestData,
-    addedBy: userId,
-    addedAt: new Date()
-  };
+    organizationId,
+    createdBy: userId
+  });
 
-  // Add guest to array
-  event.guests.push(newGuest);
-  
-  // Update summary
-  updateGuestSummary(event);
-  
-  await event.save();
-  
-  return event.guests[event.guests.length - 1]; // Return newly added guest
+  return guest;
 };
 
 /**
- * Get all guests for an event with filters
+ * Get all guests for an event
  */
 const getEventGuests = async (eventId, organizationId, filters = {}) => {
-  const { side, group, rsvpStatus, search, page = 1, limit = 50 } = filters;
-  
-  const event = await Event.findOne({ _id: eventId, organizationId });
-  
-  if (!event) {
-    throw new Error('Event not found or does not belong to your organization');
-  }
-
-  let guests = event.guests || [];
+  const query = {
+    eventId,
+    organizationId,
+    isDeleted: false
+  };
 
   // Apply filters
-  if (side) {
-    guests = guests.filter(g => g.side === side);
+  if (filters.rsvpStatus) {
+    query.rsvpStatus = filters.rsvpStatus;
   }
-  if (group) {
-    guests = guests.filter(g => g.group === group);
+  if (filters.side) {
+    query.side = filters.side;
   }
-  if (rsvpStatus) {
-    guests = guests.filter(g => g.rsvpStatus === rsvpStatus);
+  if (filters.guestType) {
+    query.guestType = filters.guestType;
   }
-  if (filters.source) {
-    guests = guests.filter(g => g.source === filters.source);
-  }
-  if (search) {
-    const searchLower = search.toLowerCase();
-    guests = guests.filter(g => 
-      g.name?.toLowerCase().includes(searchLower) ||
-      g.phone?.includes(search) ||
-      g.email?.toLowerCase().includes(searchLower)
-    );
+  if (filters.search) {
+    query.$or = [
+      { firstName: { $regex: filters.search, $options: 'i' } },
+      { lastName: { $regex: filters.search, $options: 'i' } },
+      { email: { $regex: filters.search, $options: 'i' } },
+      { phone: { $regex: filters.search, $options: 'i' } }
+    ];
   }
 
-  // Pagination
-  const startIndex = (page - 1) * limit;
-  const endIndex = page * limit;
-  const paginatedGuests = guests.slice(startIndex, endIndex);
+  const guests = await Guest.find(query)
+    .populate('groupId', 'groupName')
+    .populate('createdBy', 'name')
+    .sort({ createdAt: -1 });
 
-  return {
-    guests: paginatedGuests,
-    pagination: {
-      total: guests.length,
-      page: parseInt(page),
-      pages: Math.ceil(guests.length / limit),
-      limit: parseInt(limit)
-    }
-  };
+  return guests;
 };
 
 /**
- * Get guest statistics
+ * Get single guest by ID
  */
-const getGuestStats = async (eventId, organizationId) => {
-  const event = await Event.findOne({ _id: eventId, organizationId });
-  
-  if (!event) {
-    throw new Error('Event not found or does not belong to your organization');
+const getGuestById = async (guestId, organizationId) => {
+  const guest = await Guest.findOne({
+    _id: guestId,
+    organizationId,
+    isDeleted: false
+  })
+    .populate('groupId', 'groupName groupType')
+    .populate('eventId', 'eventName eventDate')
+    .populate('createdBy', 'name')
+    .populate('updatedBy', 'name');
+
+  if (!guest) {
+    throw new Error('Guest not found or does not belong to your organization');
   }
 
-  const guests = event.guests || [];
+  return guest;
+};
 
-  // Calculate stats
-  const stats = {
-    totalInvited: guests.length,
-    totalConfirmed: guests.filter(g => g.rsvpStatus === 'confirmed').length,
-    totalDeclined: guests.filter(g => g.rsvpStatus === 'declined').length,
-    totalTentative: guests.filter(g => g.rsvpStatus === 'tentative').length,
-    expectedHeadcount: guests
-      .filter(g => g.rsvpStatus === 'confirmed' || g.rsvpStatus === 'checked_in')
-      .reduce((sum, g) => sum + (g.headcount || 1), 0),
-    onsiteAdded: guests.filter(g => g.addedOnsite).length,
-    checkedIn: guests.filter(g => g.rsvpStatus === 'checked_in').length,
-    
-    // By group
-    byGroup: {
-      family: guests.filter(g => g.group === 'family').length,
-      friends: guests.filter(g => g.group === 'friends').length,
-      vip: guests.filter(g => g.group === 'vip').length,
-      vendor: guests.filter(g => g.group === 'vendor').length,
-      other: guests.filter(g => g.group === 'other').length
-    },
-    
-    // By side
-    bySide: {
-      bride: guests.filter(g => g.side === 'bride').length,
-      groom: guests.filter(g => g.side === 'groom').length,
-      both: guests.filter(g => g.side === 'both').length,
-      vendor: guests.filter(g => g.side === 'vendor').length
-    }
-  };
+/**
+ * Get guest by RSVP token (for public RSVP page)
+ */
+const getGuestByToken = async (rsvpToken) => {
+  const guest = await Guest.findOne({
+    rsvpToken,
+    isDeleted: false
+  })
+    .populate('eventId', 'eventName eventDate venue clientId')
+    .populate({
+      path: 'eventId',
+      populate: { path: 'clientId', select: 'name' }
+    });
 
-  return stats;
+  if (!guest) {
+    throw new Error('Invalid RSVP link');
+  }
+
+  return guest;
 };
 
 /**
  * Update guest
  */
-const updateGuest = async (eventId, guestId, updateData, organizationId) => {
-  const event = await Event.findOne({ _id: eventId, organizationId });
-  
-  if (!event) {
-    throw new Error('Event not found or does not belong to your organization');
+const updateGuest = async (guestId, updateData, organizationId, userId) => {
+  const guest = await Guest.findOne({
+    _id: guestId,
+    organizationId,
+    isDeleted: false
+  });
+
+  if (!guest) {
+    throw new Error('Guest not found or does not belong to your organization');
   }
 
-  const guestIndex = event.guests.findIndex(g => g._id.toString() === guestId);
-  
-  if (guestIndex === -1) {
-    throw new Error('Guest not found');
-  }
-
-  // Update guest fields
+  // Update allowed fields
   Object.keys(updateData).forEach(key => {
-    if (key !== '_id' && key !== 'addedBy' && key !== 'addedAt') {
-      event.guests[guestIndex][key] = updateData[key];
+    if (updateData[key] !== undefined) {
+      guest[key] = updateData[key];
     }
   });
 
-  // Update summary
-  updateGuestSummary(event);
-  
-  await event.save();
-  
-  return event.guests[guestIndex];
+  guest.updatedBy = userId;
+  await guest.save();
+
+  return guest;
 };
 
 /**
- * Delete guest
+ * Submit RSVP (public - no auth required)
  */
-const deleteGuest = async (eventId, guestId, organizationId) => {
-  const event = await Event.findOne({ _id: eventId, organizationId });
-  
-  if (!event) {
-    throw new Error('Event not found or does not belong to your organization');
+const submitRSVP = async (rsvpToken, rsvpData) => {
+  const guest = await Guest.findOne({ rsvpToken, isDeleted: false });
+
+  if (!guest) {
+    throw new Error('Invalid RSVP link');
   }
 
-  const guestIndex = event.guests.findIndex(g => g._id.toString() === guestId);
-  
-  if (guestIndex === -1) {
-    throw new Error('Guest not found');
-  }
+  // Update RSVP fields
+  guest.rsvpStatus = rsvpData.rsvpStatus;
+  guest.plusOneAttending = rsvpData.plusOneAttending;
+  guest.plusOneName = rsvpData.plusOneName;
+  guest.dietaryRestrictions = rsvpData.dietaryRestrictions || [];
+  guest.dietaryNotes = rsvpData.dietaryNotes;
+  guest.specialRequests = rsvpData.specialRequests;
 
-  event.guests.splice(guestIndex, 1);
-  
-  // Update summary
-  updateGuestSummary(event);
-  
-  await event.save();
-  
-  return { message: 'Guest deleted successfully' };
+  await guest.save(); // rsvpDate will be auto-set by pre-save hook
+
+  return guest;
 };
 
 /**
- * Quick add guest (on-site)
+ * Delete guest (soft delete)
  */
-const quickAddGuest = async (eventId, guestData, organizationId, userId) => {
-  const event = await Event.findOne({ _id: eventId, organizationId });
-  
-  if (!event) {
-    throw new Error('Event not found or does not belong to your organization');
+const deleteGuest = async (guestId, organizationId) => {
+  const guest = await Guest.findOne({
+    _id: guestId,
+    organizationId,
+    isDeleted: false
+  });
+
+  if (!guest) {
+    throw new Error('Guest not found or does not belong to your organization');
   }
 
-  const newGuest = {
-    ...guestData,
-    source: 'onsite',
-    addedOnsite: true,
-    addedBy: userId,
-    addedAt: new Date()
-  };
+  guest.isDeleted = true;
+  await guest.save();
 
-  event.guests.push(newGuest);
-  
-  updateGuestSummary(event);
-  
-  await event.save();
-  
-  return event.guests[event.guests.length - 1];
+  return guest;
 };
 
 /**
- * Check in guest
+ * Bulk delete guests
  */
-const checkInGuest = async (eventId, guestId, organizationId) => {
-  const event = await Event.findOne({ _id: eventId, organizationId });
-  
-  if (!event) {
-    throw new Error('Event not found or does not belong to your organization');
-  }
-
-  const guestIndex = event.guests.findIndex(g => g._id.toString() === guestId);
-  
-  if (guestIndex === -1) {
-    throw new Error('Guest not found');
-  }
-
-  event.guests[guestIndex].rsvpStatus = 'checked_in';
-  event.guests[guestIndex].checkedInAt = new Date();
-  
-  updateGuestSummary(event);
-  
-  await event.save();
-  
-  return event.guests[guestIndex];
-};
-
-/**
- * Helper: Update guest summary
- */
-const updateGuestSummary = (event) => {
-  const guests = event.guests || [];
-  
-  event.guestSummary = {
-    totalInvited: guests.length,
-    totalConfirmed: guests.filter(g => g.rsvpStatus === 'confirmed').length,
-    totalDeclined: guests.filter(g => g.rsvpStatus === 'declined').length,
-    expectedHeadcount: guests
-      .filter(g => g.rsvpStatus === 'confirmed' || g.rsvpStatus === 'checked_in')
-      .reduce((sum, g) => sum + (g.headcount || 1), 0),
-    onsiteAdded: guests.filter(g => g.addedOnsite).length,
-    checkedIn: guests.filter(g => g.rsvpStatus === 'checked_in').length
-  };
-};
-
-/**
- * Bulk import guests from parsed CSV data
- */
-const bulkImportGuests = async (eventId, guestsData, organizationId, userId) => {
-  const event = await Event.findOne({ _id: eventId, organizationId });
-  
-  if (!event) {
-    throw new Error('Event not found or does not belong to your organization');
-  }
-
-  const results = {
-    total: guestsData.length,
-    successful: 0,
-    failed: 0,
-    errors: []
-  };
-
-  for (let i = 0; i < guestsData.length; i++) {
-    const guestData = guestsData[i];
-    
-    try {
-      // Validate required fields
-      if (!guestData.name || !guestData.side || !guestData.group) {
-        results.failed++;
-        results.errors.push({
-          row: i + 1,
-          data: guestData,
-          error: 'Missing required fields: name, side, or group'
-        });
-        continue;
-      }
-
-      // Check for duplicates (same name and phone)
-      const isDuplicate = event.guests.some(g => 
-        g.name.toLowerCase() === guestData.name.toLowerCase() &&
-        g.phone && guestData.phone && g.phone === guestData.phone
-      );
-
-      if (isDuplicate) {
-        results.failed++;
-        results.errors.push({
-          row: i + 1,
-          data: guestData,
-          error: 'Duplicate guest: same name and phone already exists'
-        });
-        continue;
-      }
-
-      // Create guest object
-      const newGuest = {
-        name: guestData.name,
-        phone: guestData.phone || '',
-        email: guestData.email || '',
-        side: guestData.side,
-        group: guestData.group,
-        rsvpStatus: guestData.rsvpStatus || 'invited',
-        headcount: parseInt(guestData.headcount) || 1,
-        plusOnes: parseInt(guestData.plusOnes) || 0,
-        specialNotes: guestData.specialNotes || '',
-        dietaryRestrictions: guestData.dietaryRestrictions || '',
-        source: 'csv_import',
-        addedBy: userId,
-        addedAt: new Date()
-      };
-
-      event.guests.push(newGuest);
-      results.successful++;
-    } catch (error) {
-      results.failed++;
-      results.errors.push({
-        row: i + 1,
-        data: guestData,
-        error: error.message
-      });
+const bulkDeleteGuests = async (guestIds, organizationId) => {
+  const result = await Guest.updateMany(
+    {
+      _id: { $in: guestIds },
+      organizationId,
+      isDeleted: false
+    },
+    {
+      $set: { isDeleted: true }
     }
-  }
+  );
 
-  // Update summary
-  updateGuestSummary(event);
-  
-  await event.save();
-
-  return results;
+  return result;
 };
 
 /**
- * Export guests to CSV format
+ * Bulk import guests from Excel
  */
-const exportGuests = async (eventId, organizationId, filters = {}) => {
-  const event = await Event.findOne({ _id: eventId, organizationId });
-  
+const bulkImportGuests = async (fileBuffer, eventId, organizationId, userId) => {
+  // Verify event exists
+  const event = await Event.findOne({
+    _id: eventId,
+    organizationId,
+    isActive: true
+  });
+
   if (!event) {
     throw new Error('Event not found or does not belong to your organization');
   }
 
-  let guests = event.guests || [];
+  // Parse Excel file
+  const workbook = xlsx.read(fileBuffer, { type: 'buffer' });
+  const sheetName = workbook.SheetNames[0];
+  const sheet = workbook.Sheets[sheetName];
+  const data = xlsx.utils.sheet_to_json(sheet);
 
-  // Apply filters if provided
-  const { side, group, rsvpStatus } = filters;
-  if (side) guests = guests.filter(g => g.side === side);
-  if (group) guests = guests.filter(g => g.group === group);
-  if (rsvpStatus) guests = guests.filter(g => g.rsvpStatus === rsvpStatus);
+  if (data.length === 0) {
+    throw new Error('Excel file is empty');
+  }
 
-  // Convert to CSV format
-  const csvData = guests.map(g => ({
-    Name: g.name,
-    Phone: g.phone || '',
-    Email: g.email || '',
-    Side: g.side,
-    Group: g.group,
-    RSVP_Status: g.rsvpStatus,
-    Headcount: g.headcount,
-    Plus_Ones: g.plusOnes,
-    Special_Notes: g.specialNotes || '',
-    Dietary_Restrictions: g.dietaryRestrictions || '',
-    Source: g.source,
-    Added_Onsite: g.addedOnsite ? 'Yes' : 'No',
-    Checked_In: g.rsvpStatus === 'checked_in' ? 'Yes' : 'No',
-    Added_At: g.addedAt ? new Date(g.addedAt).toLocaleDateString() : ''
+  // Map Excel columns to guest fields
+  const guests = data.map(row => {
+    const guest = {
+      eventId,
+      organizationId,
+      createdBy: userId,
+      firstName: row['First Name'] || row.firstName || '',
+      lastName: row['Last Name'] || row.lastName || '',
+      email: row.Email || row.email || '',
+      phone: row.Phone || row.phone || '',
+      guestType: row['Guest Type'] || row.guestType || 'friend',
+      side: row.Side || row.side || 'neutral',
+      plusOne: row['Plus One'] === 'Yes' || row.plusOne === true || false,
+      notes: row.Notes || row.notes || ''
+    };
+
+    // Handle dietary restrictions (comma-separated in Excel)
+    if (row['Dietary Restrictions'] || row.dietaryRestrictions) {
+      const dietary = row['Dietary Restrictions'] || row.dietaryRestrictions;
+      if (typeof dietary === 'string') {
+        guest.dietaryRestrictions = dietary.split(',').map(s => s.trim().toLowerCase());
+      }
+    }
+
+    return guest;
+  }).filter(g => g.firstName); // Remove rows without first name
+
+  // Bulk insert
+  const inserted = await Guest.insertMany(guests);
+
+  return {
+    total: guests.length,
+    imported: inserted.length,
+    guests: inserted
+  };
+};
+
+/**
+ * Get RSVP statistics for an event
+ */
+const getRSVPStats = async (eventId, organizationId) => {
+  const guests = await Guest.find({
+    eventId,
+    organizationId,
+    isDeleted: false
+  });
+
+  const stats = {
+    total: guests.length,
+    attending: 0,
+    notAttending: 0,
+    maybe: 0,
+    pending: 0,
+    withPlusOne: 0,
+    expectedHeadcount: 0,
+    invitationsSent: 0,
+    rsvpRate: 0
+  };
+
+  guests.forEach(guest => {
+    // Count by RSVP status
+    if (guest.rsvpStatus === 'attending') stats.attending++;
+    else if (guest.rsvpStatus === 'not_attending') stats.notAttending++;
+    else if (guest.rsvpStatus === 'maybe') stats.maybe++;
+    else stats.pending++;
+
+    // Plus ones
+    if (guest.plusOne) stats.withPlusOne++;
+
+    // Expected headcount
+    if (guest.rsvpStatus === 'attending') {
+      stats.expectedHeadcount += 1;
+      if (guest.plusOne && guest.plusOneAttending !== false) {
+        stats.expectedHeadcount += 1;
+      }
+    }
+
+    // Invitations sent
+    if (guest.invitationSent) stats.invitationsSent++;
+  });
+
+  // RSVP rate (% of guests who have responded)
+  const responded = stats.attending + stats.notAttending + stats.maybe;
+  stats.rsvpRate = stats.total > 0 
+    ? Math.round((responded / stats.total) * 100) 
+    : 0;
+
+  return stats;
+};
+
+/**
+ * Export guests to Excel
+ */
+const exportGuestsToExcel = async (eventId, organizationId) => {
+  const guests = await Guest.find({
+    eventId,
+    organizationId,
+    isDeleted: false
+  }).sort({ lastName: 1, firstName: 1 });
+
+  // Prepare data for Excel
+  const data = guests.map(guest => ({
+    'First Name': guest.firstName,
+    'Last Name': guest.lastName || '',
+    'Email': guest.email || '',
+    'Phone': guest.phone || '',
+    'Guest Type': guest.guestType,
+    'Side': guest.side,
+    'RSVP Status': guest.rsvpStatus,
+    'Plus One': guest.plusOne ? 'Yes' : 'No',
+    'Plus One Name': guest.plusOneName || '',
+    'Dietary Restrictions': guest.dietaryRestrictions.join(', '),
+    'Special Requests': guest.specialRequests || '',
+    'Table Number': guest.tableNumber || '',
+    'RSVP Date': guest.rsvpDate ? guest.rsvpDate.toLocaleDateString() : '',
+    'Notes': guest.notes || ''
   }));
 
-  return csvData;
+  // Create workbook
+  const workbook = xlsx.utils.book_new();
+  const worksheet = xlsx.utils.json_to_sheet(data);
+  xlsx.utils.book_append_sheet(workbook, worksheet, 'Guests');
+
+  // Generate buffer
+  const buffer = xlsx.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+
+  return buffer;
 };
 
 /**
- * Get CSV template structure
+ * Send invitations (mark as sent, generate links)
  */
-const getCSVTemplate = () => {
-  return [
+const markInvitationsSent = async (guestIds, organizationId, userId) => {
+  const result = await Guest.updateMany(
     {
-      Name: 'John Doe',
-      Phone: '9876543210',
-      Email: 'john@example.com',
-      Side: 'bride',
-      Group: 'family',
-      RSVP_Status: 'invited',
-      Headcount: '2',
-      Plus_Ones: '1',
-      Special_Notes: 'Vegetarian',
-      Dietary_Restrictions: 'No peanuts'
+      _id: { $in: guestIds },
+      organizationId,
+      isDeleted: false
+    },
+    {
+      $set: {
+        invitationSent: true,
+        invitationSentDate: new Date(),
+        updatedBy: userId
+      }
     }
-  ];
+  );
+
+  // Return guests with their RSVP links
+  const guests = await Guest.find({
+    _id: { $in: guestIds },
+    organizationId
+  }).select('firstName lastName email phone rsvpToken');
+
+  return guests.map(guest => ({
+    ...guest.toObject(),
+    rsvpLink: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/rsvp/${guest.rsvpToken}`
+  }));
 };
 
 module.exports = {
-  addGuest,
+  createGuest,
   getEventGuests,
-  getGuestStats,
+  getGuestById,
+  getGuestByToken,
   updateGuest,
+  submitRSVP,
   deleteGuest,
-  quickAddGuest,
-  checkInGuest,
+  bulkDeleteGuests,
   bulkImportGuests,
-  exportGuests,
-  getCSVTemplate
+  getRSVPStats,
+  exportGuestsToExcel,
+  markInvitationsSent
 };

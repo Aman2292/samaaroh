@@ -74,7 +74,7 @@ const AddGuestModal = ({ eventId, isOpen, onClose, onSuccess }) => {
         setLoading(true);
 
         try {
-            const response = await fetch(`http://localhost:5001/api/events/${eventId}/guests`, {
+            const response = await fetch(`http://localhost:5001/api/guests`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

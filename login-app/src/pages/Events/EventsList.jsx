@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Add, Calendar, Eye, TaskSquare, Element3, ClipboardText, TickCircle, Clock, CloseCircle, Flag, SearchNormal, Refresh } from 'iconsax-react';
 import LoadingSkeleton from '../../components/common/LoadingSkeleton';
 import EmptyState from '../../components/common/EmptyState';
@@ -12,6 +13,7 @@ import Select from '../../components/common/Select';
 import DatePicker from '../../components/common/DatePicker';
 
 const EventsList = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -64,10 +66,10 @@ const EventsList = () => {
                 setEvents(data.data);
                 setPagination(data.pagination);
             } else {
-                setError(data.error || 'Failed to fetch events');
+                setError(data.error || t('events.fetchError') || 'Failed to fetch events');
             }
         } catch (err) {
-            setError('Failed to connect to server');
+            setError(t('events.serverError') || 'Failed to connect to server');
         } finally {
             setLoading(false);
         }
@@ -111,14 +113,14 @@ const EventsList = () => {
             const data = await response.json();
 
             if (response.ok) {
-                toast.success('Event status updated');
+                toast.success(t('events.statusUpdated') || 'Event status updated');
                 // Optimistic update
                 setEvents(events.map(e => e._id === eventId ? { ...e, status: newStatus } : e));
             } else {
-                toast.error(data.error || 'Failed to update status');
+                toast.error(data.error || t('events.statusUpdateFailed') || 'Failed to update status');
             }
         } catch (error) {
-            toast.error('Something went wrong');
+            toast.error(t('common.error') || 'Something went wrong');
         }
     };
 
@@ -138,22 +140,22 @@ const EventsList = () => {
             <div className="max-w-7xl mx-auto">
                 <div className="flex justify-between items-center mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-800">Events</h1>
-                        <p className="text-slate-500 mt-1">Manage your events</p>
+                        <h1 className="text-3xl font-bold text-slate-800">{t('events.title')}</h1>
+                        <p className="text-slate-500 mt-1">{t('events.manage')}</p>
                     </div>
                     <div className="flex items-center space-x-4">
                         <div className="flex bg-slate-100 p-1 rounded-lg">
                             <button
                                 onClick={() => setViewMode('list')}
                                 className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-white shadow text-primary-600' : 'text-slate-500 hover:text-slate-700'}`}
-                                title="List View"
+                                title={t('events.listView') || 'List View'}
                             >
                                 <TaskSquare size={20} variant={viewMode === 'list' ? 'Bold' : 'Outline'} color="currentColor" />
                             </button>
                             <button
                                 onClick={() => setViewMode('kanban')}
                                 className={`p-2 rounded-md transition-all ${viewMode === 'kanban' ? 'bg-white shadow text-primary-600' : 'text-slate-500 hover:text-slate-700'}`}
-                                title="Kanban View"
+                                title={t('events.kanbanView') || 'Kanban View'}
                             >
                                 <Element3 size={20} variant={viewMode === 'kanban' ? 'Bold' : 'Outline'} color="currentColor" />
                             </button>
@@ -161,7 +163,7 @@ const EventsList = () => {
                         {canCreate && (
                             <button onClick={() => navigate('/events/create')} className="flex items-center space-x-2 px-4 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium">
                                 <Add size="20" color="currentColor" />
-                                <span>Create Event</span>
+                                <span>{t('events.createEvent')}</span>
                             </button>
                         )}
                     </div>
@@ -174,46 +176,46 @@ const EventsList = () => {
                         className="flex items-center space-x-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors mb-4"
                     >
                         <SearchNormal size={20} />
-                        <span>{showFilters ? 'Hide Filters' : 'Show Filters'}</span>
+                        <span>{showFilters ? t('events.hideFilters') : t('events.showFilters')}</span>
                     </button>
 
                     {showFilters && (
                         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">Status</label>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">{t('common.status')}</label>
                                     <select
                                         value={filters.status}
                                         onChange={(e) => setFilters({ ...filters, status: e.target.value })}
                                         className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                     >
-                                        <option value="">All Statuses</option>
-                                        <option value="pending">Pending</option>
-                                        <option value="confirmed">Confirmed</option>
-                                        <option value="in_progress">In Progress</option>
-                                        <option value="completed">Completed</option>
-                                        <option value="cancelled">Cancelled</option>
+                                        <option value="">{t('events.allStatuses')}</option>
+                                        <option value="pending">{t('events.pending')}</option>
+                                        <option value="confirmed">{t('events.confirmed')}</option>
+                                        <option value="in_progress">{t('events.inProgress')}</option>
+                                        <option value="completed">{t('common.completed')}</option>
+                                        <option value="cancelled">{t('events.cancelled')}</option>
                                     </select>
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">Event Type</label>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">{t('events.eventType')}</label>
                                     <select
                                         value={filters.eventType}
                                         onChange={(e) => setFilters({ ...filters, eventType: e.target.value })}
                                         className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                     >
-                                        <option value="">All Types</option>
-                                        <option value="wedding">Wedding</option>
-                                        <option value="corporate">Corporate</option>
-                                        <option value="birthday">Birthday</option>
-                                        <option value="anniversary">Anniversary</option>
-                                        <option value="other">Other</option>
+                                        <option value="">{t('events.allTypes')}</option>
+                                        <option value="wedding">{t('events.wedding')}</option>
+                                        <option value="corporate">{t('events.corporate')}</option>
+                                        <option value="birthday">{t('events.birthday')}</option>
+                                        <option value="anniversary">{t('events.anniversary')}</option>
+                                        <option value="other">{t('events.other')}</option>
                                     </select>
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">From Date</label>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">{t('events.fromDate')}</label>
                                     <input
                                         type="date"
                                         value={filters.dateFrom}
@@ -223,7 +225,7 @@ const EventsList = () => {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">To Date</label>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">{t('events.toDate')}</label>
                                     <input
                                         type="date"
                                         value={filters.dateTo}
@@ -234,13 +236,13 @@ const EventsList = () => {
 
                                 {userInfo.role === 'PLANNER_OWNER' && teamMembers.length > 0 && (
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-2">Assigned Planner</label>
+                                        <label className="block text-sm font-medium text-slate-700 mb-2">{t('events.assignedPlanner')}</label>
                                         <select
                                             value={filters.plannerId}
                                             onChange={(e) => setFilters({ ...filters, plannerId: e.target.value })}
                                             className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                         >
-                                            <option value="">All Planners</option>
+                                            <option value="">{t('events.allPlanners')}</option>
                                             {teamMembers.map(member => (
                                                 <option key={member._id} value={member._id}>{member.name}</option>
                                             ))}
@@ -255,10 +257,10 @@ const EventsList = () => {
                                     className="flex items-center space-x-2 px-4 py-2 text-slate-600 hover:text-slate-800 transition-colors"
                                 >
                                     <Refresh size={18} />
-                                    <span>Clear Filters</span>
+                                    <span>{t('events.clearFilters')}</span>
                                 </button>
                                 <div className="text-sm text-slate-500">
-                                    {events.length} event(s) found
+                                    {t('events.eventsFound', { count: events.length })}
                                 </div>
                             </div>
                         </div>
@@ -276,9 +278,9 @@ const EventsList = () => {
                             </svg>
                         </div>
                         <div className="flex-1">
-                            <h3 className="text-sm font-medium text-blue-800">Viewing Your Assigned Events</h3>
+                            <h3 className="text-sm font-medium text-blue-800">{t('events.viewingAssigned')}</h3>
                             <p className="text-sm text-blue-700 mt-1">
-                                You are viewing only events where you are the lead planner. Other events in your organization are not visible to you.
+                                {t('events.plannerOnlyDesc')}
                             </p>
                         </div>
                     </div>
@@ -293,9 +295,9 @@ const EventsList = () => {
                             </svg>
                         </div>
                         <div className="flex-1">
-                            <h3 className="text-sm font-medium text-blue-800">Read-Only Access</h3>
+                            <h3 className="text-sm font-medium text-blue-800">{t('events.readOnlyAccess')}</h3>
                             <p className="text-sm text-blue-700 mt-1">
-                                You have read-only access to events for financial tracking purposes. Contact your organization owner to make changes.
+                                {t('events.financeOnlyDesc')}
                             </p>
                         </div>
                     </div>
@@ -308,9 +310,9 @@ const EventsList = () => {
                 ) : events.length === 0 ? (
                     <EmptyState
                         icon={Calendar}
-                        title="No events found"
-                        description="Get started by creating your first event"
-                        actionLabel={canCreate ? "+ Create First Event" : undefined}
+                        title={t('events.noEventsFound')}
+                        description={t('events.getStarted')}
+                        actionLabel={canCreate ? t('events.createFirstEvent') : undefined}
                         onAction={canCreate ? () => navigate('/events/create') : undefined}
                     />
                 ) : (
@@ -326,12 +328,12 @@ const EventsList = () => {
                                 <table className="w-full">
                                     <thead className="bg-slate-50 border-b border-slate-100">
                                         <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Event Name</th>
-                                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Client</th>
-                                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Date</th>
-                                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Type</th>
-                                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Status</th>
-                                            <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase">Actions</th>
+                                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">{t('events.eventName')}</th>
+                                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">{t('clients.title')}</th>
+                                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">{t('events.eventDate')}</th>
+                                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">{t('events.eventType')}</th>
+                                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">{t('common.status')}</th>
+                                            <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase">{t('common.actions')}</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100">
@@ -339,7 +341,7 @@ const EventsList = () => {
                                             <tr key={event._id} className="hover:bg-slate-50 transition-colors">
                                                 <td className="px-6 py-4">
                                                     <div className="font-medium text-slate-800">{event.eventName}</div>
-                                                    <div className="text-sm text-slate-500">{event.venue || 'No venue'}</div>
+                                                    <div className="text-sm text-slate-500">{event.venue || t('dashboard.noVenue')}</div>
                                                 </td>
                                                 <td className="px-6 py-4 text-slate-600">
                                                     {event.clientId?.name || 'N/A'}
@@ -403,7 +405,7 @@ const EventsList = () => {
                                                 <td className="px-6 py-4 text-right">
                                                     <button onClick={() => navigate(`/events/${event._id}`)} className="text-primary-600 hover:text-primary-800 transition-colors flex items-center justify-end space-x-1">
                                                         <Eye size="16" color="currentColor" />
-                                                        <span>View</span>
+                                                        <span>{t('dashboard.view')}</span>
                                                     </button>
                                                 </td>
                                             </tr>
@@ -416,14 +418,14 @@ const EventsList = () => {
                         {pagination && pagination.pages > 1 && (
                             <div className="mt-6 flex items-center justify-between">
                                 <p className="text-sm text-slate-600">
-                                    Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} events
+                                    {t('events.showing', { from: ((pagination.page - 1) * pagination.limit) + 1, to: Math.min(pagination.page * pagination.limit, pagination.total), total: pagination.total })}
                                 </p>
                                 <div className="flex space-x-2">
                                     <button onClick={() => setPage(page - 1)} disabled={page === 1} className="px-4 py-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                                        Previous
+                                        {t('common.previous')}
                                     </button>
                                     <button onClick={() => setPage(page + 1)} disabled={page === pagination.pages} className="px-4 py-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                                        Next
+                                        {t('common.next')}
                                     </button>
                                 </div>
                             </div>

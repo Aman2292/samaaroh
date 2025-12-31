@@ -63,62 +63,6 @@ const eventSchema = new mongoose.Schema({
     type: String
   },
   
-  // GUEST LIST - Embedded guests array
-  guests: [{
-    // Basic Info
-    name: { type: String, required: true },
-    phone: String,
-    email: String,
-    
-    // Categorization
-    side: {
-      type: String,
-      enum: ['bride', 'groom', 'both', 'vendor'],
-      required: true
-    },
-    group: {
-      type: String,
-      enum: ['family', 'friends', 'vip', 'vendor', 'other'],
-      required: true
-    },
-    
-    // RSVP & Attendance
-    rsvpStatus: {
-      type: String,
-      enum: ['invited', 'confirmed', 'declined', 'tentative', 'checked_in'],
-      default: 'invited'
-    },
-    headcount: { type: Number, default: 1 },
-    plusOnes: { type: Number, default: 0 },
-    
-    // Special Requirements
-    specialNotes: String,
-    dietaryRestrictions: String,
-    
-    // Source Tracking
-    source: {
-      type: String,
-      enum: ['manual', 'csv_import', 'onsite'],
-      default: 'manual'
-    },
-    addedOnsite: { type: Boolean, default: false },
-    checkedInAt: Date,
-    
-    // Metadata
-    addedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    addedAt: { type: Date, default: Date.now }
-  }],
-  
-  // Guest Summary (cached for performance)
-  guestSummary: {
-    totalInvited: { type: Number, default: 0 },
-    totalConfirmed: { type: Number, default: 0 },
-    totalDeclined: { type: Number, default: 0 },
-    expectedHeadcount: { type: Number, default: 0 },
-    onsiteAdded: { type: Number, default: 0 },
-    checkedIn: { type: Number, default: 0 }
-  },
-  
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'

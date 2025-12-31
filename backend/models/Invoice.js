@@ -131,7 +131,13 @@ const invoiceSchema = new mongoose.Schema({
     required: true
   },
   sentAt: Date,
-  paidAt: Date
+  paidAt: Date,
+  
+  // Document Integration
+  documentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Document'
+  }
 }, {
   timestamps: true
 });

@@ -192,6 +192,14 @@ class InvoiceService {
       { new: true }
     );
     
+    // Sync with document
+    try {
+      const documentService = require('./documentService');
+      await documentService.updateInvoiceDocumentMetadata(invoiceId, updateData);
+    } catch (error) {
+      console.error('Error updating document metadata:', error);
+    }
+    
     return invoice;
   }
 
@@ -461,8 +469,21 @@ class InvoiceService {
     
     // Update invoice with PDF URL
     invoice.pdfUrl = `/invoices/${fileName}`;
+    
+    // Create document entry (if not already exists)
+    try {
+      const documentService = require('./documentService');
+      const document = await documentService.createDocumentFromInvoice(invoice);
+      
+      // Link invoice to document
+      invoice.documentId = document._id;
+    } catch (error) {
+      console.error('Error creating document for invoice:', error);
+      // Continue even if document creation fails
+    }
+    
     await invoice.save();
-        return `/invoices/${fileName}`;
+    return `/invoices/${fileName}`;
   }
 
   /**

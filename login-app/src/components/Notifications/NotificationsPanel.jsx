@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { CloseCircle } from 'iconsax-react';
+import { CloseCircle, Add } from 'iconsax-react';
 import { toast } from 'react-toastify';
 import NotificationItem from './NotificationItem';
+import AddNotificationModal from './AddNotificationModal';
 
 const NotificationsPanel = ({ isOpen, onClose }) => {
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [showAddModal, setShowAddModal] = useState(false);
 
     const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
+    const isPlannerOwner = userInfo.role === 'PLANNER_OWNER';
 
     useEffect(() => {
         if (isOpen) {
@@ -118,19 +121,32 @@ const NotificationsPanel = ({ isOpen, onClose }) => {
             {/* Panel */}
             <div className="fixed right-0 top-0 h-full w-full md:w-96 bg-white shadow-2xl z-50 flex flex-col">
                 {/* Header */}
-                <div className="p-4 border-b border-slate-200 flex items-center justify-between">
-                    <div>
-                        <h3 className="text-lg font-bold text-slate-800">Notifications</h3>
-                        {unreadCount > 0 && (
-                            <p className="text-xs text-slate-500 mt-1">{unreadCount} unread</p>
-                        )}
+                <div className="p-4 border-b border-slate-200">
+                    <div className="flex items-center justify-between mb-3">
+                        <div>
+                            <h3 className="text-lg font-bold text-slate-800">Notifications</h3>
+                            {unreadCount > 0 && (
+                                <p className="text-xs text-slate-500 mt-1">{unreadCount} unread</p>
+                            )}
+                        </div>
+                        <button
+                            onClick={onClose}
+                            className="text-slate-400 hover:text-slate-600"
+                        >
+                            <CloseCircle size="24" />
+                        </button>
                     </div>
-                    <button
-                        onClick={onClose}
-                        className="text-slate-400 hover:text-slate-600"
-                    >
-                        <CloseCircle size="24" />
-                    </button>
+
+                    {/* Add Notification Button (Planner Owner Only) */}
+                    {isPlannerOwner && (
+                        <button
+                            onClick={() => setShowAddModal(true)}
+                            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium shadow-sm"
+                        >
+                            <Add size="20" variant="Bold" />
+                            <span className="text-sm">Add Notification</span>
+                        </button>
+                    )}
                 </div>
 
                 {/* Mark All as Read Button */}
@@ -222,6 +238,13 @@ const NotificationsPanel = ({ isOpen, onClose }) => {
                     )}
                 </div>
             </div>
+
+            {/* Add Notification Modal */}
+            <AddNotificationModal
+                isOpen={showAddModal}
+                onClose={() => setShowAddModal(false)}
+                onNotificationAdded={fetchNotifications}
+            />
         </>
     );
 };

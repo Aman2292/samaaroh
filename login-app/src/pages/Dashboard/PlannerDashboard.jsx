@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Calendar, TrendUp, CalendarTick, Eye } from 'iconsax-react';
 import LoadingSkeleton from '../../components/common/LoadingSkeleton';
 import ErrorMessage from '../../components/common/ErrorMessage';
 
 const PlannerDashboard = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [stats, setStats] = useState({
         myEvents: 0,
@@ -57,10 +59,10 @@ const PlannerDashboard = () => {
                 });
                 setRecentEvents(allEvents.slice(0, 5));
             } else {
-                setError('Failed to fetch dashboard data');
+                setError(t('dashboard.fetchError') || 'Failed to fetch dashboard data');
             }
         } catch (err) {
-            setError('Failed to connect to server');
+            setError(t('dashboard.serverError') || 'Failed to connect to server');
         } finally {
             setLoading(false);
         }
@@ -74,7 +76,7 @@ const PlannerDashboard = () => {
             completed: 'bg-gray-100 text-gray-700',
             cancelled: 'bg-red-100 text-red-700'
         };
-        return colors[status] || 'bg-gray-100 text-gray-700';
+        return colors[status] || 'bg-gray-100 text-gray-700'
     };
 
     return (
@@ -82,8 +84,8 @@ const PlannerDashboard = () => {
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-slate-800">Welcome back, {userInfo.name}!</h1>
-                    <p className="text-slate-500 mt-1">Here's an overview of your events</p>
+                    <h1 className="text-3xl font-bold text-slate-800">{t('dashboard.welcome', { name: userInfo.name })}</h1>
+                    <p className="text-slate-500 mt-1">{t('dashboard.overview')}</p>
                 </div>
 
                 {loading ? (
@@ -98,9 +100,9 @@ const PlannerDashboard = () => {
                             <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-sm font-medium text-slate-500">My Events</p>
+                                        <p className="text-sm font-medium text-slate-500">{t('dashboard.myEvents')}</p>
                                         <p className="text-3xl font-bold text-slate-800 mt-2">{stats.myEvents}</p>
-                                        <p className="text-xs text-slate-500 mt-1">Total events assigned to you</p>
+                                        <p className="text-xs text-slate-500 mt-1">{t('dashboard.myEventsDesc')}</p>
                                     </div>
                                     <div className="p-3 bg-blue-50 rounded-lg">
                                         <Calendar size="32" color="#3b82f6" variant="Bold" />
@@ -112,9 +114,9 @@ const PlannerDashboard = () => {
                             <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-sm font-medium text-slate-500">Upcoming Events</p>
+                                        <p className="text-sm font-medium text-slate-500">{t('dashboard.upcomingEvents')}</p>
                                         <p className="text-3xl font-bold text-slate-800 mt-2">{stats.upcomingEvents}</p>
-                                        <p className="text-xs text-slate-500 mt-1">In the next 7 days</p>
+                                        <p className="text-xs text-slate-500 mt-1">{t('dashboard.next7Days')}</p>
                                     </div>
                                     <div className="p-3 bg-orange-50 rounded-lg">
                                         <TrendUp size="32" color="#f97316" variant="Bold" />
@@ -126,9 +128,9 @@ const PlannerDashboard = () => {
                             <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-sm font-medium text-slate-500">Events This Month</p>
+                                        <p className="text-sm font-medium text-slate-500">{t('dashboard.eventsThisMonth')}</p>
                                         <p className="text-3xl font-bold text-slate-800 mt-2">{stats.eventsThisMonth}</p>
-                                        <p className="text-xs text-slate-500 mt-1">Current month</p>
+                                        <p className="text-xs text-slate-500 mt-1">{t('dashboard.currentMonth')}</p>
                                     </div>
                                     <div className="p-3 bg-green-50 rounded-lg">
                                         <CalendarTick size="32" color="#10b981" variant="Bold" />
@@ -143,9 +145,9 @@ const PlannerDashboard = () => {
                                 <div className="bg-white rounded-xl shadow-sm border border-red-100 p-6">
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <p className="text-sm font-medium text-red-600">Risky Events</p>
+                                            <p className="text-sm font-medium text-red-600">{t('dashboard.riskyEvents')}</p>
                                             <p className="text-3xl font-bold text-red-700 mt-2">{stats.riskyEvents}</p>
-                                            <p className="text-xs text-red-500 mt-1">Due soon & overdue payments</p>
+                                            <p className="text-xs text-red-500 mt-1">{t('dashboard.riskyEventsDesc')}</p>
                                         </div>
                                         <div className="p-3 bg-red-50 rounded-lg animate-pulse">
                                             <Calendar size="32" color="#ef4444" variant="Bold" />
@@ -159,11 +161,11 @@ const PlannerDashboard = () => {
                                 <div className="bg-white rounded-xl shadow-sm border border-orange-100 p-6">
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <p className="text-sm font-medium text-orange-600">Cash Stuck</p>
+                                            <p className="text-sm font-medium text-orange-600">{t('dashboard.cashStuck')}</p>
                                             <p className="text-3xl font-bold text-orange-700 mt-2">
                                                 ₹{(stats.cashStuck / 1000).toFixed(1)}k
                                             </p>
-                                            <p className="text-xs text-orange-500 mt-1">Total overdue payments</p>
+                                            <p className="text-xs text-orange-500 mt-1">{t('dashboard.cashStuckDesc')}</p>
                                         </div>
                                         <div className="p-3 bg-orange-50 rounded-lg">
                                             <TrendUp size="32" color="#f97316" variant="Bold" />
@@ -176,25 +178,25 @@ const PlannerDashboard = () => {
                         {/* Recent Events Table */}
                         <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
                             <div className="p-6 border-b border-slate-100">
-                                <h2 className="text-xl font-bold text-slate-800">Recent Events</h2>
-                                <p className="text-sm text-slate-500 mt-1">Your last 5 events</p>
+                                <h2 className="text-xl font-bold text-slate-800">{t('dashboard.recentEvents')}</h2>
+                                <p className="text-sm text-slate-500 mt-1">{t('dashboard.last5Events')}</p>
                             </div>
 
                             {recentEvents.length === 0 ? (
                                 <div className="p-12 text-center">
                                     <Calendar size="64" color="#cbd5e1" className="mx-auto mb-4" />
-                                    <p className="text-slate-500">No events assigned yet</p>
-                                    <p className="text-sm text-slate-400 mt-1">Events assigned to you will appear here</p>
+                                    <p className="text-slate-500">{t('dashboard.noEvents')}</p>
+                                    <p className="text-sm text-slate-400 mt-1">{t('dashboard.noEventsDesc')}</p>
                                 </div>
                             ) : (
                                 <table className="w-full">
                                     <thead className="bg-slate-50 border-b border-slate-100">
                                         <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Event Name</th>
-                                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Client</th>
-                                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Date</th>
-                                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Status</th>
-                                            <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase">Actions</th>
+                                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">{t('events.eventName')}</th>
+                                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">{t('clients.title')}</th>
+                                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">{t('events.eventDate')}</th>
+                                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">{t('common.status')}</th>
+                                            <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase">{t('common.actions')}</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100">
@@ -202,7 +204,7 @@ const PlannerDashboard = () => {
                                             <tr key={event._id} className="hover:bg-slate-50 transition-colors">
                                                 <td className="px-6 py-4">
                                                     <div className="font-medium text-slate-800">{event.eventName}</div>
-                                                    <div className="text-sm text-slate-500">{event.venue || 'No venue'}</div>
+                                                    <div className="text-sm text-slate-500">{event.venue || t('dashboard.noVenue')}</div>
                                                 </td>
                                                 <td className="px-6 py-4 text-slate-600">
                                                     {event.clientId?.name || 'N/A'}
@@ -221,7 +223,7 @@ const PlannerDashboard = () => {
                                                         className="text-primary-600 hover:text-primary-800 transition-colors flex items-center justify-end space-x-1"
                                                     >
                                                         <Eye size="16" color="currentColor" />
-                                                        <span>View</span>
+                                                        <span>{t('dashboard.view')}</span>
                                                     </button>
                                                 </td>
                                             </tr>

@@ -24,6 +24,9 @@ import Venue from './pages/Venue/Venue'
 import TasksPage from './pages/Tasks/TasksPage'
 import InvoicesList from './pages/Invoices/InvoicesList'
 import CreateInvoice from './pages/Invoices/CreateInvoice'
+import GuestsList from './pages/Guests/GuestsList'
+import CheckInScanner from './pages/CheckIn/CheckInScanner'
+import DocumentsList from './pages/Documents/DocumentsList'
 
 // Wrapper component to handle authentication state
 function AppContent() {
@@ -78,6 +81,9 @@ function AppContent() {
         <Route path="/invoices" element={isAuthenticated ? <Layout onLogout={handleLogout}><InvoicesList /></Layout> : <Navigate to="/login" replace />} />
         <Route path="/invoices/create" element={isAuthenticated ? <Layout onLogout={handleLogout}><CreateInvoice /></Layout> : <Navigate to="/login" replace />} />
         <Route path="/invoices/edit/:id" element={isAuthenticated ? <Layout onLogout={handleLogout}><CreateInvoice mode="edit" /></Layout> : <Navigate to="/login" replace />} />
+        <Route path="/events/:eventId/guests" element={isAuthenticated ? <Layout onLogout={handleLogout}><GuestsList /></Layout> : <Navigate to="/login" replace />} />
+        <Route path="/events/:eventId/check-in" element={isAuthenticated ? <CheckInScanner /> : <Navigate to="/login" replace />} />
+        <Route path="/documents" element={isAuthenticated ? <Layout onLogout={handleLogout}><DocumentsList /></Layout> : <Navigate to="/login" replace />} />
         <Route path="*" element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />} />
       </Routes>
     </>

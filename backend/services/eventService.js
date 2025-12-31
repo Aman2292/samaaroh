@@ -78,8 +78,7 @@ const getEventById = async (eventId) => {
     .populate('clientId')
     .populate('leadPlannerId', 'name email')
     .populate('assignedCoordinators', 'name email')
-    .populate('venueId')
-    .populate('guests.addedBy', 'name');
+    .populate('venueId');
 };
 
 /**

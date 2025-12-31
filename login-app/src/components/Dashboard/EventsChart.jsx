@@ -1,12 +1,14 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell } from 'recharts';
 
 const EventsChart = ({ data }) => {
+    const { t } = useTranslation();
     const statusData = [
-        { name: 'Pending', value: data.byStatus?.pending || 0, color: '#3b82f6' },
-        { name: 'Confirmed', value: data.byStatus?.confirmed || 0, color: '#10b981' },
-        { name: 'In Progress', value: data.byStatus?.in_progress || 0, color: '#f59e0b' },
-        { name: 'Completed', value: data.byStatus?.completed || 0, color: '#8b5cf6' }
+        { name: t('dashboard.charts.eventStatus.pending'), value: data.byStatus?.pending || 0, color: '#3b82f6' },
+        { name: t('dashboard.charts.eventStatus.confirmed'), value: data.byStatus?.confirmed || 0, color: '#10b981' },
+        { name: t('dashboard.charts.eventStatus.inProgress'), value: data.byStatus?.in_progress || 0, color: '#f59e0b' },
+        { name: t('dashboard.charts.eventStatus.completed'), value: data.byStatus?.completed || 0, color: '#8b5cf6' }
     ];
 
     const CustomTooltip = ({ active, payload }) => {
@@ -25,7 +27,7 @@ const EventsChart = ({ data }) => {
 
     return (
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">Events by Status</h3>
+            <h3 className="text-lg font-semibold text-slate-800 mb-4">{t('dashboard.charts.eventsByStatus')}</h3>
             <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={statusData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />

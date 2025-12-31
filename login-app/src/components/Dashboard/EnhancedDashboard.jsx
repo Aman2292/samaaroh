@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { User, Calendar, MoneyRecive, People, Add, Notification, Task, DocumentText } from 'iconsax-react';
 import { toast } from 'react-toastify';
 import MetricCard from './MetricCard';
@@ -10,6 +11,7 @@ import SendNotificationModal from '../Notifications/SendNotificationModal';
 import { format } from 'date-fns';
 
 const EnhancedDashboard = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [dashboardData, setDashboardData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -63,37 +65,37 @@ const EnhancedDashboard = () => {
 
     const quickActions = [
         {
-            label: 'Create Event',
+            label: t('dashboard.quickActions.createEvent'),
             icon: Calendar,
             color: 'bg-green-500 hover:bg-green-600',
             action: () => navigate('/events/create')
         },
         {
-            label: 'Add Client',
+            label: t('dashboard.quickActions.addClient'),
             icon: User,
             color: 'bg-blue-500 hover:bg-blue-600',
             action: () => navigate('/clients')
         },
         {
-            label: 'Add Team Member',
+            label: t('dashboard.quickActions.addTeamMember'),
             icon: People,
             color: 'bg-purple-500 hover:bg-purple-600',
             action: () => navigate('/team')
         },
         {
-            label: 'Create Task',
+            label: t('dashboard.quickActions.createTask'),
             icon: Task,
             color: 'bg-orange-500 hover:bg-orange-600',
             action: () => navigate('/tasks')
         },
         {
-            label: 'Record Payment',
+            label: t('dashboard.quickActions.recordPayment'),
             icon: MoneyRecive,
             color: 'bg-indigo-500 hover:bg-indigo-600',
             action: () => navigate('/payments/outstanding')
         },
         {
-            label: 'Send Notification',
+            label: t('dashboard.quickActions.sendNotification'),
             icon: Notification,
             color: 'bg-pink-500 hover:bg-pink-600',
             action: () => setIsSendNotificationModalOpen(true)
@@ -104,15 +106,15 @@ const EnhancedDashboard = () => {
         <div className="p-8">
             {/* Header */}
             <div className="mb-8">
-                <h1 className="text-3xl font-bold text-slate-800">Dashboard</h1>
-                <p className="text-slate-500 mt-1">Welcome back, {userInfo.name}!</p>
+                <h1 className="text-3xl font-bold text-slate-800">{t('dashboard.title')}</h1>
+                <p className="text-slate-500 mt-1">{t('dashboard.welcome', { name: userInfo.name })}</p>
                 <p className="text-sm text-slate-400">{format(new Date(), 'EEEE, MMMM dd, yyyy')}</p>
             </div>
 
             {/* Metric Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <MetricCard
-                    title="Total Clients"
+                    title={t('dashboard.totalClients')}
                     value={dashboardData?.metrics?.totalClients?.value || 0}
                     change={dashboardData?.metrics?.totalClients?.change}
                     icon={User}
@@ -120,7 +122,7 @@ const EnhancedDashboard = () => {
                     onClick={() => navigate('/clients')}
                 />
                 <MetricCard
-                    title="Active Events"
+                    title={t('dashboard.activeEvents')}
                     value={dashboardData?.metrics?.activeEvents?.value || 0}
                     change={dashboardData?.metrics?.activeEvents?.change}
                     icon={Calendar}
@@ -128,7 +130,7 @@ const EnhancedDashboard = () => {
                     onClick={() => navigate('/events')}
                 />
                 <MetricCard
-                    title="Pending Payments"
+                    title={t('dashboard.pendingPayments')}
                     value={dashboardData?.metrics?.pendingPayments?.value || 0}
                     change={dashboardData?.metrics?.pendingPayments?.change}
                     icon={MoneyRecive}
@@ -137,7 +139,7 @@ const EnhancedDashboard = () => {
                     onClick={() => navigate('/payments/outstanding')}
                 />
                 <MetricCard
-                    title="Team Members"
+                    title={t('dashboard.teamMembers')}
                     value={dashboardData?.metrics?.teamMembers?.value || 0}
                     change={dashboardData?.metrics?.teamMembers?.change}
                     icon={People}
@@ -148,7 +150,7 @@ const EnhancedDashboard = () => {
 
             {/* Quick Actions */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 mb-8">
-                <h3 className="text-lg font-semibold text-slate-800 mb-4">Quick Actions</h3>
+                <h3 className="text-lg font-semibold text-slate-800 mb-4">{t('dashboard.quickActionsTitle')}</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                     {quickActions.map((action, index) => {
                         const ActionIcon = action.icon;
@@ -178,13 +180,13 @@ const EnhancedDashboard = () => {
 
                 {/* Task Overview */}
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-                    <h3 className="text-lg font-semibold text-slate-800 mb-4">Task Overview</h3>
+                    <h3 className="text-lg font-semibold text-slate-800 mb-4">{t('dashboard.taskOverview')}</h3>
                     <div className="space-y-3">
                         {[
-                            { label: 'To Do', value: dashboardData?.charts?.tasks?.todo || 0, color: 'bg-blue-500' },
-                            { label: 'In Progress', value: dashboardData?.charts?.tasks?.in_progress || 0, color: 'bg-orange-500' },
-                            { label: 'Completed', value: dashboardData?.charts?.tasks?.completed || 0, color: 'bg-green-500' },
-                            { label: 'Overdue', value: dashboardData?.charts?.tasks?.overdue || 0, color: 'bg-red-500' }
+                            { label: t('dashboard.taskStatus.todo'), value: dashboardData?.charts?.tasks?.todo || 0, color: 'bg-blue-500' },
+                            { label: t('dashboard.taskStatus.inProgress'), value: dashboardData?.charts?.tasks?.in_progress || 0, color: 'bg-orange-500' },
+                            { label: t('dashboard.taskStatus.completed'), value: dashboardData?.charts?.tasks?.completed || 0, color: 'bg-green-500' },
+                            { label: t('dashboard.taskStatus.overdue'), value: dashboardData?.charts?.tasks?.overdue || 0, color: 'bg-red-500' }
                         ].map((task, index) => (
                             <div key={index} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                                 <div className="flex items-center space-x-3">
@@ -199,14 +201,14 @@ const EnhancedDashboard = () => {
                         onClick={() => navigate('/tasks')}
                         className="w-full mt-4 py-2 border-2 border-primary-200 text-primary-700 rounded-lg hover:bg-primary-50 transition-colors font-medium"
                     >
-                        View All Tasks
+                        {t('dashboard.viewAllTasks')}
                     </button>
                 </div>
             </div>
 
             {/* Recent Activity */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-                <h3 className="text-lg font-semibold text-slate-800 mb-4">Recent Activity</h3>
+                <h3 className="text-lg font-semibold text-slate-800 mb-4">{t('dashboard.recentActivity')}</h3>
                 {dashboardData?.recentActivity?.length > 0 ? (
                     <div className="space-y-4">
                         {dashboardData.recentActivity.map((activity, index) => (
@@ -232,7 +234,7 @@ const EnhancedDashboard = () => {
                 ) : (
                     <div className="text-center py-8 text-slate-400">
                         <DocumentText size="48" className="mx-auto mb-2" />
-                        <p>No recent activity</p>
+                        <p>{t('dashboard.noRecentActivity')}</p>
                     </div>
                 )}
             </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { People, Add, DocumentUpload, DocumentDownload, Trash } from 'iconsax-react';
+import { useTranslation } from 'react-i18next';
 import LoadingSkeleton from '../../components/common/LoadingSkeleton';
 import EmptyState from '../../components/common/EmptyState';
 import ErrorMessage from '../../components/common/ErrorMessage';
@@ -10,6 +11,7 @@ import MemberProfileModal from '../../components/Team/MemberProfileModal';
 import { toast } from 'react-toastify';
 
 const TeamList = () => {
+    const { t } = useTranslation();
     const [teamMembers, setTeamMembers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -161,8 +163,8 @@ const TeamList = () => {
             <div className="max-w-7xl mx-auto">
                 <div className="flex justify-between items-center mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-800">Team Members</h1>
-                        <p className="text-slate-500 mt-1">Manage your team</p>
+                        <h1 className="text-3xl font-bold text-slate-800">{t('team.title')}</h1>
+                        <p className="text-slate-500 mt-1">{t('team.manage')}</p>
                     </div>
 
 
@@ -174,7 +176,7 @@ const TeamList = () => {
                                     className="flex items-center space-x-2 px-4 py-2.5 border border-primary-600 text-primary-600 rounded-lg hover:bg-primary-50 transition-colors font-medium"
                                 >
                                     <DocumentUpload size="20" color="currentColor" />
-                                    <span>Import CSV</span>
+                                    <span>{t('team.importCSV')}</span>
                                 </button>
                             )}
                             {canExport && (
@@ -183,7 +185,7 @@ const TeamList = () => {
                                     className="flex items-center space-x-2 px-4 py-2.5 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium"
                                 >
                                     <DocumentDownload size="20" color="currentColor" />
-                                    <span>Export CSV</span>
+                                    <span>{t('team.exportCSV')}</span>
                                 </button>
                             )}
                             {canManage && (
@@ -192,7 +194,7 @@ const TeamList = () => {
                                     className="flex items-center space-x-2 px-4 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
                                 >
                                     <Add size="20" color="currentColor" />
-                                    <span>Add Team Member</span>
+                                    <span>{t('team.addMember')}</span>
                                 </button>
                             )}
                         </div>
@@ -287,7 +289,7 @@ const TeamList = () => {
                                                     }}
                                                     className="text-red-600 hover:text-red-800 font-medium text-sm px-3 py-1 hover:bg-red-50 rounded-md transition-colors"
                                                 >
-                                                    Delete
+                                                    {t('common.delete')}
                                                 </button>
                                             </td>
                                         )}

@@ -1,7 +1,9 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 const RevenueChart = ({ data }) => {
+    const { t } = useTranslation();
     const CustomTooltip = ({ active, payload }) => {
         if (active && payload && payload.length) {
             return (
@@ -20,7 +22,7 @@ const RevenueChart = ({ data }) => {
 
     return (
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">Revenue Trend (Last 6 Months)</h3>
+            <h3 className="text-lg font-semibold text-slate-800 mb-4">{t('dashboard.charts.revenueTitle')}</h3>
             <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={data}>
                     <defs>
@@ -45,7 +47,7 @@ const RevenueChart = ({ data }) => {
                         strokeWidth={2}
                         fillOpacity={1}
                         fill="url(#colorClient)"
-                        name="Client Payments"
+                        name={t('dashboard.charts.clientPayments')}
                     />
                     <Area
                         type="monotone"
@@ -54,7 +56,7 @@ const RevenueChart = ({ data }) => {
                         strokeWidth={2}
                         fillOpacity={1}
                         fill="url(#colorVendor)"
-                        name="Vendor Payments"
+                        name={t('dashboard.charts.vendorPayments')}
                     />
                 </AreaChart>
             </ResponsiveContainer>

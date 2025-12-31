@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { MoneyRecive, MoneySend, Calendar, Eye, Refresh2 } from 'iconsax-react';
 import LoadingSkeleton from '../../components/common/LoadingSkeleton';
 import MarkPaidModal from '../../components/Payments/MarkPaidModal';
 import { toast } from 'react-toastify';
 
 const OutstandingPayments = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('all');
@@ -121,26 +123,26 @@ const OutstandingPayments = () => {
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="mb-6">
-                    <h1 className="text-3xl font-bold text-gray-900">Outstanding Payments</h1>
-                    <p className="text-gray-600 mt-1">Track pending and overdue payments</p>
+                    <h1 className="text-3xl font-bold text-gray-900">{t('payments.title')}</h1>
+                    <p className="text-gray-600 mt-1">{t('payments.subtitle')}</p>
                 </div>
 
                 {/* Summary Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                     <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-6 rounded-xl shadow-lg text-white">
-                        <p className="text-orange-100 text-sm mb-1">Total Outstanding</p>
+                        <p className="text-orange-100 text-sm mb-1">{t('payments.totalOutstanding')}</p>
                         <p className="text-3xl font-bold">₹{(paymentsData.summary.totalOutstanding || 0).toLocaleString('en-IN')}</p>
                     </div>
                     <div className="bg-gradient-to-br from-red-500 to-red-600 p-6 rounded-xl shadow-lg text-white">
-                        <p className="text-red-100 text-sm mb-1">Overdue Amount</p>
+                        <p className="text-red-100 text-sm mb-1">{t('payments.overdueAmount')}</p>
                         <p className="text-3xl font-bold">₹{(paymentsData.summary.overdueAmount || 0).toLocaleString('en-IN')}</p>
                     </div>
                     <div className="bg-gradient-to-br from-purple-500 to-purple-600 p-6 rounded-xl shadow-lg text-white">
-                        <p className="text-purple-100 text-sm mb-1">Overdue Count</p>
+                        <p className="text-purple-100 text-sm mb-1">{t('payments.overdueCount')}</p>
                         <p className="text-3xl font-bold">{paymentsData.summary.overdueCount || 0}</p>
                     </div>
                     <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-xl shadow-lg text-white">
-                        <p className="text-blue-100 text-sm mb-1">Total Payments</p>
+                        <p className="text-blue-100 text-sm mb-1">{t('payments.totalPayments')}</p>
                         <p className="text-3xl font-bold">{paymentsData.payments.length}</p>
                     </div>
                 </div>
@@ -156,7 +158,7 @@ const OutstandingPayments = () => {
                                     : 'text-slate-600 hover:bg-slate-50'
                                     }`}
                             >
-                                All Payments
+                                {t('payments.allPayments')}
                             </button>
                             {showClient && (
                                 <button
@@ -166,7 +168,7 @@ const OutstandingPayments = () => {
                                         : 'text-slate-600 hover:bg-slate-50'
                                         }`}
                                 >
-                                    Client Payments
+                                    {t('payments.clientPayments')}
                                 </button>
                             )}
                             {showVendor && (
@@ -177,7 +179,7 @@ const OutstandingPayments = () => {
                                         : 'text-slate-600 hover:bg-slate-50'
                                         }`}
                                 >
-                                    Vendor Payments
+                                    {t('payments.vendorPayments')}
                                 </button>
                             )}
                             <button
@@ -187,7 +189,7 @@ const OutstandingPayments = () => {
                                     : 'text-slate-600 hover:bg-slate-50'
                                     }`}
                             >
-                                Invoices
+                                {t('payments.invoices')}
                             </button>
                             <button
                                 onClick={() => setActiveTab('paid')}
@@ -196,7 +198,7 @@ const OutstandingPayments = () => {
                                     : 'text-slate-600 hover:bg-slate-50'
                                     }`}
                             >
-                                Paid
+                                {t('payments.paid')}
                             </button>
                         </div>
                         <button
@@ -404,7 +406,7 @@ const OutstandingPayments = () => {
                                                                 onClick={() => handleMarkPaid(payment)}
                                                                 className="text-green-600 hover:text-green-700 text-xs font-medium"
                                                             >
-                                                                Mark Paid
+                                                                {t('payments.markPaid')}
                                                             </button>
                                                         )}
                                                         <button

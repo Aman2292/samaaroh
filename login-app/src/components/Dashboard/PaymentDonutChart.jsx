@@ -1,11 +1,13 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
 const PaymentDonutChart = ({ data }) => {
+    const { t } = useTranslation();
     const chartData = [
-        { name: 'Paid', value: data.paid, color: '#10b981' },
-        { name: 'Pending', value: data.pending, color: '#f59e0b' },
-        { name: 'Overdue', value: data.overdue, color: '#ef4444' }
+        { name: t('dashboard.charts.paid'), value: data.paid, color: '#10b981' },
+        { name: t('dashboard.charts.pending'), value: data.pending, color: '#f59e0b' },
+        { name: t('dashboard.charts.overdue'), value: data.overdue, color: '#ef4444' }
     ].filter(item => item.value > 0);
 
     const CustomTooltip = ({ active, payload }) => {
@@ -44,7 +46,7 @@ const PaymentDonutChart = ({ data }) => {
 
     return (
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">Payment Status Distribution</h3>
+            <h3 className="text-lg font-semibold text-slate-800 mb-4">{t('dashboard.charts.paymentStatusTitle')}</h3>
             {chartData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
@@ -69,7 +71,7 @@ const PaymentDonutChart = ({ data }) => {
                 </ResponsiveContainer>
             ) : (
                 <div className="h-[300px] flex items-center justify-center text-slate-400">
-                    No payment data available
+                    {t('dashboard.charts.noPaymentData')}
                 </div>
             )}
         </div>

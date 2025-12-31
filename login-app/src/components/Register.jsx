@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, Eye, EyeSlash, Sms, User, Building, Call, Location, ArrowLeft, ArrowRight } from 'iconsax-react';
+import { useTranslation } from 'react-i18next';
+import { Lock, Eye, EyeSlash, Sms, User, Building, Call, Location, ArrowLeft, ArrowRight, Global } from 'iconsax-react';
 import PrimaryButton from './common/PrimaryButton';
 import TertiaryButton from './common/TertiaryButton';
 import registerBg from '../assets/register-bg.png';
 
 const Register = ({ onLogin, onNavigate }) => {
+    const { t, i18n } = useTranslation();
+
     // ... state ...
     const [formData, setFormData] = useState({
         name: '',
@@ -13,7 +16,8 @@ const Register = ({ onLogin, onNavigate }) => {
         phone: '',
         organizationName: '',
         city: '',
-        role: 'PLANNER_OWNER'
+        role: 'PLANNER_OWNER',
+        preferredLanguage: 'en'
     });
 
     const testimonials = [
@@ -62,6 +66,11 @@ const Register = ({ onLogin, onNavigate }) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const handleLanguageChange = (lang) => {
+        setFormData({ ...formData, preferredLanguage: lang });
+        i18n.changeLanguage(lang);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -78,6 +87,8 @@ const Register = ({ onLogin, onNavigate }) => {
 
             if (response.ok) {
                 localStorage.setItem('userInfo', JSON.stringify(data));
+                localStorage.setItem('preferredLanguage', data.preferredLanguage);
+                i18n.changeLanguage(data.preferredLanguage);
                 onLogin();
             } else {
                 setError(data.message || 'Something went wrong');
@@ -95,18 +106,47 @@ const Register = ({ onLogin, onNavigate }) => {
             <div className="w-full md:w-1/2 p-6 md:p-8 flex flex-col justify-center overflow-y-auto">
                 <div className="max-w-md mx-auto w-full">
                     <div className="mb-8">
-                        <h3 className="text-3xl font-bold text-slate-900">Partner with Samaaroh</h3>
-                        <p className="text-slate-500 mt-2">Create your business account today.</p>
+                        <h3 className="text-3xl font-bold text-slate-900">{t('auth.register.title')}</h3>
+                        <p className="text-slate-500 mt-2">{t('auth.register.subtitle')}</p>
+                    </div>
+
+                    {/* Language Selector */}
+                    <div className="mb-6">
+                        <label className="block text-sm font-medium text-slate-700 mb-1.5">{t('auth.register.selectLanguage')}</label>
+                        <div className="relative">
+                            <Global size="20" color="#64748b" className="absolute left-3.5 top-1/2 -translate-y-1/2 z-10" variant="Outline" />
+                            <select
+                                value={formData.preferredLanguage}
+                                onChange={(e) => handleLanguageChange(e.target.value)}
+                                className="w-full pl-11 pr-10 py-3 rounded-xl border border-slate-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 outline-none transition-all appearance-none bg-white cursor-pointer text-slate-700 font-medium"
+                            >
+                                <option value="en">{t('auth.register.english')}</option>
+                                <option value="hi">{t('auth.register.hindi')}</option>
+                                <option value="mr">{t('auth.register.marathi')}</option>
+                                <option value="gu">{t('auth.register.gujarati')}</option>
+                                <option value="bn">{t('auth.register.bengali')}</option>
+                                <option value="ta">{t('auth.register.tamil')}</option>
+                                <option value="te">{t('auth.register.telugu')}</option>
+                                <option value="kn">{t('auth.register.kannada')}</option>
+                                <option value="ml">{t('auth.register.malayalam')}</option>
+                            </select>
+                            {/* Custom dropdown arrow */}
+                            <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
+                                <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
+                        </div>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <InputField label="Full Name" name="name" value={formData.name} onChange={handleChange} Icon={User} placeholder="John Doe" />
-                            <InputField label="Email" name="email" type="email" value={formData.email} onChange={handleChange} Icon={Sms} placeholder="user@example.com" />
+                            <InputField label={t('auth.register.fullName')} name="name" value={formData.name} onChange={handleChange} Icon={User} placeholder="John Doe" />
+                            <InputField label={t('auth.register.email')} name="email" type="email" value={formData.email} onChange={handleChange} Icon={Sms} placeholder="user@example.com" />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
+                            <label className="block text-sm font-medium text-slate-700 mb-1.5">{t('auth.register.password')}</label>
                             <div className="relative">
                                 <Lock size="20" color="#64748b" className="absolute left-3.5 top-1/2 -translate-y-1/2 z-10" variant="Outline" />
                                 <input
@@ -128,11 +168,11 @@ const Register = ({ onLogin, onNavigate }) => {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <InputField label="Phone" name="phone" value={formData.phone} onChange={handleChange} Icon={Call} placeholder="+91 98765 43210" />
-                            <InputField label="City" name="city" value={formData.city} onChange={handleChange} Icon={Location} placeholder="Mumbai" />
+                            <InputField label={t('auth.register.phone')} name="phone" value={formData.phone} onChange={handleChange} Icon={Call} placeholder="+91 98765 43210" />
+                            <InputField label={t('auth.register.city')} name="city" value={formData.city} onChange={handleChange} Icon={Location} placeholder="Mumbai" />
                         </div>
 
-                        <InputField label="Business Name" name="organizationName" value={formData.organizationName} onChange={handleChange} Icon={Building} placeholder="Dream Weddings Ltd." />
+                        <InputField label={t('auth.register.businessName')} name="organizationName" value={formData.organizationName} onChange={handleChange} Icon={Building} placeholder="Dream Weddings Ltd." />
 
                         {error && (
                             <div className="text-red-500 text-sm text-center bg-red-50 py-3 rounded-xl font-medium">
@@ -141,15 +181,15 @@ const Register = ({ onLogin, onNavigate }) => {
                         )}
 
                         <PrimaryButton type="submit" disabled={loading} fullWidth className="!py-3 !text-base !rounded-xl mt-4">
-                            {loading ? 'Registering...' : 'Create Account'}
+                            {loading ? t('auth.register.creating') : t('auth.register.createAccount')}
                         </PrimaryButton>
                     </form>
 
                     <div className="mt-8 text-center">
                         <span className="text-slate-500">
-                            Already have an account?{' '}
+                            {t('auth.register.alreadyHaveAccount')}{' '}
                             <TertiaryButton onClick={() => onNavigate('login')} className="!px-1 !py-0 !inline-flex !font-semibold !text-[#7F5EFF] hover:!bg-transparent hover:!underline">
-                                Sign in
+                                {t('auth.register.signIn')}
                             </TertiaryButton>
                         </span>
                     </div>

@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { User, Building, Calendar, ShieldSecurity, Camera } from 'iconsax-react';
+import { User, Building, Calendar, ShieldSecurity, Camera, Global } from 'iconsax-react';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 import ChangePasswordModal from '../../components/Profile/ChangePasswordModal';
+import LanguageSelector from '../../components/common/LanguageSelector';
 import LoadingSkeleton from '../../components/common/LoadingSkeleton';
 
 const MyProfile = () => {
+    const { t } = useTranslation();
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [editing, setEditing] = useState(false);
@@ -111,13 +114,13 @@ const MyProfile = () => {
             <div className="max-w-4xl mx-auto">
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-slate-800">My Profile</h1>
-                    <p className="text-slate-500 mt-1">Manage your personal information and settings</p>
+                    <h1 className="text-3xl font-bold text-slate-800">{t('settings.profile')}</h1>
+                    <p className="text-slate-500 mt-1">{t('profile.manageInfo') || 'Manage your personal information and settings'}</p>
                 </div>
 
                 {/* Profile Photo Section */}
                 <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6 mb-6">
-                    <h2 className="text-lg font-semibold text-slate-800 mb-4">Profile Photo</h2>
+                    <h2 className="text-lg font-semibold text-slate-800 mb-4">{t('profile.profilePhoto') || 'Profile Photo'}</h2>
                     <div className="flex items-center space-x-6">
                         <div className="relative">
                             <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white text-3xl font-bold">
@@ -128,9 +131,9 @@ const MyProfile = () => {
                             </button>
                         </div>
                         <div>
-                            <p className="text-sm text-slate-600 mb-2">Upload a new profile photo</p>
+                            <p className="text-sm text-slate-600 mb-2">{t('profile.uploadPhoto') || 'Upload a new profile photo'}</p>
                             <button className="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 text-sm">
-                                Coming Soon
+                                {t('common.comingSoon') || 'Coming Soon'}
                             </button>
                         </div>
                     </div>
@@ -139,13 +142,13 @@ const MyProfile = () => {
                 {/* Personal Information */}
                 <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6 mb-6">
                     <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-lg font-semibold text-slate-800">Personal Information</h2>
+                        <h2 className="text-lg font-semibold text-slate-800">{t('profile.personalInfo') || 'Personal Information'}</h2>
                         {!editing && (
                             <button
                                 onClick={() => setEditing(true)}
                                 className="px-4 py-2 text-primary-600 hover:bg-primary-50 rounded-lg text-sm font-medium"
                             >
-                                Edit
+                                {t('common.edit')}
                             </button>
                         )}
                     </div>
@@ -154,7 +157,7 @@ const MyProfile = () => {
                         {/* Name */}
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-2">
-                                Full Name *
+                                {t('auth.register.fullName')} *
                             </label>
                             {editing ? (
                                 <input
@@ -171,18 +174,18 @@ const MyProfile = () => {
                         {/* Email (Read-only) */}
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-2">
-                                Email Address
+                                {t('auth.register.email')}
                             </label>
                             <div className="relative">
                                 <p className="text-slate-400 py-2">{profile?.email}</p>
-                                <span className="text-xs text-slate-500">Email cannot be changed for security reasons</span>
+                                <span className="text-xs text-slate-500">{t('profile.emailFixed') || 'Email cannot be changed for security reasons'}</span>
                             </div>
                         </div>
 
                         {/* Phone */}
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-2">
-                                Phone Number
+                                {t('auth.register.phone')}
                             </label>
                             {editing ? (
                                 <input
@@ -190,17 +193,17 @@ const MyProfile = () => {
                                     value={formData.phone}
                                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                     className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                    placeholder="Enter phone number"
+                                    placeholder={t('profile.enterPhone') || 'Enter phone number'}
                                 />
                             ) : (
-                                <p className="text-slate-800 py-2">{profile?.phone || 'Not provided'}</p>
+                                <p className="text-slate-800 py-2">{profile?.phone || t('profile.notProvided') || 'Not provided'}</p>
                             )}
                         </div>
 
                         {/* Role */}
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-2">
-                                Role
+                                {t('profile.role') || 'Role'}
                             </label>
                             <p className="text-slate-800 py-2">
                                 <span className="px-3 py-1 rounded-full text-sm font-medium bg-primary-100 text-primary-700">
@@ -217,14 +220,14 @@ const MyProfile = () => {
                                 className="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50"
                                 disabled={saveLoading}
                             >
-                                Cancel
+                                {t('common.cancel')}
                             </button>
                             <button
                                 onClick={handleSave}
                                 className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
                                 disabled={saveLoading}
                             >
-                                {saveLoading ? 'Saving...' : 'Save Changes'}
+                                {saveLoading ? (t('common.saving') || 'Saving...') : t('settings.saveChanges')}
                             </button>
                         </div>
                     )}
@@ -235,20 +238,20 @@ const MyProfile = () => {
                     <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6 mb-6">
                         <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
                             <Building size="20" className="mr-2 text-primary-600" />
-                            Organization Information
+                            {t('profile.organizationInfo') || 'Organization Information'}
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">
-                                    Organization Name
+                                    {t('profile.organizationName') || 'Organization Name'}
                                 </label>
                                 <p className="text-slate-800">{profile.organizationId.name}</p>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">
-                                    City
+                                    {t('auth.register.city')}
                                 </label>
-                                <p className="text-slate-800">{profile.organizationId.city || 'Not specified'}</p>
+                                <p className="text-slate-800">{profile.organizationId.city || t('profile.notSpecified') || 'Not specified'}</p>
                             </div>
                         </div>
                         {userInfo.role === 'PLANNER_OWNER' && (
@@ -257,29 +260,48 @@ const MyProfile = () => {
                                     href="/settings"
                                     className="text-primary-600 hover:text-primary-700 text-sm font-medium"
                                 >
-                                    View Organization Settings →
+                                    {t('profile.viewOrgSettings') || 'View Organization Settings'} →
                                 </a>
                             </div>
                         )}
                     </div>
                 )}
 
+                {/* Language & Region Section */}
+                <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6 mb-6">
+                    <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
+                        <Global size="20" className="mr-2 text-primary-600" />
+                        {t('profile.languageRegion') || 'Language & Region'}
+                    </h2>
+                    <div className="max-w-md">
+                        <LanguageSelector
+                            currentLanguage={profile?.preferredLanguage || userInfo.preferredLanguage || 'en'}
+                            onLanguageChange={(lang) => {
+                                // Update profile state if needed
+                                if (profile) {
+                                    setProfile({ ...profile, preferredLanguage: lang });
+                                }
+                            }}
+                        />
+                    </div>
+                </div>
+
                 {/* Security Section */}
                 <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6 mb-6">
                     <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
                         <ShieldSecurity size="20" className="mr-2 text-primary-600" />
-                        Security
+                        {t('profile.security') || 'Security'}
                     </h2>
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-slate-800 font-medium">Password</p>
-                            <p className="text-sm text-slate-500">Last changed: Never</p>
+                            <p className="text-slate-800 font-medium">{t('auth.login.password')}</p>
+                            <p className="text-sm text-slate-500">{t('profile.lastChanged') || 'Last changed'}: {t('profile.never') || 'Never'}</p>
                         </div>
                         <button
                             onClick={() => setShowPasswordModal(true)}
                             className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
                         >
-                            Change Password
+                            {t('profile.changePassword') || 'Change Password'}
                         </button>
                     </div>
                 </div>
@@ -288,17 +310,17 @@ const MyProfile = () => {
                 <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
                     <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
                         <Calendar size="20" className="mr-2 text-primary-600" />
-                        Activity
+                        {t('profile.activity') || 'Activity'}
                     </h2>
                     <div className="space-y-3">
                         <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                            <span className="text-slate-600">Last Login</span>
+                            <span className="text-slate-600">{t('profile.lastLogin') || 'Last Login'}</span>
                             <span className="text-slate-800 font-medium">
                                 {getRelativeTime(profile?.lastLogin)}
                             </span>
                         </div>
                         <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                            <span className="text-slate-600">Member Since</span>
+                            <span className="text-slate-600">{t('profile.memberSince') || 'Member Since'}</span>
                             <span className="text-slate-800 font-medium">
                                 {new Date(profile?.createdAt).toLocaleDateString('en-IN', {
                                     day: 'numeric',
@@ -308,9 +330,9 @@ const MyProfile = () => {
                             </span>
                         </div>
                         <div className="flex justify-between items-center py-2">
-                            <span className="text-slate-600">Account Status</span>
+                            <span className="text-slate-600">{t('profile.accountStatus') || 'Account Status'}</span>
                             <span className="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700">
-                                Active
+                                {t('common.active')}
                             </span>
                         </div>
                     </div>
