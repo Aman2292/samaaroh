@@ -6,9 +6,8 @@ const getBaseUrl = () => {
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
         return 'http://localhost:5001';
     }
-    // For Production (Render, Ngrok, etc.), use the same origin as the page
-    // This works because the backend is serving the frontend
-    return window.location.origin;
+    // For Production (Netlify, Mobile, etc.), use the live Render Backend
+    return 'https://samaaroh-1.onrender.com';
 };
 
 const API_BASE_URL = getBaseUrl();
